@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 训练「情感外挂 Qwen3-4B（带思考链）」LoRA 适配器
 ================================================
 与 train_emotion_lora.py 的唯一差异：chat template 渲染时 enable_thinking=True，

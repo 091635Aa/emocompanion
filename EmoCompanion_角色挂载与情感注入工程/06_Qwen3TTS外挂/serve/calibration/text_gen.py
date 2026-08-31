@@ -13,7 +13,6 @@
 协议与 unified_server._call_text_engine 一致：POST {text_base}/chat, {"messages":[...], 采样参数}
 """
 import json
-import urllib.error
 import urllib.request
 
 import re

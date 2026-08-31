@@ -121,7 +121,6 @@ def shape_for_style(text, style):
         t = t.replace(",", "，")
         t = _re.sub(r"[，,]+", "，", t)
         # 把句内逗号升级为更强的停顿，节奏舒展
-        t = t.replace("，", "；") if False else t  # 占位
         t = t.replace("，", "。").replace("；", "。").replace(";", "。")
     elif rate > 1.03:                    # 快：句末标点轻化为逗号，缩短停顿
         t = t.replace("。", "，").replace("！", "，").replace("!", "，")
@@ -287,11 +286,8 @@ class GGUFTTS:
         # 自动路径(未显式给定语速)：输入层按说话风格塑形节奏(标点停顿，可靠无电音)
         if rate is None:
             tts_text = shape_for_style(tts_text, style)
-        try:
-            wav, sr, _, wall, dur = self._run_wav(tts_text, ref, s, t, k,
-                                                  top_p=tp, repeat_penalty=rp)
-        except Exception as e:
-            raise
+        wav, sr, _, wall, dur = self._run_wav(tts_text, ref, s, t, k,
+                                              top_p=tp, repeat_penalty=rp)
         # 仅当调用方显式指定语速(≠1.0)时才做正确相位声码变速（带相位传播，无电音）。
         # 自动对话流程统一走自然语速，不做任何程序变速，从根上避免电音。
         if abs(r - 1.0) >= 1e-3 and len(wav) > 0:

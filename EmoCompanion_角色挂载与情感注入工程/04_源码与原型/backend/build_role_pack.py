@@ -76,8 +76,11 @@ def load_embed_weight(model_dir):
 
 
 def anchor_vectors(emb, tok, anchors):
-    """用词嵌入均值构造 K 个锚向量（同实验 run_sweep.anchor_vectors）"""
+    """用词嵌入均值构造 K 个锚向量（同实验 run_sweep.anchor_vectors）。
+    返回 (归一化 A 矩阵, kept_names)：kept_names 为成功构造锚向量的锚点名列表，
+    行序与 A 一致，供 compute_bias 按名查权重，避免无 token 锚点被跳过导致下标错位。"""
     vs = []
+    kept = []
     for w in anchors:
         ids = tok.tokenize(w.encode("utf-8"), add_bos=False, special=False)
         if not ids:
@@ -85,16 +88,19 @@ def anchor_vectors(emb, tok, anchors):
         if not ids:
             print(f"[build] 警告: 锚 '{w}' 无 token, 跳过"); continue
         vs.append(emb[ids].mean(axis=0))
+        kept.append(w)
     A = np.stack(vs)
     A = A / np.linalg.norm(A, axis=1, keepdims=True).clip(min=1e-9)
-    return A
+    return A, kept
 
 
-def compute_bias(emb, A, weights, beta, T):
-    """bias = beta*tanh(S·w_target/T), S = emb_norm @ A^T (V×K)"""
+def compute_bias(emb, A, weights, beta, T, names):
+    """bias = beta*tanh(S·w_target/T), S = emb_norm @ A^T (V×K)。
+    names 为 A 各行对应的锚点名列表（可直接用 anchor_vectors 的 kept_names），
+    按名查权重，保证与 A 行序一致（即使有锚点被跳过也不错位）。"""
     en = emb / np.linalg.norm(emb, axis=1, keepdims=True).clip(min=1e-9)
     S = en @ A.T                       # V×K
-    wv = np.array([weights.get(ANCHORS[k], 0.0) for k in range(A.shape[0])], dtype=np.float32)
+    wv = np.array([weights.get(names[k], 0.0) for k in range(A.shape[0])], dtype=np.float32)
     cov = S @ wv                       # V
     bias = beta * np.tanh(cov / T)
     return bias.astype(np.float32)
@@ -179,10 +185,10 @@ def main():
     tok = llm  # 复用 Llama.tokenize
 
     # --- 3) 锚点 + bias ---
-    A = anchor_vectors(emb, tok, ANCHORS)
+    A, kept_names = anchor_vectors(emb, tok, ANCHORS)
     print(f"[build] anchors: {A.shape}")
     beta_eff = BETA * BETA_4BIT_MUL
-    bias = compute_bias(emb, A, TARGET_WEIGHTS, beta_eff, T_ANCHOR)
+    bias = compute_bias(emb, A, TARGET_WEIGHTS, beta_eff, T_ANCHOR, kept_names)
     print(f"[build] p3_bias: {bias.shape} mean={bias.mean():.4f} std={bias.std():.4f} "
           f"pos_frac={(bias>0).mean():.3f}")
 

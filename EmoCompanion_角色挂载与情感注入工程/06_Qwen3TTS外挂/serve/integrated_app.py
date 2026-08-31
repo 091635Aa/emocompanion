@@ -720,28 +720,6 @@ def synth_flow_tts(segments, backend: str = "gguf",
     return np.asarray(wav, dtype="float32"), int(sr), meta
 
 
-def _trim_silence(arr, sr, thresh=0.005, keep_lead=0.02, keep_tail=0.06):
-    """裁掉首尾数字静音，保留极短头尾，避免逐句拼接出现长静音拖沓(不连贯)。"""
-    a = np.asarray(arr, dtype="float32")
-    idx = np.where(np.abs(a) > thresh)[0]
-    if len(idx) == 0:
-        return a
-    start = max(0, idx[0] - int(sr * keep_lead))
-    end = min(len(a), idx[-1] + int(sr * keep_tail))
-    return a[start:end]
-
-
-def _concat_wavs(wavs, sr, gap_s: float = 0.08):
-    """把多段 float32 wav 拼接为整段（先裁静音，句间加小停顿，听感连贯）。"""
-    gap = np.zeros(int(sr * gap_s), dtype="float32")
-    pieces = []
-    for i, w in enumerate(wavs):
-        pieces.append(_trim_silence(w, sr))
-        if i < len(wavs) - 1:
-            pieces.append(gap)
-    return np.concatenate(pieces) if pieces else np.zeros(1, dtype="float32")
-
-
 def _wav_bytes(arr, sr) -> bytes:
     import wave
     buf = io.BytesIO()

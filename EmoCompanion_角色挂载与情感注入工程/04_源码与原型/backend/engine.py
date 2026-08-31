@@ -190,8 +190,13 @@ class emocompanionEngine:
         self.model_name = "Qwen3-4B-Q4_K_M"
         print(f"[engine] 模型加载完成: {time.time()-t0:.1f}s")
 
-    def layers(self, emo_bias=None, emo_scale=1.0):
-        return PersonaLayers(self.p3_bias, self.deai, emo_bias=emo_bias, emo_scale=emo_scale)
+    def layers(self, emo_bias=None, emo_scale=1.0, p3_bias=None, deai=None):
+        """构造 PersonaLayers，支持角色级 p3_bias/deai 覆盖（缺省用引擎单例）。"""
+        return PersonaLayers(
+            p3_bias if p3_bias is not None else self.p3_bias,
+            deai if deai is not None else self.deai,
+            emo_bias=emo_bias, emo_scale=emo_scale,
+        )
 
     def compute_emo_bias(self, emotion, scale_emo=1.0):
         """情感向量外挂路由：算一次 (V,) 的 logits 偏置（O(V)，每次生成调用一次）。
@@ -225,7 +230,8 @@ class emocompanionEngine:
             text = ""
         return text.strip()
 
-    def _extract_topic(self, text):
+    @staticmethod
+    def _extract_topic(text):
         """第二步核心：从 AI 输出中抓走【T:n】并剥离标签。
         返回 (clean_text, topic_id|None)，取最后一个标签的数字作为本轮话题。"""
         matches = list(TOPIC_TAG_RE.finditer(text))
@@ -242,9 +248,10 @@ class emocompanionEngine:
 
     def chat(self, messages, max_new=MAX_NEW, temperature=TEMP, top_p=TOP_P,
              top_k=TOP_K, use_layers=True, persona=None, seed=None,
-             emotion=None, scale_emo=1.0):
+             emotion=None, scale_emo=1.0, p3_bias=None, deai=None):
         """messages: [{"role": "user"|"assistant", "content": str}, ...]
         emotion/scale_emo: 情感外挂路由；emotion=None 或 scale_emo=0 时路由关闭，输出与原来一致。
+        p3_bias/deai: 角色级情感偏置与去AI腔 token 表（None 则用引擎单例）。
         隐形话题：自动在 System Prompt 末尾追加【T:n】规则；返回前剥离标签并更新会话话题。"""
         sys_msgs = [{"role": "system", "content": (persona or self.persona) + TOPIC_SYS_SUFFIX}]
         msgs = sys_msgs + messages
@@ -252,7 +259,7 @@ class emocompanionEngine:
         proc = None
         if use_layers:
             emo_bias = self.compute_emo_bias(emotion, scale_emo)  # 每次生成算一次 O(V)，勿在 token 级重复
-            proc = self.layers(emo_bias, scale_emo)
+            proc = self.layers(emo_bias, scale_emo, p3_bias=p3_bias, deai=deai)
         t0 = time.time()
         with self._gen_lock:
             out = self.llm.create_completion(
@@ -281,9 +288,10 @@ class emocompanionEngine:
 
     def chat_stream(self, messages, max_new=MAX_NEW, temperature=TEMP, top_p=TOP_P,
                     top_k=TOP_K, use_layers=True, persona=None, seed=None,
-                    emotion=None, scale_emo=1.0):
+                    emotion=None, scale_emo=1.0, p3_bias=None, deai=None):
         """流式生成，逐 token yield 文本增量。thinking 已由模板关闭。
         完整文本由调用方累积后用 _strip_thinking 清洗。
+        p3_bias/deai: 角色级情感偏置与去AI腔 token 表（None 则用引擎单例）。
         隐形话题：末尾用延迟窗口缓冲，剥离【T:n】后一并放出，标签不会飘到前端。"""
         sys_msgs = [{"role": "system", "content": (persona or self.persona) + TOPIC_SYS_SUFFIX}]
         msgs = sys_msgs + messages
@@ -291,7 +299,7 @@ class emocompanionEngine:
         proc = None
         if use_layers:
             emo_bias = self.compute_emo_bias(emotion, scale_emo)  # 每次生成算一次 O(V)，勿在 token 级重复
-            proc = self.layers(emo_bias, scale_emo)
+            proc = self.layers(emo_bias, scale_emo, p3_bias=p3_bias, deai=deai)
         t0 = time.time()
         n_tok = 0
         from collections import deque
@@ -315,7 +323,7 @@ class emocompanionEngine:
             self._set_topic(topic)
             if tail:
                 yield tail
-                n_tok += 1
+                n_tok += len(tail)
         dt = time.time() - t0
         with self._lock:
             self.stats["calls"] += 1

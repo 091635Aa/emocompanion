@@ -44,7 +44,7 @@ def autotune_style(style, target_dur, iters=3, text=_TEXT, emotion="开心"):
         # 时长偏短 -> 放慢(rate 降、gap 增)；偏长 -> 加快
         if i < iters:
             rate = min(max(rate + 0.03 * np.sign(-err) * min(3.0, abs(err) / target_dur), 0.80), 1.20)
-            gap = min(max(gap - 0.02 * np.sign(err), 0.03), 0.30)
+            gap = min(max(gap + 0.02 * np.sign(err), 0.03), 0.30)
             # 把整定结果临时写回预设，确保下一轮用新参数合成
             M.STYLE_PRESETS[style]["rate"] = round(float(rate), 3)
             M.STYLE_PRESETS[style]["gap"] = round(float(gap), 3)

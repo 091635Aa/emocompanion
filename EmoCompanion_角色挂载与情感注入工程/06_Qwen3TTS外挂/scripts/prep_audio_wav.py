@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 EmoCompanion 打标 mp4 → 24kHz mono wav 批量转换（供 Qwen3-TTS 微调使用）
 ================================================================
 Qwen3-TTS 要求 24kHz mono wav。源为 F:\打标\数据层\分割片段\*.mp4。

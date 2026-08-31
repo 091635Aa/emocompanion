@@ -20,6 +20,7 @@
 不影响主流程（降级情况在冒烟结果中记录）。
 """
 import math
+import os
 import sys
 import dataclasses
 from typing import Optional
@@ -27,8 +28,8 @@ from typing import Optional
 import numpy as np
 
 # ── 路径注入（参照 P3 混合注入器.py 的 sys.path 写法）──
-ETD目录 = r"h:\情感潮汐解码（Emotion Tidal Decoding, ETD）"
-回响工程根 = r"i:\Desktop\语义回响"
+ETD目录 = os.environ.get("EMOTION_REPO_ROOT", r"h:\情感潮汐解码（Emotion Tidal Decoding, ETD）")
+回响工程根 = os.environ.get("EMOTION_REPO_ROOT", r"i:\Desktop\语义回响")
 for _p in (ETD目录, 回响工程根):
     if _p not in sys.path:
         sys.path.insert(0, _p)

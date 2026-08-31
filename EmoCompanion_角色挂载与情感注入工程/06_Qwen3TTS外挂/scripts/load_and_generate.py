@@ -146,8 +146,7 @@ def main():
     if wavs is not None and hasattr(wavs, "__len__"):
         try:
             import soundfile as sf
-            sf.write("output_demo.wav", wavs[0] if torch.is_tensor(wavs[0]) else wavs[0],
-                     sr)
+            sf.write("output_demo.wav", wavs[0], sr)
             print("[out] 已写 output_demo.wav")
         except Exception as e:
             print(f"[warn] 写音频失败: {e}")

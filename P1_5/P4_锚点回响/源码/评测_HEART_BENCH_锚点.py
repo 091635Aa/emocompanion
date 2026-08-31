@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 HEART-BENCH（FEEL）共情评测 — 锚点回响（P4） vs 裸模型
 =======================================================
 复用 HEART-BENCH 数据（mcq.json + scenarios.json）与 P3 评测_HEART_BENCH.py 的

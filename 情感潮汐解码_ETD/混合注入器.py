@@ -24,7 +24,7 @@ import torch.nn.functional as F
 from typing import Callable, Dict, List, Optional, Set
 
 # 语义回响工程根（回响注入器所在）
-回响工程根 = r"i:\Desktop\语义回响"
+回响工程根 = os.environ.get("EMOTION_REPO_ROOT", r"i:\Desktop\语义回响")
 if 回响工程根 not in sys.path:
     sys.path.insert(0, 回响工程根)
 本目录 = os.path.dirname(os.path.abspath(__file__))

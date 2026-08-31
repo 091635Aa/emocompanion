@@ -109,13 +109,16 @@ def chat(req: ChatRequest):
     msgs = [{"role": m.role, "content": m.content} for m in req.messages]
     last_emo["emotion"] = req.emotion
     last_emo["scale_emo"] = req.scale_emo
-    out = eng.chat(
-        msgs, max_new=req.max_new, temperature=req.temperature,
-        top_p=req.top_p, top_k=req.top_k, use_layers=req.use_layers,
-        persona=r["persona"], seed=req.seed,
-        emotion=req.emotion, scale_emo=req.scale_emo,
-    )
-    # 注：当前 p3_bias 单例共享；多角色同时需扩展 engine.layers 注入角色 bias
+    try:
+        out = eng.chat(
+            msgs, max_new=req.max_new, temperature=req.temperature,
+            top_p=req.top_p, top_k=req.top_k, use_layers=req.use_layers,
+            persona=r["persona"], seed=req.seed,
+            emotion=req.emotion, scale_emo=req.scale_emo,
+            p3_bias=r["p3_bias"], deai=r["deai"],
+        )
+    except Exception as e:
+        raise HTTPException(500, f"生成失败: {e}")
     return {"role": role, **out}
 
 
@@ -139,7 +142,8 @@ def chat_stream(req: ChatRequest):
                     msgs, max_new=req.max_new, temperature=req.temperature,
                     top_p=req.top_p, top_k=req.top_k, use_layers=req.use_layers,
                     persona=r["persona"], seed=req.seed,
-                    emotion=req.emotion, scale_emo=req.scale_emo):
+                    emotion=req.emotion, scale_emo=req.scale_emo,
+                    p3_bias=r["p3_bias"], deai=r["deai"]):
                 buf.append(delta)
                 yield f"data: {json.dumps({'delta': delta}, ensure_ascii=False)}\n\n"
             full = eng._strip_thinking("".join(buf))
@@ -173,8 +177,11 @@ def health():
         g = subprocess.run(["nvidia-smi", "--query-gpu=memory.used,memory.total",
                             "--format=csv,noheader,nounits"],
                            capture_output=True, text=True, timeout=5)
-        used, total = g.stdout.strip().split(",")
-        vram = {"used_mb": int(used), "total_mb": int(total)}
+        # 兼容多卡：每行一个 GPU，聚合求和（单卡则为单行）
+        rows = [ln.strip() for ln in g.stdout.strip().splitlines() if ln.strip()]
+        used = sum(int(ln.split(",")[0]) for ln in rows)
+        total = sum(int(ln.split(",")[1]) for ln in rows)
+        vram = {"used_mb": used, "total_mb": total}
     except Exception:
         vram = None
     import psutil

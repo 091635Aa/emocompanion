@@ -132,7 +132,9 @@ def parse_request(text, is_json=False, interactive=False):
     if is_json:
         try:
             req = json.loads(text)
-            msgs = req.get("messages", [{"role": "user", "content": req.get("content", "")}])
+            msgs = req.get("messages")
+            if not msgs:  # messages 缺失或为空列表时回退到顶层 content，避免丢内容
+                msgs = [{"role": "user", "content": req.get("content", "")}]
             kw = {k: v for k, v in req.items() if k not in ("messages", "content")}
             return msgs, kw
         except json.JSONDecodeError as e:

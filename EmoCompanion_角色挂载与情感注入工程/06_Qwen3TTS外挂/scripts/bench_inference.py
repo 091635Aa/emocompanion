@@ -30,7 +30,6 @@ def pick_backend():
     if torch.backends.mps.is_available():
         return "mps", "mps", torch.float16
     try:
-        from torch import dtype as _d
         # 占位：AMD DirectML/ROCm 若可用会在 torch 中暴露为 cuda 风格后端
         if hasattr(torch, "xpu") and torch.xpu.is_available():
             return "xpu(intel)", "xpu", torch.bfloat16
