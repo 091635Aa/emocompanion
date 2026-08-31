@@ -1,0 +1,274 @@
+[
+  {
+    "model": "Qwen2.5-0.5B",
+    "size": "0.5B",
+    "4bit": false,
+    "mode": "baseline",
+    "semantic_entropy": 2.8451,
+    "rep2": 0.0401,
+    "sent_pos_neg_neu": [
+      36,
+      7,
+      0
+    ],
+    "target_hit": 2,
+    "tok/s": 27.66,
+    "peak_vram_GB": 1.96,
+    "sample": "最近是否有什么事情需要和我分享一下？\n主播：你好！很高兴在这里与您见面，首先请对您的提问表示一声感谢。如果需要的话，请先"
+  },
+  {
+    "model": "Qwen2.5-0.5B",
+    "size": "0.5B",
+    "4bit": false,
+    "mode": "P3",
+    "semantic_entropy": 3.2159,
+    "rep2": 0.0607,
+    "sent_pos_neg_neu": [
+      30,
+      9,
+      0
+    ],
+    "target_hit": 3,
+    "tok/s": 28.86,
+    "peak_vram_GB": 1.96,
+    "sample": "（播放音效） 你好，我是您的解说主播小黄。我在这儿为大家做主菜。首先，欢迎来到我们的直播大厅~我们这里会有大量的美食爱好"
+  },
+  {
+    "model": "Qwen3-0.6B",
+    "size": "0.6B",
+    "4bit": false,
+    "mode": "baseline",
+    "semantic_entropy": 2.2305,
+    "rep2": 0.1647,
+    "sent_pos_neg_neu": [
+      24,
+      8,
+      0
+    ],
+    "target_hit": 10,
+    "tok/s": 22.39,
+    "peak_vram_GB": 2.28,
+    "sample": "我是主持人XXX，非常期待听到大家的反馈。我们接下来要聊的是一档非常有创意的节目——《光影之夜》，它是由我精心策划的创意"
+  },
+  {
+    "model": "Qwen3-0.6B",
+    "size": "0.6B",
+    "4bit": false,
+    "mode": "P3",
+    "semantic_entropy": 2.7512,
+    "rep2": 0.1247,
+    "sent_pos_neg_neu": [
+      37,
+      8,
+      0
+    ],
+    "target_hit": 7,
+    "tok/s": 21.99,
+    "peak_vram_GB": 2.28,
+    "sample": "有没有特别想去的地方？或者说有什么想说的话？今天的直播将介绍如何更好地规划你的生活方式，包括健康管理、人际关系、目标设定"
+  },
+  {
+    "model": "SmolLM2-1.7B",
+    "size": "1.7B",
+    "4bit": false,
+    "mode": "baseline",
+    "semantic_entropy": 1.5096,
+    "rep2": 0.2062,
+    "sent_pos_neg_neu": [
+      61,
+      0,
+      0
+    ],
+    "target_hit": 0,
+    "tok/s": 36.74,
+    "peak_vram_GB": 3.95,
+    "sample": "@水瓶子君 我非常感谢你的支持！我和别人谈到神奇的虚构故事，虽然"
+  },
+  {
+    "model": "SmolLM2-1.7B",
+    "size": "1.7B",
+    "4bit": false,
+    "mode": "P3",
+    "semantic_entropy": 1.5736,
+    "rep2": 0.1333,
+    "sent_pos_neg_neu": [
+      54,
+      1,
+      0
+    ],
+    "target_hit": 0,
+    "tok/s": 34.84,
+    "peak_vram_GB": 3.95,
+    "sample": "随便说一说想和大家分享的吗？(Hello everyone, welcome to my live! How was y"
+  },
+  {
+    "model": "gemma-2-2b",
+    "size": "2B",
+    "4bit": false,
+    "mode": "baseline",
+    "semantic_entropy": 1.4906,
+    "rep2": 0.0811,
+    "sent_pos_neg_neu": [
+      47,
+      2,
+      0
+    ],
+    "target_hit": 3,
+    "tok/s": 18.3,
+    "peak_vram_GB": 9.28,
+    "sample": " \n\n* 互动环节：\n   *  **问候**: 问大家今天过得怎么样，并询问他们是否来过我的直播。\n   *  **投"
+  },
+  {
+    "model": "gemma-2-2b",
+    "size": "2B",
+    "4bit": false,
+    "mode": "P3",
+    "semantic_entropy": 1.4309,
+    "rep2": 0.2257,
+    "sent_pos_neg_neu": [
+      97,
+      7,
+      0
+    ],
+    "target_hit": 5,
+    "tok/s": 20.18,
+    "peak_vram_GB": 9.28,
+    "sample": "\n\n**[准备一些游戏，例如：猜歌，问答等]**\n\n**[介绍游戏规则]**\n\n**[开始游戏]**\n\n**[互动与提问"
+  },
+  {
+    "model": "Phi-3.5-mini",
+    "size": "3.8B",
+    "4bit": false,
+    "mode": "baseline",
+    "semantic_entropy": 1.3866,
+    "rep2": 0.0324,
+    "sent_pos_neg_neu": [
+      9,
+      1,
+      0
+    ],
+    "target_hit": 2,
+    "tok/s": 27.64,
+    "peak_vram_GB": 9.28,
+    "sample": "\n\n用户：我在浏览新的电子积木，又想玩些弹簧模式的游戏。你推荐什么好玩的？\n"
+  },
+  {
+    "model": "Phi-3.5-mini",
+    "size": "3.8B",
+    "4bit": false,
+    "mode": "P3",
+    "semantic_entropy": 1.3849,
+    "rep2": 0.0488,
+    "sent_pos_neg_neu": [
+      11,
+      3,
+      0
+    ],
+    "target_hit": 0,
+    "tok/s": 29.38,
+    "peak_vram_GB": 9.28,
+    "sample": "谢谢大家的光临，今天我有特别想跟大家分享的内容，我是在学习一个关于现代推导的方法，推导拟"
+  },
+  {
+    "model": "Qwen3-4B",
+    "size": "4B",
+    "4bit": true,
+    "mode": "baseline",
+    "semantic_entropy": 1.8184,
+    "rep2": 0.1525,
+    "sent_pos_neg_neu": [
+      31,
+      7,
+      0
+    ],
+    "target_hit": 8,
+    "tok/s": 13.2,
+    "peak_vram_GB": 9.28,
+    "sample": "是不是感觉有点疲惫？今天我们要聊的是一个很有趣的话题，就是如何在日常生活中保持精力充沛，提高效率，同时还能享受每一天。今"
+  },
+  {
+    "model": "Qwen3-4B",
+    "size": "4B",
+    "4bit": true,
+    "mode": "P3",
+    "semantic_entropy": 1.5608,
+    "rep2": 0.1203,
+    "sent_pos_neg_neu": [
+      54,
+      11,
+      0
+    ],
+    "target_hit": 5,
+    "tok/s": 12.77,
+    "peak_vram_GB": 9.28,
+    "sample": "都坐好啦~那我先说一下今天的直播主题，是分享一下我最近在学习中的一些新发现，还有最近的一段经历，希望可以和大家分享，同时"
+  },
+  {
+    "model": "DeepSeek-R1-Qwen7B",
+    "size": "7B",
+    "4bit": true,
+    "mode": "baseline",
+    "semantic_entropy": 1.3098,
+    "rep2": 0.1857,
+    "sent_pos_neg_neu": [
+      60,
+      7,
+      0
+    ],
+    "target_hit": 2,
+    "tok/s": 14.59,
+    "peak_vram_GB": 9.53,
+    "sample": "嗯，今天有点小忙碌。嗯，现在我要说的是一些关于数学的知识点。首先，我先复习一下基本的代数知识，比如说等式的基本性质，比如"
+  },
+  {
+    "model": "DeepSeek-R1-Qwen7B",
+    "size": "7B",
+    "4bit": true,
+    "mode": "P3",
+    "semantic_entropy": 1.7177,
+    "rep2": 0.1224,
+    "sent_pos_neg_neu": [
+      17,
+      14,
+      0
+    ],
+    "target_hit": 3,
+    "tok/s": 14.63,
+    "peak_vram_GB": 9.53,
+    "sample": "有没有遇到一些有趣的数学题或者生活中的小问题？\n\n嗯，最近遇到了一个关于排列组合的问题，觉得有点意思，但是又有点难度。题"
+  },
+  {
+    "model": "Qwen3-8B",
+    "size": "8B",
+    "4bit": true,
+    "mode": "baseline",
+    "semantic_entropy": 1.3121,
+    "rep2": 0.1218,
+    "sent_pos_neg_neu": [
+      27,
+      6,
+      0
+    ],
+    "target_hit": 11,
+    "tok/s": 11.74,
+    "peak_vram_GB": 10.62,
+    "sample": "今天是周三，也是我们第三次见面啦！今天想和大家聊聊最近的一些生活趣事，以及我最近在学习的新技能。比如，我最近开始学做咖啡"
+  },
+  {
+    "model": "Qwen3-8B",
+    "size": "8B",
+    "4bit": true,
+    "mode": "P3",
+    "semantic_entropy": 2.0305,
+    "rep2": 0.121,
+    "sent_pos_neg_neu": [
+      17,
+      4,
+      0
+    ],
+    "target_hit": 5,
+    "tok/s": 9.8,
+    "peak_vram_GB": 10.62,
+    "sample": "今天直播间有什么好看的？今天是2024年10月28日，星期一，农历九月廿六，秋高气爽，非常适合户外活动哦。我们今天的主题"
+  }
+]

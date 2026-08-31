@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>缘圆模块 · 语音合成工作台</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171b26; --card2:#1d2230; --line:#2a3145;
+    --txt:#e8eaf0; --mut:#9aa3b8; --acc:#7c8cff; --acc2:#57d6b3;
+    --danger:#ff6b6b; --warn:#ffc857; --ctl:#8fb7ff; --rich:#7ce8b0; --unk:#8891a8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--txt); font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif; font-size:14px; line-height:1.6;}
+  .wrap{max-width:1180px; margin:0 auto; padding:20px;}
+  header{display:flex; align-items:center; gap:12px; padding:6px 0 16px; flex-wrap:wrap;}
+  header h1{font-size:20px; font-weight:700; letter-spacing:1px;}
+  header h1 em{font-style:normal; color:var(--acc);}
+  .sub{font-size:12px; color:var(--mut);}
+  .dot{width:9px; height:9px; border-radius:50%; background:#666;}
+  .dot.ok{background:var(--acc2); box-shadow:0 0 8px var(--acc2);}
+  .dot.err{background:var(--danger); box-shadow:0 0 8px var(--danger);}
+  .sp{flex:1;}
+  .balbox{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .pill{font-size:12px; padding:4px 10px; border-radius:20px; background:var(--card2); border:1px solid var(--line); color:var(--mut); cursor:pointer;}
+  .pill.ok{color:var(--acc2); border-color:var(--acc2);}
+  .pill.warn{color:var(--warn); border-color:var(--warn);}
+  .pill.err{color:var(--danger); border-color:var(--danger);}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .card h2{font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .card h2 .no{display:inline-flex; width:20px; height:20px; border-radius:6px; background:var(--acc); color:#fff; align-items:center; justify-content:center; font-size:12px; flex:none;}
+  label{display:block; font-size:12px; color:var(--mut); margin:10px 0 4px;}
+  select,input[type=text],textarea{width:100%; background:var(--card2); border:1px solid var(--line); color:var(--txt); border-radius:8px; padding:8px 10px; font-size:13px; outline:none;}
+  select:focus,input:focus,textarea:focus{border-color:var(--acc);}
+  textarea{resize:vertical; font-family:inherit;}
+  .row{display:flex; gap:8px; align-items:center;}
+  .row > *{flex:1;}
+  .row .noflex{flex:none;}
+  button{cursor:pointer; border:1px solid var(--line); background:var(--card2); color:var(--txt); border-radius:8px; padding:7px 12px; font-size:13px; transition:.15s;}
+  button:hover{border-color:var(--acc); color:var(--acc);}
+  button.primary{background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600;}
+  button.primary:hover{filter:brightness(1.12); color:#fff;}
+  button.primary:disabled{opacity:.5; cursor:not-allowed;}
+  button.danger:hover{border-color:var(--danger); color:var(--danger);}
+  button.ai{background:linear-gradient(135deg,#7c8cff,#57d6b3); border:none; color:#fff; font-weight:600;}
+  button.ai:hover{filter:brightness(1.1); color:#fff;}
+  .hint{font-size:12px; color:var(--mut); margin-top:6px;}
+  .tagwrap{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .tagbtn{font-size:12px; padding:4px 9px; border-radius:6px; background:var(--card2); border:1px solid var(--line);}
+  .tagbtn:hover{border-color:var(--ctl); color:var(--ctl);}
+  .tagbtn .zh{font-weight:600;}
+  .tagbtn .eng{font-size:11px; color:var(--mut); margin-left:5px; font-weight:400;}
+  .grp-title{font-size:12px; color:var(--mut); margin-top:12px; display:flex; align-items:center; gap:6px;}
+  .grp-title:first-child{margin-top:0;}
+  .preview{background:var(--card2); border:1px dashed var(--line); border-radius:8px; padding:10px 12px; margin-top:10px; min-height:44px; font-size:13px; white-space:pre-wrap; word-break:break-all;}
+  .preview .ph{color:#5b6377;}
+  .tag-c{color:var(--ctl); background:rgba(143,183,255,.12); border-radius:4px; padding:0 3px;}
+  .tag-r{color:var(--rich); background:rgba(124,232,176,.12); border-radius:4px; padding:0 3px;}
+  .tag-u{color:var(--unk);}
+  .dimgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px 12px; margin-top:10px;}
+  .dimcell label{display:block; font-size:11px; color:var(--mut); margin-bottom:3px;}
+  .dimcell select{width:100%; padding:6px 8px; font-size:12px;}
+  .scenebtn{border-color:var(--acc); color:var(--acc); background:rgba(124,140,255,.08);}
+  .scenebtn:hover{background:rgba(124,140,255,.18);}
+  .status{margin-top:14px; font-size:13px; min-height:20px; color:var(--mut);}
+  .status.err{color:var(--danger);}
+  .status.warn{color:var(--warn);}
+  .status.ok{color:var(--acc2);}
+  audio{width:100%; margin-top:8px;}
+  .meta{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--mut); margin-top:8px;}
+  details{font-size:12px; color:var(--mut); margin-top:12px;}
+  details summary{cursor:pointer; color:var(--acc);}
+  .guide{background:rgba(124,140,255,.1); border:1px solid rgba(124,140,255,.35); border-radius:8px; padding:8px 12px; font-size:13px; margin-bottom:12px; color:var(--txt);}
+  .guide b{color:var(--acc);}
+  .balrow{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;}
+  .balrow:last-child{border-bottom:none;}
+  .balrow .name{flex:1; font-size:13px; color:var(--mut);}
+  .balrow b{font-size:14px;}
+  .balrow a{font-size:12px; color:var(--acc);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>缘圆<em>模块</em></h1>
+    <span class="sub">可插拔语音合成模块 · 选声音 → 写文字 → 点合成</span>
+    <span class="dot" id="statusDot" title="服务状态"></span>
+    <span class="sp"></span>
+    <div class="balbox">
+      <span class="pill" id="balDk" title="DeepSeek 余额">DeepSeek …</span>
+      <span class="pill" id="balAli" title="阿里云状态">阿里云 …</span>
+      <button id="btnRefreshBal" class="noflex">刷新余额</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 左：输入与标注 -->
+    <div class="card">
+      <h2><span class="no">1</span>输入文字</h2>
+      <div class="guide">小白三步：<b>①</b> 把要朗读的文字粘贴到下面 → <b>②</b> 点「🤖 AI 自动标注」，AI 会自动识别语气并插入情绪标签 → <b>③</b> 点「🎧 合成语音」听效果。</div>
+      <div class="row">
+        <button id="btnAnnotate" class="ai noflex" style="flex:2;">🤖 AI 自动标注（识别语气，插入情绪标签）</button>
+        <button id="btnExample" class="noflex">示例</button>
+        <button id="btnClear" class="noflex">清空</button>
+      </div>
+      <textarea id="text" rows="11" placeholder="在这里粘贴/输入要朗读的文字，例如：&#10;今天天气真不错，我们出去玩吧！&#10;&#10;（直接写大白话就行，点上面的「AI 自动标注」会帮你加上语气标签）"></textarea>
+      <div class="preview" id="preview"><span class="ph">（预览：标签将以颜色高亮显示）</span></div>
+
+      <details>
+        <summary>高级 · 手动插入标签（30 个）与段落风格</summary>
+        <div class="grp-title">🎭 情绪控制标签（作用于其后文本，直到下一个控制标签）</div>
+        <div class="tagwrap" id="tagControl"></div>
+        <div class="grp-title">🗣 富语言标签（当前位置插入拟声）</div>
+        <div class="tagwrap" id="tagRich"></div>
+        <div class="row" style="margin-top:12px;">
+          <select id="paraTagSel"></select>
+          <button id="btnCurPara" class="noflex">加到当前段落开头</button>
+          <button id="btnEveryPara" class="noflex">加到每段开头</button>
+        </div>
+        <div class="hint">也可以直接手写中文标签，例如 [悲伤] 会自动转成 [sad]。</div>
+      </details>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1fr; gap:16px;">
+
+      <!-- 右：声音与风格 -->
+      <div class="card">
+        <h2><span class="no">2</span>选择声音与风格</h2>
+        <label>声音（默认已选好你的复刻音色，直接合成即可）</label>
+        <div class="row">
+          <select id="voiceSel"></select>
+          <button id="btnRefreshVoices" class="noflex">刷新</button>
+          <button id="btnRenameVoice" class="noflex">改名</button>
+        </div>
+        <div class="hint" id="voiceNote"></div>
+
+        <label style="margin-top:14px;">发音优化 · 多音字纠正（如主播名「缘圆」）</label>
+        <div class="row">
+          <input type="text" id="pronWord" placeholder="词，如：缘圆">
+          <input type="text" id="pronPh" placeholder="带声调拼音，如：yuan3 yuan4">
+          <button id="btnPronAdd" class="noflex primary">+ 添加</button>
+        </div>
+        <div class="tagwrap" id="pronList"></div>
+        <div class="hint">合成时自动给这些词注音：如「缘圆 → yuan3 yuan4」，即读作 yuǎn yuàn。点条目可修改，点 × 删除。</div>
+
+        <label style="margin-top:14px;">场景预设 · 点一个，自动生成声音风格</label>
+        <div class="tagwrap" id="sceneBtns"></div>
+        <div class="dimgrid" id="dimGrid"></div>
+        <div class="row" style="margin-top:12px;">
+          <button id="btnGenInst" class="primary">✨ 生成指令</button>
+          <button id="btnOptInst" class="ai">🤖 AI 优化指令</button>
+        </div>
+        <textarea id="inst" rows="2" placeholder="这里会自动生成声音风格指令，也可以手动改…"></textarea>
+        <div class="hint" id="instCount"></div>
+
+        <details>
+          <summary>高级 · 模型 / 格式 / 采样率 / 风格预设管理</summary>
+          <label>合成模型</label>
+          <div class="row">
+            <select id="modelSel"></select>
+            <button id="btnRefreshModels" class="noflex">查询</button>
+            <button id="btnRenameModel" class="noflex">重命名</button>
+          </div>
+          <div class="hint" id="modelNote"></div>
+          <div class="row" style="margin-top:10px;">
+            <div><label>输出格式</label><select id="fmtSel"><option value="wav">wav（推荐）</option><option value="mp3">mp3</option></select></div>
+            <div><label>采样率</label><select id="rateSel"><option value="48000">48000 Hz</option><option value="24000">24000 Hz</option></select></div>
+          </div>
+          <label style="margin-top:10px;">全局风格预设</label>
+          <div class="row">
+            <select id="presetSel"></select>
+            <button id="btnApplyPreset" class="noflex">应用</button>
+            <button id="btnSavePreset" class="noflex">存为预设</button>
+            <button id="btnDeletePreset" class="noflex danger">删除</button>
+          </div>
+        </details>
+      </div>
+
+      <!-- 右：合成 -->
+      <div class="card">
+        <h2><span class="no">3</span>合成与播放</h2>
+        <button id="btnSynth" class="primary" style="width:100%; padding:12px; font-size:15px;">🎧 合成语音</button>
+        <div class="status" id="status">就绪。</div>
+        <div id="playerWrap" style="display:none;">
+          <audio id="player" controls></audio>
+          <div class="meta">
+            <span>请求 ID：<b id="reqId">-</b></span>
+            <span>大小：<b id="sizeInfo">-</b></span>
+            <a id="dlLink" href="#" download style="color:var(--acc);">⬇ 下载音频</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右：余额 -->
+      <div class="card">
+        <h2><span class="no">4</span>余额与状态</h2>
+        <div class="balrow">
+          <span class="name">DeepSeek（AI 标注 / 优化）</span>
+          <b id="balDkBig">…</b>
+          <a href="https://platform.deepseek.com/top_up" target="_blank">充值</a>
+        </div>
+        <div class="balrow">
+          <span class="name">阿里云（语音合成）</span>
+          <b id="balAliBig">…</b>
+          <button id="btnAliProbe" class="noflex">🔍 试合成探测</button>
+          <a href="https://expense.aliyun.com" target="_blank">充值</a>
+        </div>
+        <div class="hint">阿里云未开放余额查询接口，点「🔍 试合成探测」用 1 个字试合成（仅消耗极小额度）来验证余额/配额是否充足。</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const CONTROL_SET = {}, RICH_SET = {}, ZH_TO_EN = {};
+let MODELS = [], VOICES = [], TAGS = {control:[], rich:[]}, PRESETS = [], DIMS = {}, SCENES = [];
+
+const LS = {
+  get(k, d){ try{ return localStorage.getItem('tts_'+k) ?? d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('tts_'+k, v); }catch(e){} }
+};
+
+// ---------- 工具 ----------
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+async function api(path, opts={}){
+  const r = await fetch(path, opts);
+  let j = null;
+  try{ j = await r.json(); }catch(e){}
+  if(!r.ok){ throw new Error((j && (j.detail || j.message)) || ('HTTP '+r.status)); }
+  return j;
+}
+function post(path, body){
+  return api(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+}
+function del(path){ return api(path, {method:'DELETE'}); }
+function fmtSize(n){ if(!n) return '-'; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; return (n/1048576).toFixed(2)+' MB'; }
+
+// ---------- 状态 ----------
+function setStatus(msg, cls=''){ const s=$('status'); s.className='status '+(cls||''); s.textContent=msg; }
+function saveLast(){ LS.set('text',$('text').value); LS.set('inst',$('inst').value); LS.set('model',$('modelSel').value); LS.set('voice',$('voiceSel').value); LS.set('fmt',$('fmtSel').value); LS.set('rate',$('rateSel').value); }
+
+// ---------- 文本区与标签 ----------
+function tagClass(name){
+  if(CONTROL_SET[name] || CONTROL_SET[ZH_TO_EN[name]]) return 'tag-c';
+  if(RICH_SET[name] || RICH_SET[ZH_TO_EN[name]]) return 'tag-r';
+  return 'tag-u';
+}
+function updatePreview(){
+  const v = $('text').value;
+  const html = esc(v).replace(/\[([^\[\]]+)\]/g, (m, name) =>
+    '<span class="'+tagClass(name)+'">['+esc(name)+']</span>');
+  $('preview').innerHTML = html || '<span class="ph">（预览：标签将以颜色高亮显示）</span>';
+}
+function insertAtCursor(text){
+  const ta = $('text');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0,s) + text + ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + text.length;
+  ta.focus(); updatePreview();
+}
+function insertCurrentParagraph(text){
+  const ta = $('text');
+  const s = ta.selectionStart;
+  const lineStart = ta.value.slice(0, s).lastIndexOf('\n') + 1;
+  ta.value = ta.value.slice(0, lineStart) + text + ta.value.slice(lineStart);
+  ta.selectionStart = ta.selectionEnd = lineStart + text.length;
+  ta.focus(); updatePreview();
+}
+function insertEveryParagraph(text){
+  const ta = $('text');
+  ta.value = ta.value.split('\n').map(l => l.trim() ? text + l : l).join('\n');
+  ta.focus(); updatePreview();
+}
+function buildTagButtons(){
+  const c = $('tagControl'), r = $('tagRich');
+  c.innerHTML = ''; r.innerHTML = '';
+  const make = (container, name, zh, isControl) => {
+    if(isControl){ CONTROL_SET[name] = zh; } else { RICH_SET[name] = zh; }
+    ZH_TO_EN[zh] = name;
+    const b = document.createElement('button');
+    b.className = 'tagbtn';
+    b.title = '插入 [' + name + '] · ' + zh;
+    b.innerHTML = '<span class="zh">' + zh + '</span><span class="eng">[' + name + ']</span>';
+    b.onclick = () => insertAtCursor('[' + name + ']');
+    container.appendChild(b);
+  };
+  TAGS.control.forEach(([name, zh]) => make(c, name, zh, true));
+  TAGS.rich.forEach(([name, zh]) => make(r, name, zh, false));
+  const ps = $('paraTagSel');
+  ps.innerHTML = '';
+  [...TAGS.control].forEach(([name, zh]) => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = zh + ' · [' + name + ']';
+    ps.appendChild(o);
+  });
+}
+
+// ---------- 声音风格助手 ----------
+function buildDimensionUI(){
+  const grid = $('dimGrid');
+  grid.innerHTML = '';
+  Object.entries(DIMS).forEach(([key, dim]) => {
+    const cell = document.createElement('div');
+    cell.className = 'dimcell';
+    const lab = document.createElement('label');
+    lab.textContent = dim.label;
+    const sel = document.createElement('select');
+    sel.id = 'dim_' + key;
+    const empty = document.createElement('option');
+    empty.value = ''; empty.textContent = '（不指定）';
+    sel.appendChild(empty);
+    dim.options.forEach(o => {
+      const op = document.createElement('option');
+      op.value = o; op.textContent = o;
+      sel.appendChild(op);
+    });
+    cell.appendChild(lab); cell.appendChild(sel);
+    grid.appendChild(cell);
+  });
+}
+function buildSceneButtons(){
+  const wrap = $('sceneBtns');
+  wrap.innerHTML = '';
+  SCENES.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'tagbtn scenebtn';
+    b.textContent = s.name;
+    b.title = '一键填充「' + s.name + '」的声线维度';
+    b.onclick = () => applyScene(s.name);
+    wrap.appendChild(b);
+  });
+}
+function applyScene(name){
+  const p = SCENES.find(x => x.name === name);
+  if(!p) return;
+  Object.entries(p.dims).forEach(([k, v]) => {
+    const sel = $('dim_' + k);
+    if(sel) sel.value = v;
+  });
+  generateInstruction();
+}
+function generateInstruction(){
+  const val = k => $('dim_' + k) ? $('dim_' + k).value : '';
+  const who = [val('gender'), val('age')].filter(Boolean).join('、');
+  const parts = [];
+  if(val('pitch')) parts.push('音调' + val('pitch'));
+  if(val('speed')) parts.push('语速' + val('speed'));
+  if(val('emotion')) parts.push('情感' + val('emotion'));
+  if(val('trait')) parts.push('声音' + val('trait'));
+  if(val('scene')) parts.push('适合' + val('scene') + '场景');
+  let inst = who ? '请用' + who + '的声音' : '请';
+  if(parts.length) inst += '，' + parts.join('，');
+  inst += '，语气自然、吐字清晰。';
+  $('inst').value = inst;
+  updateInstCount();
+  setStatus('✨ 声音风格已生成，可直接合成。', 'ok');
+}
+
+// ---------- AI ----------
+async function annotateText(){
+  const ta = $('text');
+  if(!ta.value.trim()){ setStatus('请先粘贴或输入要朗读的文字。', 'err'); ta.focus(); return; }
+  const btn = $('btnAnnotate');
+  btn.disabled = true; btn.textContent = '🤖 AI 分析中，请稍候…';
+  setStatus('正在让 AI 分析语气并插入情绪标签…');
+  try{
+    const j = await post('/api/ai/annotate', {text: ta.value, hint: $('inst').value.trim()});
+    ta.value = j.text || ta.value;
+    updatePreview();
+    setStatus('✓ AI 标注完成：已自动识别语气并插入情绪/拟声标签。', 'ok');
+  }catch(e){
+    setStatus('✗ ' + e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🤖 AI 自动标注（识别语气，插入情绪标签）';
+  }
+}
+async function optimizeInstruction(){
+  const inst = $('inst').value.trim();
+  if(!inst){ setStatus('请先在上方「✨ 生成指令」或手动填写，再让 AI 优化。', 'err'); return; }
+  const btn = $('btnOptInst');
+  btn.disabled = true; btn.textContent = '🤖 优化中…';
+  try{
+    const j = await post('/api/ai/optimize_instruction', {instruction: inst});
+    $('inst').value = j.instruction || inst;
+    updateInstCount();
+    setStatus('✓ 指令已由 AI 优化润色。', 'ok');
+  }catch(e){
+    setStatus('✗ ' + e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🤖 AI 优化指令';
+  }
+}
+
+// ---------- 余额 ----------
+function fmtMoney(v){
+  const n = parseFloat(v);
+  return isNaN(n) ? (v || '—') : '¥' + n.toFixed(2);
+}
+async function loadBalances(){
+  const pills = {dk: $('balDk'), ali: $('balAli')};
+  try{
+    const j = await api('/api/balance/deepseek');
+    const b = (j.balances || [])[0];
+    const total = b ? parseFloat(b.total) : NaN;
+    const txt = 'DeepSeek ' + (isNaN(total) ? '—' : '¥' + total.toFixed(2));
+    $('balDkBig').textContent = isNaN(total) ? '—' : '¥' + total.toFixed(2);
+    pills.dk.textContent = txt;
+    let cls = 'ok', title = 'DeepSeek 账户可用';
+    if(!j.is_available){ cls = 'warn'; title = 'DeepSeek 账户当前不可用，请前往充值'; }
+    if(!isNaN(total) && total < 1){ cls = 'warn'; title = 'DeepSeek 余额不足 ¥1，建议充值'; }
+    pills.dk.className = 'pill ' + cls; pills.dk.title = title;
+  }catch(e){
+    pills.dk.textContent = 'DeepSeek ✗'; pills.dk.className = 'pill err'; pills.dk.title = e.message;
+    $('balDkBig').textContent = '查询失败';
+  }
+  try{
+    const j = await api('/api/balance/aliyun');
+    $('balAliBig').textContent = j.valid ? '账户可用 ✓' : '不可用 ✗';
+    pills.ali.textContent = j.valid ? '阿里云 ✓' : '阿里云 ✗';
+    pills.ali.className = 'pill ' + (j.valid ? 'ok' : 'err');
+    pills.ali.title = j.message;
+  }catch(e){
+    pills.ali.textContent = '阿里云 ✗'; pills.ali.className = 'pill err'; pills.ali.title = e.message;
+    $('balAliBig').textContent = '查询失败';
+  }
+}
+async function probeAliyun(){
+  const btn = $('btnAliProbe');
+  btn.disabled = true; btn.textContent = '⏳ 探测中…';
+  setStatus('正在试合成 1 个字，探测阿里云余额/配额…');
+  try{
+    const j = await post('/api/balance/aliyun/probe', {});
+    if(j.ok){ setStatus('✓ ' + j.message, 'ok'); $('balAliBig').textContent = '账户可用 ✓'; }
+    else if(j.insufficient){ setStatus('⚠ 余额或配额不足：' + j.message + ' —— 可点「充值」到阿里云费用中心充值。', 'err'); }
+    else { setStatus('✗ ' + j.message, 'err'); }
+  }catch(e){
+    setStatus('✗ ' + e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🔍 试合成探测';
+  }
+}
+
+// ---------- 模型 ----------
+function fillModels(sel){
+  sel.innerHTML = '';
+  MODELS.forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.id; o.textContent = (m.name !== m.id ? m.name + '  (' + m.id + ')' : m.id) + (m.tags ? '  ★' : '');
+    sel.appendChild(o);
+  });
+}
+async function refreshModels(){
+  const j = await api('/api/models');
+  MODELS = j.models;
+  fillModels($('modelSel'));
+  updateModelNote();
+}
+function updateModelNote(){
+  const m = MODELS.find(x => x.id === $('modelSel').value);
+  if(!m) return;
+  $('modelNote').textContent = (m.tags ? '支持标签 ✓ · ' : '不支持标签，会按原文读出 ⚠ · ') + (m.note || '');
+}
+async function renameModel(){
+  const id = $('modelSel').value;
+  const m = MODELS.find(x => x.id === id);
+  const alias = prompt('给模型「' + id + '」起个显示名（留空恢复默认）', m && m.alias !== m.id ? m.alias : '');
+  if(alias === null) return;
+  await post('/api/models/rename', {model_id: id, alias});
+  await refreshModels();
+  setStatus('模型已重命名。', 'ok');
+}
+
+// ---------- 音色 ----------
+async function refreshVoices(){
+  const j = await api('/api/voices');
+  VOICES = j.voices;
+  const sel = $('voiceSel');
+  const cur = $('voiceSel').value;
+  sel.innerHTML = '';
+  VOICES.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v.id;
+    o.textContent = v.name + (v.lang && v.lang !== '未知' ? ' · ' + v.lang : '') + (v.kind === 'system' ? '' : '（复刻）');
+    o.title = v.id;
+    sel.appendChild(o);
+  });
+  // 默认优先选本地复刻音色（缘圆），其次上次用的/默认音色/第一个系统音色
+  const local = VOICES.find(v => v.kind === 'local_clone');
+  const pick = (local ? local.id : '')
+             || (cur && VOICES.some(v => v.id === cur) ? cur : '')
+             || (j.default_voice && VOICES.some(v => v.id === j.default_voice) ? j.default_voice : '')
+             || (VOICES.find(v => v.kind === 'system') || {}).id || '';
+  if(pick) sel.value = pick;
+  const lc = VOICES.find(v => v.kind === 'local_clone');
+  $('voiceNote').textContent = lc ? '已默认选好定制音色：' + lc.name + '（可下拉切换其他音色）'
+                             : '共 ' + VOICES.length + ' 个音色可选';
+}
+async function renameVoice(){
+  const id = $('voiceSel').value;
+  const v = VOICES.find(x => x.id === id);
+  const alias = prompt('给音色「' + v.name + '」起个显示名（留空恢复默认）', '');
+  if(alias === null) return;
+  await post('/api/voices/rename', {voice_id: id, alias});
+  await refreshVoices();
+}
+
+// ---------- 发音纠正 ----------
+let PRONS = [];
+function buildPronList(){
+  const wrap = $('pronList');
+  wrap.innerHTML = '';
+  if(!PRONS.length){ wrap.innerHTML = '<span class="hint">（暂无，可在上方添加，例如 缘圆 → yuan3 yuan4）</span>'; return; }
+  PRONS.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'tagbtn';
+    b.innerHTML = '<span class="zh">' + esc(p.word) + '</span><span class="eng">' + esc(p.ph) + ' ×</span>';
+    b.title = '点击删除「' + p.word + '」';
+    b.onclick = () => deletePron(p.word);
+    wrap.appendChild(b);
+  });
+}
+async function addPron(){
+  const word = $('pronWord').value.trim();
+  const ph = $('pronPh').value.trim();
+  if(!word || !ph){ setStatus('请填写「词」和「带声调拼音」。', 'err'); return; }
+  try{
+    const j = await post('/api/pronunciations', {word, ph});
+    PRONS = j.pronunciations;
+    buildPronList();
+    setStatus('✓ 发音纠正已保存：' + word + ' → ' + ph, 'ok');
+  }catch(e){
+    setStatus('✗ ' + e.message, 'err');
+  }
+}
+async function deletePron(word){
+  if(!confirm('删除发音纠正「' + word + '」？')) return;
+  try{
+    const j = await del('/api/pronunciations?word=' + encodeURIComponent(word));
+    PRONS = j.pronunciations;
+    buildPronList();
+    setStatus('已删除「' + word + '」。', 'ok');
+  }catch(e){
+    setStatus('✗ ' + e.message, 'err');
+  }
+}
+
+// ---------- 风格预设 ----------
+function fillPresets(){
+  const ps = $('presetSel');
+  ps.innerHTML = '';
+  PRESETS.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.name; o.textContent = p.name;
+    ps.appendChild(o);
+  });
+}
+function applyPreset(){
+  const p = PRESETS.find(x => x.name === $('presetSel').value);
+  if(p){ $('inst').value = p.instruction; updateInstCount(); setStatus('已应用风格预设：' + p.name, 'ok'); }
+}
+async function savePreset(){
+  const name = prompt('预设名称（与已有同名则覆盖）', '');
+  if(!name) return;
+  await post('/api/styles', {name, instruction: $('inst').value});
+  PRESETS = (await api('/api/styles')).presets;
+  fillPresets();
+  $('presetSel').value = name;
+  setStatus('风格预设已保存。', 'ok');
+}
+async function deletePreset(){
+  const name = $('presetSel').value;
+  if(!name || !confirm('删除预设「' + name + '」？')) return;
+  await del('/api/styles?name=' + encodeURIComponent(name));
+  PRESETS = (await api('/api/styles')).presets;
+  fillPresets();
+  setStatus('预设已删除。', 'ok');
+}
+function updateInstCount(){ $('instCount').textContent = $('inst').value.length + ' 字' + ($('inst').value.trim() ? '（合成时会作为风格指令发给引擎）' : ''); }
+
+// ---------- 合成 ----------
+async function synthesize(){
+  const btn = $('btnSynth');
+  const model = $('modelSel').value, voice = $('voiceSel').value;
+  const text = $('text').value.trim();
+  if(!text){ setStatus('请先粘贴或输入要朗读的文字。', 'err'); return; }
+  btn.disabled = true;
+  btn.textContent = '⏳ 合成中，请稍候…';
+  setStatus('正在合成…');
+  try{
+    const j = await post('/api/synthesize', {
+      model, voice, text,
+      instruction: $('inst').value.trim(),
+      format: $('fmtSel').value,
+      sample_rate: parseInt($('rateSel').value, 10),
+    });
+    $('playerWrap').style.display = 'block';
+    $('player').src = j.audio_url;
+    $('dlLink').href = j.audio_url;
+    $('dlLink').download = '缘圆_' + Date.now() + '.' + j.format;
+    $('reqId').textContent = j.request_id || '-';
+    $('sizeInfo').textContent = fmtSize(j.size);
+    setStatus('✓ 合成完成' + (j.warning ? '（⚠ ' + j.warning + '）' : ''), j.warning ? 'warn' : 'ok');
+    $('player').play && $('player').play().catch(()=>{});
+  }catch(e){
+    setStatus('✗ ' + e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🎧 合成语音';
+  }
+}
+
+// ---------- 示例 ----------
+function loadExample(){
+  $('text').value = '你怎么这么久都不理我？[gasp] 我还以为……以为你把我忘了呢。\n' +
+    '刚才一个人走夜路的时候，我真的好害怕，好想给你打个电话。\n' +
+    '现在看到你来了，[giggles] 心里一下子就踏实了。\n' +
+    '喂，笑什么？不许笑话我。走，我们回家，今晚我给你煮热汤，谁也不许再说分开的话。';
+  updatePreview();
+}
+
+// ---------- 初始化 ----------
+async function init(){
+  $('text').addEventListener('input', updatePreview);
+  $('inst').addEventListener('input', updateInstCount);
+  $('modelSel').addEventListener('change', () => { updateModelNote(); saveLast(); });
+  $('voiceSel').addEventListener('change', saveLast);
+  $('fmtSel').addEventListener('change', saveLast);
+  $('rateSel').addEventListener('change', saveLast);
+  $('btnAnnotate').onclick = annotateText;
+  $('btnExample').onclick = loadExample;
+  $('btnClear').onclick = () => { $('text').value=''; updatePreview(); };
+  $('btnCurPara').onclick = () => insertCurrentParagraph('[' + $('paraTagSel').value + ']');
+  $('btnEveryPara').onclick = () => insertEveryParagraph('[' + $('paraTagSel').value + '] ');
+  $('btnRefreshModels').onclick = refreshModels;
+  $('btnRenameModel').onclick = renameModel;
+  $('btnRefreshVoices').onclick = refreshVoices;
+  $('btnRenameVoice').onclick = renameVoice;
+  $('btnGenInst').onclick = generateInstruction;
+  $('btnOptInst').onclick = optimizeInstruction;
+  $('btnApplyPreset').onclick = applyPreset;
+  $('btnSavePreset').onclick = savePreset;
+  $('btnDeletePreset').onclick = deletePreset;
+  $('btnSynth').onclick = synthesize;
+  $('btnRefreshBal').onclick = loadBalances;
+  $('btnAliProbe').onclick = probeAliyun;
+  $('btnPronAdd').onclick = addPron;
+
+  $('text').value = LS.get('text', '');
+  $('inst').value = LS.get('inst', '');
+
+  try{
+    const b = await api('/api/bootstrap');
+    MODELS = b.models; TAGS = b.tags; PRESETS = b.style_presets;
+    DIMS = b.voice_dimensions || {}; SCENES = b.scene_presets || [];
+    PRONS = b.pronunciations || [];
+    $('statusDot').className = 'dot ok';
+    fillModels($('modelSel'));
+    // 默认用主配置模型（qwen-audio-3.0-tts-plus，配复刻音色），可在高级设置里切换
+    $('modelSel').value = (b.last_used.model && MODELS.some(m => m.id === b.last_used.model))
+      ? b.last_used.model : MODELS[0].id;
+    $('fmtSel').value = LS.get('fmt', b.last_used.format || 'wav');
+    $('rateSel').value = LS.get('rate', String(b.last_used.sample_rate || 48000));
+    updateModelNote();
+    buildTagButtons();
+    buildPronList();
+    buildDimensionUI();
+    buildSceneButtons();
+    fillPresets();
+    $('presetSel').value = PRESETS[0] ? PRESETS[0].name : '';
+    if(PRESETS.length) applyPreset();
+    updatePreview(); updateInstCount();
+    if(!$('inst').value.trim() && SCENES.length) applyScene(SCENES[0].name);
+    await refreshVoices();
+    const lsVoice = LS.get('voice', '');
+    if(lsVoice && VOICES.some(v => v.id === lsVoice)) $('voiceSel').value = lsVoice;
+    saveLast();
+    loadBalances();
+  }catch(e){
+    $('statusDot').className = 'dot err';
+    setStatus('初始化失败：' + e.message, 'err');
+  }
+}
+init();
+</script>
+</body>
+</html>

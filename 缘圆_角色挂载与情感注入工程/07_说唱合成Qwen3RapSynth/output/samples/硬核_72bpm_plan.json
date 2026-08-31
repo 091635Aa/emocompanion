@@ -1,0 +1,60 @@
+{
+  "plan": {
+    "bpm": 72.0,
+    "style": "硬核",
+    "beat_sec": 0.8333333333333334,
+    "total_seconds": 13.333,
+    "lines": [
+      {
+        "index": 0,
+        "text": "麦克风吹过就抛出厚重节拍",
+        "syllables": 12,
+        "start_sec": 0.0,
+        "duration_sec": 5.0,
+        "mean_f0": 154.8,
+        "f0_style": "punch",
+        "energy": 1.35,
+        "jump": 1
+      },
+      {
+        "index": 1,
+        "text": "低音砸在鼓点把地板撑开",
+        "syllables": 11,
+        "start_sec": 5.833,
+        "duration_sec": 4.583,
+        "mean_f0": 183.6,
+        "f0_style": "punch",
+        "energy": 1.35,
+        "jump": 1
+      },
+      {
+        "index": 2,
+        "text": "每一句都像拳头落进尘埃",
+        "syllables": 11,
+        "start_sec": 11.25,
+        "duration_sec": 4.583,
+        "mean_f0": 154.8,
+        "f0_style": "punch",
+        "energy": 1.35,
+        "jump": 1
+      },
+      {
+        "index": 3,
+        "text": "我在这条路上不肯退开",
+        "syllables": 10,
+        "start_sec": 16.667,
+        "duration_sec": 4.167,
+        "mean_f0": 183.6,
+        "f0_style": "punch",
+        "energy": 1.35,
+        "jump": 1
+      }
+    ]
+  },
+  "onsets": [
+    0.0,
+    5.833,
+    11.25,
+    16.667
+  ]
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>缘圆智能体 · 全模态实时通话</title>
+<link rel="icon" href="/静态/资源/图标.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/静态/页面样式.css?v=20260807">
+<!-- 全部本地脚本（defer 保证按序执行），不引入任何外部 CDN，完全离线可用。
+     v= 版本参数：WebView2/浏览器可能缓存旧脚本，改动 JS 后递增该值强制刷新 -->
+<script src="/静态/脚本/请求封装.js?v=20260807" defer></script>
+<script src="/静态/脚本/对话界面.js?v=20260807" defer></script>
+<script src="/静态/脚本/通话控制.js?v=20260807" defer></script>
+<script src="/静态/脚本/音色面板.js?v=20260807" defer></script>
+<script src="/静态/脚本/媒体采集.js?v=20260807" defer></script>
+<script src="/静态/脚本/主控.js?v=20260807" defer></script>
+</head>
+<body>
+<!-- 顶部状态条：随连接状态变色（细条） -->
+<div id="状态条" class="状态条 状态-空闲"></div>
+
+<div class="外壳">
+  <header class="顶栏">
+    <img id="呼吸灯图标" class="顶栏图标" src="/静态/资源/图标.svg" alt="缘圆智能体">
+    <h1>缘圆智能体</h1>
+    <span class="副标题">全模态 · 实时通话 · 语音合成 · 定制音色</span>
+    <span class="分隔"></span>
+    <span id="连接状态灯" class="状态灯 状态-空闲" title="连接状态：空闲"></span>
+    <span id="全局状态" class="状态文字">空闲</span>
+  </header>
+
+  <nav class="主导航">
+    <button class="标签页按钮 激活" data-标签="对话" type="button">对话</button>
+    <button class="标签页按钮" data-标签="合成" type="button">合成</button>
+    <button class="标签页按钮" data-标签="音色" type="button">音色</button>
+    <button class="标签页按钮" data-标签="通话" type="button">通话</button>
+  </nav>
+
+  <main id="主内容区" class="主内容区">
+
+    <!-- ======== 对话区 ======== -->
+    <section id="对话区" class="功能面板 激活">
+      <!-- 媒体工具条：由 媒体采集.js 动态注入按钮 -->
+      <div id="媒体工具条" class="媒体工具条"></div>
+      <!-- 对话控制条：模型选择 / 音色选择 / 识别转换开关（由 通话控制.js 构建） -->
+      <div id="对话控制条" class="对话控制条"></div>
+      <!-- 消息列表：由 对话界面.js 动态添加消息 -->
+      <div id="消息滚动区" class="消息区">
+        <ul id="消息列表"></ul>
+      </div>
+      <!-- 输入区：Enter 发送，Shift+Enter 换行 -->
+      <div class="对话输入区">
+        <textarea id="输入框" rows="2" placeholder="输入消息，/spec 查看规格，/goal 查看目标；Enter 发送，Shift+Enter 换行"></textarea>
+        <div class="输入按钮组">
+          <!-- 开启实时通话：点击切到通话标签页并直接开始 -->
+          <button id="通话按钮" class="通话入口按钮" type="button" title="开启实时通话" aria-label="开启实时通话">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </button>
+          <button id="上传按钮" class="次要按钮" type="button" title="上传功能由媒体采集模块提供">上传</button>
+          <button id="发送按钮" class="主要按钮" type="button">发送</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== 合成区（语音合成工作台） ======== -->
+    <section id="合成区" class="功能面板">
+      <div class="合成表单">
+        <div class="表单行">
+          <label for="合成模型">模型</label>
+          <select id="合成模型"></select>
+        </div>
+        <div class="表单行">
+          <label for="合成音色">音色</label>
+          <select id="合成音色"></select>
+        </div>
+        <div class="表单行">
+          <label>情感 / 效果标签（点击插入到文本光标处）</label>
+          <div id="合成标签区" class="标签区"></div>
+        </div>
+        <div class="表单行">
+          <label for="合成文本">文本</label>
+          <textarea id="合成文本" rows="3" placeholder="输入要合成的文本，可点击上方标签插入 [sad]、[laughing] 等效果"></textarea>
+        </div>
+        <div class="表单行">
+          <label for="合成指令">指令（可选）</label>
+          <div class="指令行">
+            <input id="合成指令" type="text" placeholder="例如：用温柔的语气朗读">
+            <select id="合成预设" class="次要控件" title="场景预设：一键填充指令">
+              <option value="">场景预设…</option>
+            </select>
+          </div>
+        </div>
+        <div class="表单行 表单行-按钮">
+          <button id="合成按钮" class="主要按钮" type="button">合成语音</button>
+          <button id="AI标注按钮" class="次要按钮" type="button" title="AI 自动识别语气，插入情绪/效果标签">AI 自动标注</button>
+          <button id="AI优化按钮" class="次要按钮" type="button" title="AI 优化当前指令">AI 优化指令</button>
+          <button id="余额探测按钮" class="次要按钮" type="button">余额探测</button>
+        </div>
+        <div class="表单行">
+          <label>多音字发音纠正（选填）</label>
+          <div class="指令行">
+            <input id="纠正词" placeholder="词" style="width:90px">
+            <input id="纠正音" placeholder="拼音，如 yuan3 yuan4">
+            <button id="纠正添加" class="次要按钮" type="button">添加</button>
+          </div>
+        </div>
+        <span id="合成提示" class="提示文字"></span>
+        <audio id="合成音频" controls></audio>
+      </div>
+    </section>
+
+    <!-- ======== 音色区：由 音色面板.js 动态构建 ======== -->
+    <section id="音色区" class="功能面板"></section>
+
+    <!-- ======== 通话区：由 通话控制.js 动态构建 ======== -->
+    <section id="通话区" class="功能面板"></section>
+
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语义回响 · 专业控制台</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="logo">语义回响 <span>专业控制台</span></div>
+  <div class="badges">
+    <span class="badge" id="服务徽章">检测中…</span>
+    <span class="badge" id="模型徽章">—</span>
+    <span class="badge" id="显存徽章">—</span>
+    <a class="badge" href="/dashboard">大屏 →</a>
+    <a class="badge" href="/">简化版 →</a>
+  </div>
+</header>
+
+<main>
+  <div class="tabs" id="页签">
+    <button data-panel="模型" class="active">模型</button>
+    <button data-panel="生成">生成</button>
+    <button data-panel="测试">测试</button>
+    <button data-panel="打标">打标</button>
+    <button data-panel="记忆">记忆</button>
+    <button data-panel="流程">流程</button>
+    <button data-panel="接口">接口</button>
+  </div>
+
+  <!-- 模型 -->
+  <div class="panel active" id="panel-模型">
+    <div class="grid two">
+      <div class="card">
+        <h2>加载状态</h2>
+        <div id="状态卡片" class="kv"></div>
+      </div>
+      <div class="card">
+        <h2>模型注册 <span class="tag">模型文件生成</span></h2>
+        <div class="row">
+          <select id="模型下拉" class="grow"></select>
+          <button id="注册按钮">注册</button>
+        </div>
+        <div class="row mt12">
+          <button id="加载按钮" class="ghost">加载</button>
+          <button id="卸载按钮" class="ghost">卸载</button>
+          <button id="下载按钮" class="ghost">去下载</button>
+        </div>
+        <pre class="log mt12" id="注册日志">选择模型后注册…</pre>
+      </div>
+    </div>
+    <div class="card">
+      <h2>模型库（已注册）</h2>
+      <table id="模型库表"><thead><tr><th>模型名</th><th>路径</th><th>类型</th><th>量化</th><th>动态策略</th><th>hidden</th><th>vocab</th><th>λ / γ / τ</th><th>来源</th><th>基准</th><th>RAG</th><th>LoRA</th><th>长上下文</th><th>自动测试</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h2>运行时开关 <span class="tag">热切换</span></h2>
+      <div class="switches" id="开关区"></div>
+      <div class="hint">RAG / LoRA 为「跟随」时沿用模型注册配置；点击卡片切换为强制开/关。API 开关控制对外 OpenAI 兼容接口。</div>
+    </div>
+    <div class="card">
+      <h2>参数调整 <span class="tag">直观覆盖推荐值</span></h2>
+      <div class="kv" id="参数展示"></div>
+      <div class="mt12" id="参数编辑"></div>
+      <button id="参数重置" class="ghost mt12">恢复推荐参数</button>
+      <div class="hint">输入 (0,1] 区间数值覆盖推荐值后实时生效；留空跟随推荐。调整后对话区可立即体验差异。</div>
+    </div>
+  </div>
+
+  <!-- 生成 -->
+  <div class="panel" id="panel-生成">
+    <div class="card">
+      <h2>生成调用 <span class="tag">POST /api/v1/generate</span></h2>
+      <div class="row">
+        <input type="text" id="生成提示" class="grow" placeholder="输入提示词">
+        <input type="number" id="生成token" value="128" style="width:90px" title="最大 token">
+        <button id="生成按钮">生成</button>
+      </div>
+      <pre class="log mt12" id="生成原始"></pre>
+    </div>
+    <div class="card">
+      <h2>生成历史（最近 50 条）</h2>
+      <table id="历史表"><thead><tr><th>提示词</th><th>回复</th><th>熵</th><th>重复率</th><th>命中率</th><th>λ</th><th>γ</th><th>τ</th><th>步数</th><th>耗时</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <!-- 测试 -->
+  <div class="panel" id="panel-测试">
+    <div class="card">
+      <h2>测试引擎 <span class="tag">激活机制</span></h2>
+      <div class="row">
+        <select id="测试范围"><option value="全部">全部</option><option value="配置">配置匹配</option><option value="λ">λ 调度</option><option value="模型">模型冒烟</option><option value="API">API 协议</option><option value="RAG">RAG 检索</option><option value="记忆">记忆回环</option></select>
+        <button id="测试按钮">激活测试</button>
+        <span class="muted small" id="测试状态">—</span>
+      </div>
+      <div id="测试结果" class="mt12"></div>
+    </div>
+    <div class="card">
+      <h2>测试报告</h2>
+      <select id="报告下拉" class="mb12"></select>
+      <pre class="log" id="报告内容"></pre>
+    </div>
+  </div>
+
+  <!-- 打标 -->
+  <div class="panel" id="panel-打标">
+    <div class="card">
+      <h2>打标任务 <span class="tag">定制模型流程</span></h2>
+      <div class="row">
+        <input type="text" id="批次名" value="批次1" class="grow">
+        <input type="number" id="打标token" value="128" style="width:90px" title="最大 token">
+        <button id="打标按钮">开始打标</button>
+      </div>
+      <div class="bar"><div id="打标进度" style="width:0%"></div></div>
+      <pre class="log mt12" id="打标状态"></pre>
+    </div>
+    <div class="card">
+      <h2>二次复查 <span class="tag">人工审核标注</span></h2>
+      <div class="row mb12">
+        <select id="复查批次" class="grow"></select>
+        <button id="复查加载" class="ghost">加载批次</button>
+        <button id="复查保存">保存复查</button>
+      </div>
+      <div id="复查统计" class="mb12"></div>
+      <table id="复查表"><thead><tr>
+        <th>#</th><th>提示词</th><th>回复（前 40 字）</th><th>熵</th><th>重复率</th>
+        <th>情感维度</th><th>质量评分</th><th>标注状态</th><th>复查备注</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h2>标注任务文件（f:\打标）</h2>
+      <table id="标注表"><thead><tr><th>文件</th><th>类型</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <!-- 记忆 -->
+  <div class="panel" id="panel-记忆">
+    <div class="card">
+      <h2>超长期记忆系统 <span class="tag">跨会话记忆</span></h2>
+      <div class="row">
+        <span class="status-pill" id="记忆状态"><span class="dot"></span>关</span>
+        <button id="记忆按钮">开启记忆</button>
+        <button id="记忆清空" class="ghost">清空记忆库</button>
+      </div>
+      <pre class="log mt12" id="记忆统计"></pre>
+      <div class="mem-list mt12" id="记忆列表"></div>
+    </div>
+  </div>
+
+  <!-- 流程 -->
+  <div class="panel" id="panel-流程">
+    <div class="card">
+      <h2>流程节点状态</h2>
+      <div class="flow" id="流程条"></div>
+      <pre class="log mt12" id="流程JSON"></pre>
+    </div>
+    <div class="card">
+      <h2>运行记录（数据\全流程_运行记录_*.json）</h2>
+      <table id="记录表"><thead><tr><th>时间戳</th><th>模型</th><th>量化</th><th>成功率</th><th>平均熵</th><th>重复率</th><th>命中率</th><th>平均耗时</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <!-- 接口 -->
+  <div class="panel" id="panel-接口">
+    <div class="card">
+      <h2>接口速查</h2>
+      <table>
+        <thead><tr><th>方法</th><th>路径</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td>/api/v1/health</td><td>服务存活 + 模型状态</td></tr>
+          <tr><td>GET</td><td>/api/v1/scan</td><td>扫描本地模型目录</td></tr>
+          <tr><td>POST</td><td>/api/v1/model/register</td><td>注册模型（生成模型描述文件）</td></tr>
+          <tr><td>POST</td><td>/api/v1/model/download</td><td>下载模型（直链 / HF 仓库）</td></tr>
+          <tr><td>GET</td><td>/api/v1/model/download/status</td><td>下载进度</td></tr>
+          <tr><td>GET</td><td>/api/v1/models</td><td>已注册模型列表</td></tr>
+          <tr><td>POST</td><td>/api/v1/model/load</td><td>加载模型（自动适配）</td></tr>
+          <tr><td>POST</td><td>/api/v1/model/unload</td><td>卸载模型</td></tr>
+          <tr><td>GET</td><td>/api/v1/model/status</td><td>模型状态 + 技术参数 + 显存</td></tr>
+          <tr><td>POST</td><td>/api/v1/generate</td><td>生成（标准流程）</td></tr>
+          <tr><td>GET</td><td>/api/v1/generate/history</td><td>生成历史</td></tr>
+          <tr><td>POST</td><td>/api/v1/label/run</td><td>打标（定制流程）</td></tr>
+          <tr><td>GET</td><td>/api/v1/label/status</td><td>打标进度</td></tr>
+          <tr><td>POST</td><td>/api/v1/test/activate</td><td>激活测试</td></tr>
+          <tr><td>GET</td><td>/api/v1/test/status</td><td>测试状态</td></tr>
+          <tr><td>GET</td><td>/api/v1/test/reports</td><td>测试报告</td></tr>
+          <tr><td>GET</td><td>/api/v1/flow/status</td><td>流程节点状态</td></tr>
+          <tr><td>GET</td><td>/api/v1/monitor</td><td>大屏数据（token/稳定度/情感/资源）</td></tr>
+          <tr><td>GET</td><td>/api/v1/logs</td><td>服务日志查询</td></tr>
+          <tr><td>GET</td><td>/api/v1/switches</td><td>运行时开关状态</td></tr>
+          <tr><td>POST</td><td>/api/v1/switch</td><td>切换开关（API/RAG/LoRA/记忆/策略）</td></tr>
+          <tr><td>GET</td><td>/api/v1/memory/status</td><td>记忆系统状态</td></tr>
+          <tr><td>GET</td><td>/api/v1/memory/list</td><td>记忆列表</td></tr>
+          <tr><td>POST</td><td>/api/v1/memory/activate</td><td>记忆开关</td></tr>
+          <tr><td>POST</td><td>/api/v1/memory/clear</td><td>清空记忆库</td></tr>
+          <tr><td>GET</td><td>/api/v1/records</td><td>全流程运行记录</td></tr>
+          <tr><td>GET</td><td>/v1/models</td><td>OpenAI 风格模型列表</td></tr>
+          <tr><td>POST</td><td>/v1/chat/completions</td><td>OpenAI 风格对话补全</td></tr>
+          <tr><td>POST</td><td>/v1/completions</td><td>OpenAI 风格文本补全</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="/js/pro.js"></script>
+</body>
+</html>

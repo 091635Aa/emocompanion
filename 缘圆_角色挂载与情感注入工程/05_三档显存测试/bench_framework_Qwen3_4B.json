@@ -1,0 +1,17 @@
+{
+  "model": "Qwen3-4B",
+  "path": "d:\\AI情感\\模型空间\\Qwen3-4B",
+  "max_new": 64,
+  "runs": 3,
+  "bench": {
+    "gguf_CUDA": {
+      "load_s": 3.9,
+      "prefill_s": null,
+      "decode_s": 2.345,
+      "decode_tok_s": 27.3,
+      "total_tok_s": 27.3,
+      "peak_vram_GB": 11.62,
+      "n_prefill": null
+    }
+  }
+}

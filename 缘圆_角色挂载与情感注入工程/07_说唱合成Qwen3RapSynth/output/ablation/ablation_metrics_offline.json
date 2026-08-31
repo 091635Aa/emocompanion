@@ -1,0 +1,38 @@
+{
+  "快嘴": {
+    "baseline": {
+      "beat_alignment_error_s": 0.0,
+      "bpm_drift": 0.8333,
+      "f0_rmse_hz": 91.51,
+      "rhyme_hit": 0.0,
+      "energy_contrast": 0.231,
+      "onset_beat_error_s": 0.1637
+    },
+    "ours": {
+      "beat_alignment_error_s": 0.1562,
+      "bpm_drift": 0.8462,
+      "f0_rmse_hz": 98.99,
+      "rhyme_hit": 0.0,
+      "energy_contrast": 0.008,
+      "onset_beat_error_s": 0.1625
+    },
+    "syllable": {
+      "beat_alignment_error_s": 0.1562,
+      "bpm_drift": 0.8462,
+      "f0_rmse_hz": 98.88,
+      "rhyme_hit": 0.0,
+      "energy_contrast": 0.011,
+      "onset_beat_error_s": 0.1468
+    }
+  },
+  "旋律说唱": {
+    "baseline": null,
+    "ours": null,
+    "syllable": null
+  },
+  "硬核": {
+    "baseline": null,
+    "ours": null,
+    "syllable": null
+  }
+}

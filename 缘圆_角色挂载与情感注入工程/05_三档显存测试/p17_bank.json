@@ -1,0 +1,46 @@
+{
+  "per_emo": {
+    "开心": 10,
+    "俏皮": 10,
+    "撒娇": 10,
+    "温柔": 10,
+    "平静": 10,
+    "兴奋": 10,
+    "激动": 6,
+    "悲伤": 10
+  },
+  "n_entries": 76,
+  "cos_fwd_bwd_mean": -0.003,
+  "resid_norm_l18": 45.15,
+  "eval": {
+    "A_base": {
+      "fidelity": 86.0,
+      "entropy": 0.845,
+      "rep2": 0.107,
+      "speed": 9.0,
+      "tone_hit": 62
+    },
+    "BankRoute": {
+      "fidelity": 87.0,
+      "entropy": 0.839,
+      "rep2": 0.127,
+      "speed": 9.0,
+      "tone_hit": 45
+    },
+    "F060": {
+      "fidelity": 84.0,
+      "entropy": 0.837,
+      "rep2": 0.105,
+      "speed": 8.7,
+      "tone_hit": 59
+    },
+    "_route_dist": {
+      "开心": 6,
+      "温柔": 1,
+      "平静": 1,
+      "兴奋": 2
+    },
+    "_cos_bank_probe_mean": 0.5856
+  },
+  "vram_peak_GB": 6.31
+}

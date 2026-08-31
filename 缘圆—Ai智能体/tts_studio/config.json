@@ -1,0 +1,27 @@
+{
+  "model_aliases": {
+    "qwen-audio-3.0-tts-plus": "缘圆Plus"
+  },
+  "voice_aliases": {},
+  "style_presets": [
+    {
+      "name": "默认·温柔自然",
+      "instruction": "用温柔、清澈、带一点俏皮的少女语气，自然地说话。"
+    },
+    {
+      "name": "睡前故事",
+      "instruction": "语速缓慢轻柔，像哄孩子入睡一样，声音低柔温暖，尾音放轻。"
+    },
+    {
+      "name": "情绪递进·独白",
+      "instruction": "女声独白，情绪层层递进：开头委屈不安、声音微微发颤；讲到害怕时呼吸加重；然后如释重负、带着笑意；最后转为俏皮撒娇又带一点温柔。语速自然，感情真挚。"
+    }
+  ],
+  "last_used": {
+    "model": "qwen-audio-3.0-tts-plus",
+    "voice": "qwen-audio-3.0-tts-plus-yuanyuan-f1a67384ee314f82b5d04da389096218",
+    "format": "wav",
+    "sample_rate": 48000
+  },
+  "pronunciations": []
+}

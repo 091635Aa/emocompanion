@@ -1,0 +1,60 @@
+{
+  "plan": {
+    "bpm": 84.0,
+    "style": "旋律说唱",
+    "beat_sec": 0.7142857142857143,
+    "total_seconds": 11.429,
+    "lines": [
+      {
+        "index": 0,
+        "text": "晚风穿过街巷把路灯点亮",
+        "syllables": 11,
+        "start_sec": 0.0,
+        "duration_sec": 7.857,
+        "mean_f0": 180.0,
+        "f0_style": "arch",
+        "energy": 0.95,
+        "jump": 2
+      },
+      {
+        "index": 1,
+        "text": "思绪像潮水轻轻推到胸腔",
+        "syllables": 11,
+        "start_sec": 8.214,
+        "duration_sec": 7.857,
+        "mean_f0": 208.1,
+        "f0_style": "arch",
+        "energy": 0.95,
+        "jump": 2
+      },
+      {
+        "index": 2,
+        "text": "唱一段心事送给月光",
+        "syllables": 9,
+        "start_sec": 16.429,
+        "duration_sec": 6.429,
+        "mean_f0": 208.1,
+        "f0_style": "arch",
+        "energy": 0.95,
+        "jump": 2
+      },
+      {
+        "index": 3,
+        "text": "让旋律在心底慢慢回响",
+        "syllables": 10,
+        "start_sec": 23.214,
+        "duration_sec": 7.143,
+        "mean_f0": 180.0,
+        "f0_style": "arch",
+        "energy": 0.95,
+        "jump": 2
+      }
+    ]
+  },
+  "onsets": [
+    0.0,
+    8.214,
+    16.429,
+    23.214
+  ]
+}

@@ -1,0 +1,801 @@
+/* ============================================================
+   缘圆智能体 V2 —— 全局样式（深色主题）
+   配色参考 tts_studio/static/index.html：深色底 + 蓝绿渐变强调
+   ============================================================ */
+:root {
+  --背景: #0f1117;
+  --卡片: #171b26;
+  --卡片2: #1d2230;
+  --分隔线: #2a3145;
+  --正文: #e8eaf0;
+  --次要: #9aa3b8;
+  --主色: #7c8cff;
+  --辅色: #57d6b3;
+  --危险: #ff6b6b;
+  --警告: #ffc857;
+  /* 连接状态色 */
+  --状态-空闲: #9aa3b8;
+  --状态-连接中: #ffc857;
+  --状态-聆听: #57d6b3;
+  --状态-回复: #7c8cff;
+  --状态-打断: #ff9f43;
+  --状态-错误: #ff6b6b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--背景);
+  color: var(--正文);
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* ---------- 顶部状态条（随连接状态变色） ---------- */
+.状态条 {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 99;
+  background: var(--状态-空闲);
+  transition: background .3s ease;
+}
+.状态条.状态-连接中 { background: var(--状态-连接中); }
+.状态条.状态-聆听 { background: var(--状态-聆听); }
+.状态条.状态-回复 { background: var(--状态-回复); }
+.状态条.状态-打断 { background: var(--状态-打断); }
+.状态条.状态-错误 { background: var(--状态-错误); }
+.状态条.状态-空闲 { background: var(--状态-空闲); }
+
+/* ---------- 外壳 ---------- */
+.外壳 {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ---------- 呼吸灯动画（opacity/box-shadow 由暗到亮往复，2.4s 循环） ---------- */
+@keyframes 呼吸灯 {
+  0%, 100% {
+    opacity: 0.55;
+    filter: brightness(0.85);
+    box-shadow: 0 0 4px rgba(124, 140, 255, 0.25);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.15);
+    box-shadow: 0 0 18px rgba(124, 140, 255, 0.7);
+  }
+}
+.呼吸灯 {
+  border-radius: 50%;
+  animation: 呼吸灯 2.4s ease-in-out infinite;
+}
+
+/* ---------- 顶栏 ---------- */
+.顶栏 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 14px;
+  flex-wrap: wrap;
+}
+.顶栏图标 { width: 32px; height: 32px; flex: none; border-radius: 50%; }
+.顶栏 h1 { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+.副标题 { font-size: 12px; color: var(--次要); }
+.分隔 { flex: 1; }
+
+/* 连接状态灯（空闲灰 / 连接中黄 / 聆听绿 / 回复蓝 / 打断橙 / 错误红） */
+#连接状态灯 {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  transition: background .3s ease, box-shadow .3s ease;
+}
+#连接状态灯.状态-空闲 { background: var(--状态-空闲); box-shadow: none; }
+#连接状态灯.状态-连接中 { background: var(--状态-连接中); box-shadow: 0 0 10px var(--状态-连接中); }
+#连接状态灯.状态-聆听 { background: var(--状态-聆听); box-shadow: 0 0 10px var(--状态-聆听); }
+#连接状态灯.状态-回复 { background: var(--状态-回复); box-shadow: 0 0 10px var(--状态-回复); }
+#连接状态灯.状态-打断 { background: var(--状态-打断); box-shadow: 0 0 10px var(--状态-打断); }
+#连接状态灯.状态-错误 { background: var(--状态-错误); box-shadow: 0 0 10px var(--状态-错误); }
+
+.状态文字 { font-size: 12px; color: var(--次要); min-width: 36px; }
+
+/* ---------- 主导航 ---------- */
+.主导航 { display: flex; gap: 8px; padding: 4px 0 12px; }
+.标签页按钮 {
+  cursor: pointer;
+  border: 1px solid var(--分隔线);
+  background: var(--卡片2);
+  color: var(--正文);
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-family: inherit;
+  transition: .15s;
+}
+.标签页按钮:hover { border-color: var(--主色); color: var(--主色); }
+.标签页按钮.激活 {
+  background: var(--主色);
+  border-color: var(--主色);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- 主内容区 / 功能面板 ---------- */
+.主内容区 { flex: 1; display: flex; min-height: 0; }
+.功能面板 { display: none; flex: 1; min-height: 0; }
+.功能面板.激活 { display: flex; }
+#对话区 { flex-direction: column; }
+#合成区, #音色区, #通话区 { flex-direction: column; overflow-y: auto; }
+
+.占位卡片 {
+  background: var(--卡片);
+  border: 1px solid var(--分隔线);
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: center;
+  color: var(--次要);
+  margin-bottom: 14px;
+}
+.占位卡片 h2 { font-size: 16px; margin-bottom: 6px; color: var(--正文); }
+
+/* ---------- 媒体工具条（媒体采集模块动态注入） ---------- */
+.媒体工具条 {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 6px 0 8px;
+  min-height: 32px;
+}
+
+/* ---------- 消息区 ---------- */
+.消息区 { flex: 1; overflow-y: auto; padding: 6px 4px 10px; }
+#消息列表 {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+}
+.消息项 {
+  display: flex;
+  flex-direction: column;
+  max-width: 78%;
+}
+.消息项 .消息时间 {
+  font-size: 10px;
+  color: var(--次要);
+  opacity: .85;
+  margin-bottom: 2px;
+}
+.消息项 .消息正文 {
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 用户文本：右对齐蓝色气泡 */
+.消息-用户 { align-self: flex-end; align-items: flex-end; }
+.消息-用户 .消息正文 {
+  background: var(--主色);
+  color: #fff;
+  border-radius: 12px 12px 2px 12px;
+}
+
+/* AI 文本：左对齐深灰气泡（流式消息） */
+.消息-AI { align-self: flex-start; align-items: flex-start; }
+.消息-AI .消息正文 {
+  background: var(--卡片2);
+  color: var(--正文);
+  border: 1px solid var(--分隔线);
+  border-radius: 12px 12px 12px 2px;
+}
+.消息-AI.正在回复 .消息正文::after {
+  content: "▌";
+  color: var(--主色);
+  margin-left: 2px;
+  animation: 光标闪烁 1s step-end infinite;
+}
+@keyframes 光标闪烁 { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* 系统消息：居中灰字 */
+.消息-系统 { align-self: center; align-items: center; max-width: 90%; }
+.消息-系统 .消息正文 {
+  background: transparent;
+  color: var(--次要);
+  font-size: 12px;
+  text-align: center;
+  border: none;
+  padding: 2px 6px;
+}
+
+/* 图像消息：圆角边框 */
+.消息-图像 { align-self: flex-start; }
+.消息-图像 img {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--分隔线);
+  background: var(--卡片2);
+  display: block;
+}
+
+/* 音频消息：带 audio 控件 */
+.消息-音频 { align-self: flex-start; max-width: 90%; }
+.消息-音频 audio { width: 340px; max-width: 100%; }
+
+/* 视频消息 */
+.消息-视频 { align-self: flex-start; max-width: 90%; }
+.消息-视频 video {
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--分隔线);
+  background: #000;
+}
+
+/* ---------- 对话输入区 ---------- */
+.对话输入区 {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--分隔线);
+}
+#输入框 {
+  flex: 1;
+  resize: none;
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  outline: none;
+  min-height: 44px;
+  max-height: 140px;
+}
+#输入框:focus { border-color: var(--主色); }
+#输入框::placeholder { color: var(--次要); }
+.输入按钮组 { display: flex; gap: 8px; flex: none; }
+
+/* ---------- 按钮 ---------- */
+.主要按钮 {
+  cursor: pointer;
+  border: 1px solid var(--主色);
+  background: var(--主色);
+  color: #fff;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13px;
+  transition: .15s;
+}
+.主要按钮:hover { filter: brightness(1.12); }
+.主要按钮:disabled { opacity: .5; cursor: not-allowed; }
+
+.次要按钮 {
+  cursor: pointer;
+  border: 1px solid var(--分隔线);
+  background: var(--卡片2);
+  color: var(--正文);
+  font-family: inherit;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  transition: .15s;
+}
+.次要按钮:hover { border-color: var(--主色); color: var(--主色); }
+
+/* ---------- 对话控制条（模型/音色/识别转换） ---------- */
+.对话控制条 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px 4px;
+  flex-wrap: wrap;
+}
+.对话控制条下拉 {
+  max-width: 180px;
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.对话控制条下拉:focus { border-color: var(--主色); }
+.对话控制条开关 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--次要);
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 10px;
+  border: 1px solid var(--分隔线);
+  border-radius: 999px;
+  transition: 0.15s;
+}
+.对话控制条开关:hover { border-color: var(--主色); color: var(--主色); }
+.对话控制条开关 input { accent-color: var(--主色); cursor: pointer; }
+
+/* ---------- 合成表单 ---------- */
+.合成表单 {
+  background: var(--卡片);
+  border: 1px solid var(--分隔线);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.表单行 { display: flex; flex-direction: column; gap: 4px; }
+.表单行-按钮 { flex-direction: row; align-items: center; gap: 10px; }
+.表单行 label { font-size: 12px; color: var(--次要); }
+.合成表单 select,
+.合成表单 input[type="text"],
+.合成表单 textarea {
+  width: 100%;
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.合成表单 select:focus,
+.合成表单 input[type="text"]:focus,
+.合成表单 textarea:focus { border-color: var(--主色); }
+.合成表单 textarea { resize: vertical; }
+.提示文字 { font-size: 12px; color: var(--次要); }
+
+/* 合成工作台：标签区 / 指令行 / 次要控件 */
+.标签区 { display: flex; flex-wrap: wrap; gap: 6px; }
+.标签按钮 {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.15s;
+}
+.标签按钮:hover { border-color: var(--主色); color: var(--主色); }
+.指令行 { display: flex; gap: 8px; align-items: center; }
+.指令行 input { flex: 1; width: auto; min-width: 0; }
+.次要控件 {
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.次要控件:focus { border-color: var(--主色); }
+
+/* 合成音频播放器：无来源时隐藏 */
+#合成音频 { width: 100%; margin-top: 4px; }
+#合成音频:not([src]) { display: none; }
+#合成音频[src=""] { display: none; }
+
+/* ---------- 响应式：窄屏 tab 换行 ---------- */
+@media (max-width: 720px) {
+  .主导航 { flex-wrap: wrap; }
+  .顶栏 { gap: 8px; }
+  .消息项 { max-width: 92%; }
+  .外壳 { padding: 12px 12px 16px; }
+  #输入框 { font-size: 16px; }
+}
+
+/* ============================================================
+   通话页（仿微信语音通话）
+   ============================================================ */
+
+/* ---------- 聊天框旁的圆形通话入口按钮 ---------- */
+.通话入口按钮 {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  /* 绿色渐变圆底 + 白色图标 */
+  background: linear-gradient(135deg, #34d399, #0e9f6e);
+  box-shadow: 0 2px 10px rgba(52, 211, 153, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+.通话入口按钮 svg { width: 22px; height: 22px; }
+.通话入口按钮:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(52, 211, 153, 0.5);
+  filter: brightness(1.08);
+}
+.通话入口按钮:active { transform: scale(0.94); }
+
+/* ---------- 通话拨号界面（撑满 #通话区） ---------- */
+#通话区 {
+  position: relative;
+  overflow: hidden;
+}
+.通话拨号界面 {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 20px 18px;
+  /* 深色渐变背景 */
+  background: linear-gradient(180deg, #0f1117 0%, #16213a 100%);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* 顶部信息条：通话时长 + 麦克风选择 + 视频开关 */
+.通话顶栏 {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--次要);
+  font-size: 13px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.通话顶栏控件 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.通话时长 {
+  /* 等宽字体计时显示 */
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--正文);
+}
+.通话麦克风开关 {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 10px;
+  border: 1px solid var(--分隔线);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: 0.15s;
+}
+.通话麦克风开关:hover { border-color: var(--主色); color: var(--主色); }
+.通话麦克风选择 {
+  max-width: 180px;
+  background: transparent;
+  border: none;
+  color: var(--正文);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+}
+.通话麦克风选择:disabled { opacity: 0.5; cursor: default; }
+.通话麦克风选择 option { background: var(--卡片2); color: var(--正文); }
+.通话视频开关 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 10px;
+  border: 1px solid var(--分隔线);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: 0.15s;
+}
+.通话视频开关:hover { border-color: var(--主色); color: var(--主色); }
+.通话视频开关 input { accent-color: var(--主色); cursor: pointer; }
+
+/* ---------- 中央球区（呼吸球体） ---------- */
+.通话球区 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 0;
+}
+.通话球体 {
+  /* 呼吸灯球：径向渐变内亮外暗 + 光晕 */
+  --呼吸色: rgba(124, 140, 255, 0.55);
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 35%, #3a4a7a 0%, #1c2742 55%, #12192e 100%);
+  box-shadow: 0 0 18px rgba(124, 140, 255, 0.25), inset 0 0 16px rgba(124, 140, 255, 0.12);
+}
+.通话球体内核 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #dfe6ff;
+}
+.通话球图标 { display: inline-flex; }
+.通话球图标 svg { width: 44px; height: 44px; }
+.通话球文字 { font-size: 13px; letter-spacing: 2px; }
+
+/* 呼吸节奏：空闲慢速 4s / 连接中中速 2s / 通话快速 1.2s + 光晕增强 /
+   回复加速 + 主色 / 错误红色暗淡无动画 */
+.通话球体.呼吸-空闲 { animation: 呼吸球 4s ease-in-out infinite; }
+.通话球体.呼吸-连接中 {
+  animation: 呼吸球 2s ease-in-out infinite;
+  --呼吸色: rgba(255, 200, 87, 0.6);
+}
+.通话球体.呼吸-通话 {
+  animation: 呼吸球 1.2s ease-in-out infinite;
+  --呼吸色: rgba(87, 214, 179, 0.6);
+}
+.通话球体.呼吸-回复 {
+  animation: 呼吸球 0.8s ease-in-out infinite;
+  --呼吸色: rgba(124, 140, 255, 0.7);
+}
+.通话球体.呼吸-错误 {
+  animation: none;
+  background: radial-gradient(circle at 50% 35%, #4a3030 0%, #2a1818 55%, #1a1010 100%);
+  box-shadow: 0 0 12px rgba(255, 107, 107, 0.25);
+}
+
+@keyframes 呼吸球 {
+  /* scale 1→1.08 + box-shadow 由弱到强往复 */
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 16px rgba(124, 140, 255, 0.2), inset 0 0 14px rgba(124, 140, 255, 0.1);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 60px var(--呼吸色, rgba(124, 140, 255, 0.55)), inset 0 0 26px rgba(124, 140, 255, 0.22);
+  }
+}
+
+.通话状态文字 { font-size: 15px; color: var(--正文); letter-spacing: 1px; }
+.通话模型信息 { font-size: 12px; color: var(--次要); }
+
+/* ---------- 底部按钮组：三个圆形按钮 ---------- */
+.通话按钮组 {
+  display: flex;
+  align-items: flex-end;
+  gap: 34px;
+}
+.通话圆形按钮 {
+  width: 88px;
+  height: 88px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--正文);
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-family: inherit;
+  transition: 0.15s;
+}
+.通话圆形按钮:hover { border-color: var(--主色); color: #fff; transform: translateY(-2px); }
+.通话圆形按钮:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.通话按钮图标 { display: inline-flex; }
+.通话按钮图标 svg { width: 30px; height: 30px; }
+.通话按钮文字 { font-size: 11px; letter-spacing: 1px; }
+
+/* 中间主按钮：空闲=绿色"开始通话"，通话中=红色"挂断" */
+.通话挂断按钮 { border: 1px solid rgba(255, 255, 255, 0.2); }
+.通话挂断按钮:not(.通话中) {
+  background: linear-gradient(135deg, #34d399, #10b981);
+  box-shadow: 0 4px 20px rgba(52, 211, 153, 0.4);
+}
+.通话挂断按钮:not(.通话中):hover { filter: brightness(1.1); transform: translateY(-2px); }
+.通话挂断按钮.通话中 {
+  background: linear-gradient(135deg, #ff6b6b, #e63946);
+  box-shadow: 0 4px 22px rgba(255, 107, 107, 0.5);
+}
+.通话挂断按钮.通话中:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+/* ---------- 提示文字 ---------- */
+.通话提示 { font-size: 12px; color: var(--次要); text-align: center; }
+
+/* ---------- 弹层（模型/音色选择浮层） ---------- */
+.通话弹层 {
+  position: absolute;
+  left: 50%;
+  bottom: 130px;
+  transform: translateX(-50%);
+  width: 300px;
+  max-width: calc(100% - 24px);
+  max-height: 60%;
+  overflow-y: auto;
+  background: var(--卡片);
+  border: 1px solid var(--分隔线);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+  padding: 12px 14px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.通话弹层.隐藏 { display: none; }
+.通话弹层标题 { font-size: 13px; color: var(--次要); letter-spacing: 1px; }
+.通话弹层列表 { display: flex; flex-direction: column; gap: 4px; }
+.通话弹层分组名 { font-size: 11px; color: var(--次要); margin: 4px 0 2px; }
+.通话弹层项 {
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--正文);
+  font-family: inherit;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  transition: 0.15s;
+}
+.通话弹层项:hover { background: var(--卡片2); color: var(--主色); }
+/* 当前选中项高亮 */
+.通话弹层项.当前 {
+  background: rgba(124, 140, 255, 0.16);
+  border-color: var(--主色);
+  color: var(--主色);
+  font-weight: 600;
+}
+/* 复刻音色（仅合成可用）：禁用态 */
+.通话弹层项-禁用,
+.通话弹层项-禁用:hover {
+  cursor: not-allowed;
+  opacity: 0.45;
+  background: transparent;
+  color: var(--次要);
+}
+.通话弹层空 { font-size: 12px; color: var(--次要); padding: 4px 2px; }
+.通话弹层输入行 { display: flex; gap: 8px; }
+.通话弹层输入行 input {
+  flex: 1;
+  min-width: 0;
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  font-size: 13px;
+  font-family: inherit;
+  border-radius: 8px;
+  padding: 6px 10px;
+  outline: none;
+}
+.通话弹层输入行 input:focus { border-color: var(--主色); }
+
+/* 通话中的实时转写 / 助手回复显示区 */
+.通话-采集指示行 {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 14px;
+  padding-bottom: 2px;
+}
+.通话麦克风活动 {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: 0.1s;
+}
+.通话麦克风活动.活动 {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.8);
+}
+.通话消息区 {
+  width: 100%;
+  min-height: 20px;
+  max-height: 84px;
+  overflow-y: auto;
+  text-align: center;
+  font-size: 13px;
+  color: var(--次要);
+  padding: 0 8px 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.通话消息-最终 { color: var(--正文); }
+
+/* 通话文字输入行 */
+.通话文本行 {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.通话文本行 input {
+  flex: 1;
+  min-width: 0;
+  background: var(--卡片2);
+  border: 1px solid var(--分隔线);
+  color: var(--正文);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.通话文本行 input:focus { border-color: var(--主色); }
+.通话文本发送 {
+  flex: none;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: var(--主色);
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.通话文本发送:hover { filter: brightness(1.1); }
+.通话文本发送:active { transform: scale(0.96); }
+
+/* 通话历史弹层内容 */
+.通话历史会话 { display: flex; flex-direction: column; gap: 2px; }
+.通话历史会话 + .通话历史会话 {
+  border-top: 1px dashed var(--分隔线);
+  padding-top: 6px;
+  margin-top: 6px;
+}
+.通话历史头 {
+  font-size: 11px;
+  color: var(--次要);
+  border-bottom: 1px solid var(--分隔线);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+.通话历史行 { font-size: 12px; color: var(--正文); line-height: 1.5; word-break: break-all; }
+.通话历史行-用户 { color: var(--主色); }
+.通话历史行-助手 { color: var(--正文); }
+.通话弹层输入行 button { padding: 7px 12px; font-size: 12px; }
+
+/* ---------- 响应式：窄屏缩小球体与按钮 ---------- */
+@media (max-width: 720px) {
+  .通话球体 { width: 140px; height: 140px; }
+  .通话圆形按钮 { width: 72px; height: 72px; }
+  .通话按钮组 { gap: 22px; }
+  .通话弹层 { bottom: 110px; }
+}

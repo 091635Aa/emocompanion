@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一体化全流程AI应用</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ===================== 侧边导航 ===================== -->
+    <aside class="侧边栏" id="侧边栏">
+        <div class="侧边栏头部">
+            <div class="侧边栏徽标">🌌</div>
+            <div class="侧边栏标题">
+                <span class="侧边栏项目名">一体化全流程AI应用</span>
+                <span class="侧边栏副题">全流程 · 本地部署 · 多模块</span>
+            </div>
+        </div>
+        <nav class="导航" aria-label="主导航">
+            <a href="javascript:void(0)" class="导航项 当前" data-模块="仪表盘"><span class="导航图标">📊</span><span>仪表盘</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="数据预处理"><span class="导航图标">🎬</span><span>数据预处理</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="打标"><span class="导航图标">🏷️</span><span>打标</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="日记生成"><span class="导航图标">📔</span><span>日记生成</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="微调"><span class="导航图标">🧬</span><span>微调</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="模型管理"><span class="导航图标">📦</span><span>模型管理</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="推理"><span class="导航图标">💬</span><span>推理</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="达标评估"><span class="导航图标">🎯</span><span>达标评估</span></a>
+            <a href="javascript:void(0)" class="导航项" data-模块="配置"><span class="导航图标">⚙️</span><span>配置</span></a>
+        </nav>
+        <div class="侧边栏页脚">
+            <span class="版本徽标" id="版本徽标">v0.1.0</span>
+        </div>
+    </aside>
+
+    <!-- 遮罩（移动端侧栏展开时） -->
+    <div class="遮罩" id="遮罩"></div>
+
+    <!-- ===================== 主区域 ===================== -->
+    <div class="主区域">
+        <header class="顶栏">
+            <div class="顶栏左侧">
+                <button class="菜单按钮" id="菜单按钮" title="展开导航">☰</button>
+                <span class="顶栏项目名">一体化全流程AI应用</span>
+                <span class="顶栏分隔">/</span>
+                <h1 class="顶栏页名" id="当前页面标题">仪表盘</h1>
+            </div>
+            <div class="顶栏右侧">
+                <span class="服务状态灯 离线" id="服务状态灯" title="服务状态"></span>
+                <span class="服务状态文字" id="服务状态文字">检测中…</span>
+                <span class="版本徽标" id="顶栏版本">v0.1.0</span>
+            </div>
+        </header>
+
+        <main class="主体">
+
+            <!-- ========== 页面：仪表盘 ========== -->
+            <section class="页面" id="页面_仪表盘">
+                <h2 class="页面标题">📊 仪表盘</h2>
+                <div class="卡片网格">
+                    <div class="卡片">
+                        <h3 class="卡片标题">🖥️ 硬件状态</h3>
+                        <div id="硬件信息" class="键值列表"><p class="占位提示">正在检测硬件…</p></div>
+                    </div>
+                    <div class="卡片">
+                        <h3 class="卡片标题">🩺 服务状态</h3>
+                        <div id="服务信息" class="键值列表"><p class="占位提示">正在检测服务…</p></div>
+                    </div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🧮 显存预估</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="显存参数量亿">模型参数量（亿）</label>
+                            <input type="number" id="显存参数量亿" min="0" step="0.1" placeholder="如 7 / 32 / 70">
+                        </div>
+                        <div class="表单组">
+                            <label for="显存量化">量化档位</label>
+                            <select id="显存量化">
+                                <option value="fp16">fp16</option>
+                                <option value="4bit">4bit</option>
+                                <option value="auto">auto</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="显存预估按钮">预估显存</button>
+                        </div>
+                    </div>
+                    <div id="显存预估结果"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🚀 快捷入口</h3>
+                    <div class="快捷网格" id="快捷网格">
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="数据预处理">🎬 数据预处理</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="打标">🏷️ 打标</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="日记生成">📔 日记生成</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="微调">🧬 微调</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="模型管理">📦 模型管理</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="推理">💬 推理</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="达标评估">🎯 达标评估</button>
+                        <button class="快捷按钮" data-动作="快捷入口" data-目标="配置">⚙️ 配置</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：数据预处理 ========== -->
+            <section class="页面" id="页面_数据预处理">
+                <h2 class="页面标题">🎬 数据预处理</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📤 上传数据</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="上传文件">选择文件</label>
+                            <input type="file" id="上传文件">
+                        </div>
+                        <div class="表单组">
+                            <label>数据类型</label>
+                            <div class="单选组">
+                                <label class="单选"><input type="radio" name="上传类型" value="视频" checked> 视频</label>
+                                <label class="单选"><input type="radio" name="上传类型" value="音频"> 音频</label>
+                                <label class="单选"><input type="radio" name="上传类型" value="文本"> 文本</label>
+                            </div>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="上传按钮">上传</button>
+                        </div>
+                    </div>
+                    <label class="勾选行 隐藏" id="视频解析行">
+                        <input type="checkbox" id="视频解析" checked>
+                        <span>是否开启视频解析（自动打标）</span>
+                    </label>
+                    <div class="任务ID条">当前任务：<code id="任务ID显示">（未上传）</code></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🎙️ 语音转写</h3>
+                    <div class="表单行">
+                        <button class="按钮 主要" id="转写按钮">开始转写</button>
+                        <button class="按钮 次要" id="查看转写按钮">查看转写文本</button>
+                    </div>
+                    <div class="进度区">
+                        <div class="进度条"><div class="进度条填充" id="转写进度填充"></div></div>
+                        <span class="进度文本" id="转写进度文本">未开始</span>
+                    </div>
+                    <pre class="文本块 隐藏" id="转写文本"></pre>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🧩 话题分割</h3>
+                    <div class="表单行">
+                        <button class="按钮 主要" id="分割按钮">执行话题分割</button>
+                        <button class="按钮 次要" id="预览分割按钮">预览分割结果</button>
+                    </div>
+                    <div id="分割列表"></div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：打标 ========== -->
+            <section class="页面" id="页面_打标">
+                <h2 class="页面标题">🏷️ 打标</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📋 打标任务</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="打标任务ID">任务 ID（来自数据预处理）</label>
+                            <input type="text" id="打标任务ID" placeholder="如 task_20260807_001">
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 次要" id="加载片段按钮">加载已分割片段</button>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="自动打标按钮">自动打标</button>
+                        </div>
+                    </div>
+                    <div class="进度区">
+                        <div class="进度条"><div class="进度条填充" id="打标进度填充"></div></div>
+                        <span class="进度文本" id="打标进度文本">未开始</span>
+                    </div>
+                    <div id="打标片段列表"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🏷️ 打标结果（可复核编辑）</h3>
+                    <div id="打标结果列表"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📦 导出微调数据包</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="导出格式">导出格式</label>
+                            <select id="导出格式">
+                                <option value="jsonl">jsonl</option>
+                                <option value="json">json</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label for="导出类型">数据包类型</label>
+                            <select id="导出类型">
+                                <option value="情感">情感</option>
+                                <option value="记忆">记忆</option>
+                                <option value="身份">身份</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="打标导出按钮">导出微调数据包</button>
+                        </div>
+                    </div>
+                    <div id="导出结果"></div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：日记生成 ========== -->
+            <section class="页面" id="页面_日记生成">
+                <h2 class="页面标题">📔 日记生成</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">👤 角色人设</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="人设姓名">姓名</label>
+                            <input type="text" id="人设姓名" placeholder="如 小圆">
+                        </div>
+                        <div class="表单组">
+                            <label for="人设性别">性别</label>
+                            <select id="人设性别">
+                                <option value="女">女</option>
+                                <option value="男">男</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label for="人设出生年份">出生年份</label>
+                            <input type="number" id="人设出生年份" placeholder="如 2007">
+                        </div>
+                        <div class="表单组">
+                            <label for="日记数据目录">数据目录（可选）</label>
+                            <input type="text" id="日记数据目录" placeholder="打标数据/画面目录，可留空">
+                        </div>
+                    </div>
+                    <div class="表单组">
+                        <label for="人设描述">人设描述</label>
+                        <textarea id="人设描述" rows="2" placeholder="如：性格内向但温暖，喜欢画画和观察昆虫…"></textarea>
+                    </div>
+                    <div class="表单组">
+                        <label for="人设经历">关键经历</label>
+                        <textarea id="人设经历" rows="2" placeholder="如：7岁转学到上海，10岁养了一只猫…"></textarea>
+                    </div>
+                    <div class="表单行">
+                        <button class="按钮 主要" id="规划按钮">📐 规划时间线</button>
+                        <button class="按钮 主要" id="日记生成按钮">📔 开始生成日记</button>
+                    </div>
+                    <div id="时间线结果"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">⏳ 生成进度</h3>
+                    <div class="进度区">
+                        <div class="进度条"><div class="进度条填充" id="日记进度填充"></div></div>
+                        <span class="进度文本" id="日记进度文本">未开始</span>
+                    </div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📚 日记列表</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="日记角色名">角色名</label>
+                            <input type="text" id="日记角色名" placeholder="与上方人设姓名一致">
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 次要" id="日记刷新按钮">刷新列表</button>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="日记导出按钮">📤 导出日记微调文本</button>
+                        </div>
+                    </div>
+                    <div id="日记列表"></div>
+                    <div id="日记导出结果"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📖 单篇查看 / 审阅</h3>
+                    <div id="日记详情"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">💬 与本地大模型对话</h3>
+                    <div class="聊天区" id="日记聊天记录"></div>
+                    <div class="聊天输入行">
+                        <input type="text" id="日记聊天输入" placeholder="输入消息，回车发送…">
+                        <button class="按钮 主要" id="日记聊天发送">发送</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：微调 ========== -->
+            <section class="页面" id="页面_微调">
+                <h2 class="页面标题">🧬 三维度微调</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🎯 微调维度</h3>
+                    <div class="单选组">
+                        <label class="勾选行"><input type="checkbox" id="勾选情感" checked> 情感微调（打标情感数据）</label>
+                        <label class="勾选行"><input type="checkbox" id="勾选记忆" checked> 记忆微调（角色经历记忆）</label>
+                        <label class="勾选行"><input type="checkbox" id="勾选身份" checked> 身份微调（身份认同）</label>
+                    </div>
+                    <p class="提示文案" id="维度组合提示"></p>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📦 基座模型</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="微调模型选择">选择本地模型</label>
+                            <select id="微调模型选择"><option value="">（加载中…）</option></select>
+                        </div>
+                        <div class="表单组">
+                            <label for="微调模型路径">或手动填写模型路径</label>
+                            <input type="text" id="微调模型路径" placeholder="j:\最后版本！\数据\模型库\qwen2.5-7b">
+                        </div>
+                    </div>
+                    <div class="表单行">
+                        <button class="按钮 次要" id="微调检测按钮">🔍 检测模型能力</button>
+                        <button class="按钮 次要" id="微调数据预览按钮">📊 数据预览</button>
+                    </div>
+                    <div id="微调检测结果"></div>
+                    <div id="微调数据预览结果"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">⚙️ 训练参数</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="微调轮数">轮数</label>
+                            <input type="number" id="微调轮数" value="3" min="1">
+                        </div>
+                        <div class="表单组">
+                            <label for="微调学习率">学习率</label>
+                            <input type="text" id="微调学习率" value="0.0002">
+                        </div>
+                        <div class="表单组">
+                            <label for="微调批量">批量</label>
+                            <input type="number" id="微调批量" value="4" min="1">
+                        </div>
+                        <div class="表单组">
+                            <label for="微调量化">量化</label>
+                            <select id="微调量化">
+                                <option value="auto">auto</option>
+                                <option value="fp16">fp16</option>
+                                <option value="4bit">4bit</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label for="微调角色名">角色名</label>
+                            <input type="text" id="微调角色名" placeholder="如 小圆">
+                        </div>
+                    </div>
+                    <div class="表单组">
+                        <label>模型组织方式</label>
+                        <div class="单选组">
+                            <label class="单选"><input type="radio" name="组织方式" value="一角色一模型" checked> 一角色一模型</label>
+                            <label class="单选"><input type="radio" name="组织方式" value="三维合一单模型"> 三维合一单模型</label>
+                        </div>
+                    </div>
+                    <div class="表单行">
+                        <button class="按钮 主要" id="微调开始按钮">🚀 开始微调</button>
+                    </div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📈 训练进度</h3>
+                    <div class="进度区">
+                        <div class="进度条"><div class="进度条填充" id="微调进度填充"></div></div>
+                        <span class="进度文本" id="微调进度文本">未开始</span>
+                    </div>
+                    <div class="阶段徽章" id="微调阶段">-</div>
+                    <pre class="日志区" id="微调日志"></pre>
+                </div>
+            </section>
+
+            <!-- ========== 页面：模型管理 ========== -->
+            <section class="页面" id="页面_模型管理">
+                <h2 class="页面标题">📦 模型管理</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🗂️ 本地模型库</h3>
+                    <div class="表单行">
+                        <button class="按钮 主要" id="模型扫描按钮">🔄 重新扫描</button>
+                        <span class="提示文案" id="模型扫描结果"></span>
+                    </div>
+                    <div class="表格容器">
+                        <table class="表格" id="模型列表">
+                            <thead>
+                                <tr>
+                                    <th>模型名</th>
+                                    <th>参数量</th>
+                                    <th>架构</th>
+                                    <th>量化</th>
+                                    <th>路径</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6" class="占位提示">加载中…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="模型评估结果"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">⬇️ 模型下载</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="下载模型ID">模型 ID</label>
+                            <input type="text" id="下载模型ID" placeholder="如 qwen/Qwen2.5-7B-Instruct">
+                        </div>
+                        <div class="表单组">
+                            <label for="下载镜像源">镜像源</label>
+                            <select id="下载镜像源">
+                                <option value="魔搭社区">魔搭社区</option>
+                                <option value="HuggingFace镜像">HuggingFace镜像</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label for="下载量化">量化</label>
+                            <select id="下载量化">
+                                <option value="fp16">fp16</option>
+                                <option value="4bit">4bit</option>
+                            </select>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="下载按钮">下载</button>
+                        </div>
+                    </div>
+                    <div class="进度区">
+                        <div class="进度条"><div class="进度条填充" id="下载进度填充"></div></div>
+                        <span class="进度文本" id="下载进度文本">未开始</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：推理 ========== -->
+            <section class="页面" id="页面_推理">
+                <h2 class="页面标题">💬 推理</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🧠 架构与模型</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label>架构类型</label>
+                            <div class="单选组">
+                                <label class="单选"><input type="radio" name="架构类型" value="V通用架构" checked> V通用架构</label>
+                                <label class="单选"><input type="radio" name="架构类型" value="V1简单回响"> V1简单回响</label>
+                            </div>
+                        </div>
+                        <div class="表单组">
+                            <label for="推理模型选择">模型选择</label>
+                            <select id="推理模型选择"><option value="">（加载中…）</option></select>
+                        </div>
+                        <div class="表单组">
+                            <label for="推理角色名">角色名</label>
+                            <input type="text" id="推理角色名" placeholder="可选，注入身份">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🎛️ 推理参数定制</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="推理λ">λ（语义回响强度）</label>
+                            <input type="text" id="推理λ" value="0.08">
+                        </div>
+                        <div class="表单组">
+                            <label for="推理γ">γ（记忆权重）</label>
+                            <input type="text" id="推理γ" value="0.07">
+                        </div>
+                        <div class="表单组">
+                            <label for="推理τ">τ（温度）</label>
+                            <input type="text" id="推理τ" value="0.09">
+                        </div>
+                        <div class="表单组">
+                            <label for="推理max">max_new_tokens</label>
+                            <input type="number" id="推理max" value="256" min="1">
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 次要" id="参数推荐按钮">✨ 自动推荐</button>
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="推理初始化按钮">🚀 初始化</button>
+                        </div>
+                    </div>
+                    <div class="任务ID条">初始化状态：<code id="推理状态">未初始化</code></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">💬 聊天</h3>
+                    <div class="聊天区" id="推理聊天记录">
+                        <div class="消息 系统">模型初始化后可开始对话。</div>
+                    </div>
+                    <div class="聊天输入行">
+                        <input type="text" id="推理输入" placeholder="输入提示词，回车发送…">
+                        <button class="按钮 主要" id="推理发送">发送</button>
+                    </div>
+                    <div class="指标行" id="推理指标"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🧩 记忆外挂</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="记忆内容">记忆内容</label>
+                            <input type="text" id="记忆内容" placeholder="如：小圆最喜欢的颜色是蓝色">
+                        </div>
+                        <div class="表单组">
+                            <label for="记忆标签">标签</label>
+                            <input type="text" id="记忆标签" placeholder="如 偏好,颜色">
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 次要" id="记忆添加按钮">➕ 添加记忆</button>
+                        </div>
+                    </div>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="记忆查询">检索查询</label>
+                            <input type="text" id="记忆查询" placeholder="输入查询内容">
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 次要" id="记忆检索按钮">🔍 检索记忆</button>
+                        </div>
+                    </div>
+                    <div id="记忆检索结果"></div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：达标评估 ========== -->
+            <section class="页面" id="页面_达标评估">
+                <h2 class="页面标题">🎯 达标评估</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🧪 图灵测试式评估</h3>
+                    <div class="表单行">
+                        <div class="表单组">
+                            <label for="达标模型路径">模型路径</label>
+                            <input type="text" id="达标模型路径" placeholder="微调输出目录，如 j:\最后版本！\数据\微调输出\角色A">
+                        </div>
+                        <div class="表单组">
+                            <label>&nbsp;</label>
+                            <button class="按钮 主要" id="达标开始按钮">开始评估</button>
+                        </div>
+                    </div>
+                    <div class="进度区">
+                        <div class="进度条"><div class="进度条填充" id="达标进度填充"></div></div>
+                        <span class="进度文本" id="达标进度文本">未开始</span>
+                    </div>
+                    <div id="达标评估结果"></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">📄 评估报告</h3>
+                    <div id="达标报告"><p class="占位提示">选择模型路径并完成评估后，可在此查看 Markdown 报告。</p></div>
+                </div>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🕘 历史记录</h3>
+                    <div id="达标历史列表"><p class="占位提示">加载中…</p></div>
+                </div>
+            </section>
+
+            <!-- ========== 页面：配置 ========== -->
+            <section class="页面" id="页面_配置">
+                <h2 class="页面标题">⚙️ 配置</h2>
+
+                <div class="卡片">
+                    <h3 class="卡片标题">🗂️ 系统配置（分组编辑）</h3>
+                    <div id="配置表格"><p class="占位提示">加载中…</p></div>
+                    <div class="表单行">
+                        <button class="按钮 主要" id="保存配置按钮">💾 保存配置</button>
+                        <button class="按钮 危险" id="恢复默认按钮">↺ 恢复默认</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="页脚">© 2026 一体化全流程AI应用 · 本机测试版 · 后端接口未就绪时各模块将提示"后端接口未就绪"</footer>
+    </div>
+
+    <!-- Toast 容器 -->
+    <div class="toast容器" id="toast容器"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

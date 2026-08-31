@@ -1,0 +1,16 @@
+﻿[Qwen3-4B] p3_as_a=True judgePick=B -> BASE
+[Qwen3-4B] p3_as_a=False judgePick=B -> P3
+[Qwen3-4B] p3_as_a=False judgePick=B -> P3
+[Qwen3-4B] p3_as_a=False judgePick=B -> P3
+[Qwen3-4B] p3_as_a=True judgePick=B -> BASE
+[DeepSeek-7B] p3_as_a=True judgePick=B -> BASE
+[DeepSeek-7B] p3_as_a=False judgePick=B -> P3
+[DeepSeek-7B] p3_as_a=False judgePick=B -> P3
+[DeepSeek-7B] p3_as_a=False judgePick=B -> P3
+[DeepSeek-7B] p3_as_a=False judgePick=B -> P3
+
+==== 无偏置裁判：P3 真实赢率 ====
+Qwen3-4B       P3胜 3/5 = 60%  （基线 2, 无效 0）
+DeepSeek-7B    P3胜 4/5 = 80%  （基线 1, 无效 0）
+TOTAL        P3胜 7/10 = 70%
+saved: d:\AI情感\缘圆_角色挂载与情感注入工程\05_三档显存测试\judge_unbiased.json
