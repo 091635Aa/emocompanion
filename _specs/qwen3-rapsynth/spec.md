@@ -6,13 +6,13 @@
 > 科研定位：**引导而非强制**。任务书中的技术路线（MFA 对齐、Transformer/LSTM/扩散韵律模型、音素级 vs 音节级控制）为参考而非硬性约束；每个阶段自查并汇报，允许调整方向。**核心前提 Qwen3-TTS「原生支持 pitch_curve/duration」未经核实**，须在第一阶段用实测扎破/修正，再决定控制面设计。
 
 ## What Changes
-- 在 `缘圆_角色挂载与情感注入工程/07_说唱合成Qwen3RapSynth/` 新建研究仓库（数据 / 韵律模型 / 集成 / 评估 / 演示）。
+- 在 `EmoCompanion_角色挂载与情感注入工程/07_说唱合成Qwen3RapSynth/` 新建研究仓库（数据 / 韵律模型 / 集成 / 评估 / 演示）。
 - 新增一个可运行的 `RapSynth` 管道：`lyrics+BPM → 韵律参数(F0/时长/能量) → 注入 Qwen3-TTS → 干声 wav`。
 - 复用既有工程资产：Base + 双路 adapter + `target_speaker_embedding.pt`、`serve/` 推理模板；**不污染 Base 权重、不破坏已交付外挂包**。
 - 产出：技术文档、可运行代码仓库、≥3 段不同风格（快嘴 / 旋律 / 硬核）合成样例。
 
 ## Impact
-- Affected specs: `qwen3tts-character-addon`（复用其外挂包与推理路径，不修改）；`yuanyuan-tts-webapp`（可选挂载合成/评估入口）。
+- Affected specs: `qwen3tts-character-addon`（复用其外挂包与推理路径，不修改）；`emocompanion-tts-webapp`（可选挂载合成/评估入口）。
 - Affected code: 新增 `07_说唱合成Qwen3RapSynth/`；对 `06_Qwen3TTS外挂/out/voice_lora|emotion_lora` 只读复用。
 - 软硬件约束：RTX 3080 16GB、GPU 负载 ≤5%，训练默认 batch=1（防 OOM）；模型加载 ≤3.9s；笔记本电源有限，**框架/探查阶段不触发大规模训练**。流水线统一 CUDA + 清华镜像 + gh-proxy 下载。
 

@@ -12,22 +12,22 @@ DST = Path(r"d:\AI情感\输出文档\专利申请_公有脱敏版")
 REPLACEMENTS = [
     # —— 代码/类名（替换为合法标识符）——
     ("class 情感注入引擎（EIE）:", "class EmotionEngine:"),
-    ("YuanyuanEngine", "EmotionEngine"),
+    ("emocompanionEngine", "EmotionEngine"),
     ("class EmotionEngine（EIE）:", "class EmotionEngine:"),
     # —— 引擎/系统名 ——
-    ("缘圆引擎", "情感注入引擎"),
-    ('"缘圆"系统', "本系统"),
-    ("缘圆系统", "本系统"),
-    ('"缘圆"', "本系统"),
-    ("缘圆", "本系统"),
+    ("EmoCompanion引擎", "情感注入引擎"),
+    ('"EmoCompanion"系统', "本系统"),
+    ("EmoCompanion系统", "本系统"),
+    ('"EmoCompanion"', "本系统"),
+    ("EmoCompanion", "本系统"),
     # —— 角色名通用化 ——
     ('character_name = "本系统"', 'character_name = "情感伙伴"'),
-    ('character_name = "缘圆"', 'character_name = "情感伙伴"'),
-    ('character_name="缘圆"', 'character_name="情感伙伴"'),
+    ('character_name = "EmoCompanion"', 'character_name = "情感伙伴"'),
+    ('character_name="EmoCompanion"', 'character_name="情感伙伴"'),
     # —— 私有方法名通用化 ——
     ("Ultra Fusion Dynamics", "动态超融合方法"),
     ("Emotional Director Dispatch", "情感导演调度方法"),
-    ("Yuanyuan", "EmotionEngine"),
+    ("emocompanion", "EmotionEngine"),
 ]
 
 def deidentify(text: str) -> str:
@@ -49,7 +49,7 @@ def main():
     print("\n残留私有词检查（应为空）：")
     for md in sorted(DST.glob("*.md")):
         t = md.read_text(encoding="utf-8")
-        for w in ("缘圆", "Yuanyuan", "yuanyuan"):
+        for w in ("EmoCompanion", "emocompanion", "emocompanion"):
             if w in t:
                 print(f"  !! {md.name}: 仍含 '{w}'  {t.count(w)} 处")
         if md.name == "P6_情感导演调度专利.md":
