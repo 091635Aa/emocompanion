@@ -32,6 +32,8 @@ if 工作目录 not in sys.path:
 if 回响工程根 not in sys.path:
     sys.path.insert(0, 回响工程根)
 
+from base_decoding_controller import 解码控制基类
+
 from 锚点库 import 锚点库
 from 目标决策器 import 目标决策器
 from 锚点解码器 import 锚点解码器, 计算熵, 计算重复率
@@ -63,7 +65,7 @@ class _GPU回响注入器(回响注入器):
         self.投影矩阵.requires_grad_(False)
 
 
-class 混合锚点器:
+class 混合锚点器(解码控制基类):
     """锚点 × 回响 × 潮汐 三通道正交叠加解码器"""
 
     def __init__(
@@ -116,16 +118,20 @@ class 混合锚点器:
         self.top_p = top_p
         self.top_k = top_k
         self.repetition_penalty = repetition_penalty
-        self.退化窗口 = 退化窗口
-        self.兜底阈值 = 兜底阈值
+        # 解码控制参数（由基类 解码控制基类 注入：句子停止/长度/兜底框架）
+        super().__init__(
+            目标长度=0,
+            句子停止=句子停止,
+            最长句数=最长句数,
+            最短字数=最短字数,
+            最大字数=最大字数,
+            退化窗口=退化窗口,
+            兜底阈值=兜底阈值,
+        )
         self.句分隔符 = re.compile(句分隔符)
         self.密度基 = 密度基
         self.密度增益 = 密度增益
         self.密度上限 = 密度上限
-        self.最短字数 = 最短字数
-        self.最大字数 = 最大字数
-        self.最长句数 = 最长句数
-        self.句子停止 = 句子停止
         self.最小长度 = 最小长度
 
         self.device = model.device
@@ -439,16 +445,7 @@ class 混合锚点器:
         c = Counter(token列表)
         return float(-sum((v / n) * math.log(v / n) for v in c.values()))
 
-    def _句子停止(self) -> bool:
-        if not self._生成文本:
-            return False
-        if len(self._生成文本) >= self.最短字数 and self._句子数 >= self.最长句数:
-            return True
-        if self._句子数 >= self.最长句数 + 1:
-            return True
-        if len(self._生成文本) >= self.最大字数:
-            return True
-        return False
+    # _句子停止 采用共享基类 解码控制基类 实现（最短字数/最长句数/最大字数 同一套逻辑）
 
     def 重置(self) -> None:
         self._当前句文本 = ""
