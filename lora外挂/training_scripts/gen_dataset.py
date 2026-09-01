@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 生成「温柔语态」LoRA 训练数据集 — 中性提问 → 温柔回复
 输出: f:\lora外挂\training_scripts\..\data\gentle_dataset.jsonl
 """

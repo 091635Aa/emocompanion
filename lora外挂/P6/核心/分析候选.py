@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """分析 P6 候选质量：多样性 + 用改良评分重选候选（零重生成）"""
-import json, re, collections
+import json, os
 
-G = json.load(open(r'f:\lora外挂\P6\评测结果\P6_生成_30.json', encoding='utf-8'))
+G = json.load(open(os.environ.get("EMOTION_REPO_ROOT", r'f:\lora外挂\P6\评测结果\P6_生成_30.json'), encoding='utf-8'))
 回复 = G['回复']
 
 # 字符串级情感词（与 token 级近似）

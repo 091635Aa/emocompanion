@@ -1,0 +1,114 @@
+{
+  "generated_at": "20260901_000533",
+  "total_pass": 176,
+  "total_fail": 0,
+  "n_suites": 15,
+  "duration_s": 3.44,
+  "suites": [
+    {
+      "file": "test_anchor_pure.py",
+      "exit_code": 0,
+      "pass": 6,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_decision_pure.py",
+      "exit_code": 0,
+      "pass": 11,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_metrics_pure.py",
+      "exit_code": 0,
+      "pass": 9,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_opt_pure.py",
+      "exit_code": 0,
+      "pass": 10,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_tts_pure.py",
+      "exit_code": 0,
+      "pass": 10,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_p15_aggregate.py",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_p15_worker.py",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_rap_injector.py",
+      "exit_code": 0,
+      "pass": 11,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_rap_metrics.py",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_rap_prosody.py",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_rapsynth.py",
+      "exit_code": 0,
+      "pass": 4,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_rapsynth_core.py",
+      "exit_code": 0,
+      "pass": 16,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_rpg_resultparse.py",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_single_source_drift.py",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_speech_common.py",
+      "exit_code": 0,
+      "pass": 12,
+      "fail": 0,
+      "error": null
+    }
+  ]
+}

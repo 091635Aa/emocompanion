@@ -2,7 +2,6 @@
 """P6 评测·汇总：健康度汇总 + 裁判 win_rate + 与 G 统一基准（前辈）对比"""
 import json
 import os
-import sys
 from datetime import datetime
 
 本目录 = os.path.dirname(os.path.abspath(__file__))

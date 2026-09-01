@@ -28,21 +28,22 @@ def _resample_mono(wav: np.ndarray, src_sr: int) -> np.ndarray:
 
 
 def _apply_duration(wav: np.ndarray, dur: float) -> np.ndarray:
-    import librosa
+    import numpy as _np
     cur = wav.shape[0] / SR
     if cur <= 1e-3:
         return wav
     rate = cur / max(dur, 1e-3)
-    rate = float(np.clip(rate, 0.7, 1.5))  # 限制拉伸幅度防音质崩坏
+    rate = float(_np.clip(rate, 0.7, 1.5))  # 限制拉伸幅度防音质崩坏
     if abs(rate - 1.0) < 1e-3:
         return wav
+    import librosa  # 惰性导入：仅真正拉伸时拉取
     return librosa.effects.time_stretch(wav, rate=rate)
 
 
 def _apply_pitch(wav: np.ndarray, semitones: float) -> np.ndarray:
-    import librosa
     if abs(semitones) < 0.5:
         return wav
+    import librosa  # 惰性导入：仅真正升降调时拉取
     return librosa.effects.pitch_shift(wav, sr=SR, n_steps=float(semitones))
 
 
@@ -97,7 +98,8 @@ def inject(plan, neutral_lines, base_f0: float = 180.0,
     返回:
         (final_wav, onsets)  onsets 为逐行起始秒数列表
     """
-    import librosa
+    # 说明：librosa 仅在各耗时子函数内按需导入；此处无需顶层 import，
+    # 移除后允许"纯拍对齐编排"路径（时长匹配/无升降）离线无 librosa 运行。
     pieces: list = []
     onsets: list = []
     t = 0.0

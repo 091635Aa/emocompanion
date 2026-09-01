@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""训练 P6 情感LoRA 外挂适配器 — Qwen2.5-1.5B 基座，监督回复（instruction 掩码）
+r"""训练 P6 情感LoRA 外挂适配器 — Qwen2.5-1.5B 基座，监督回复（instruction 掩码）
 用法: python p6_train_lora.py [--epochs 3] [--r 8] [--alpha 16] [--lr 2e-4] [--out 输出目录]
 输出: f:\lora外挂\lora_adapters\p6_emotion\
 """

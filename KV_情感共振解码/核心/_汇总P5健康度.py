@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """汇总 P5 30 条生成的健康度指标"""
 import json
+import os
 from collections import defaultdict
 
-路径 = r"i:\Desktop\语义回响\发布\SemanticEcho-AnchorEcho\评测结果\P5_生成_30.json"
+路径 = os.environ.get("EMOTION_REPO_ROOT", r"i:\Desktop\语义回响\发布\SemanticEcho-AnchorEcho\评测结果\P5_生成_30.json")
 with open(路径, encoding="utf-8") as f:
     d = json.load(f)
 

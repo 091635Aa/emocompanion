@@ -1,0 +1,129 @@
+{
+  "generated_at": "20260901_000613",
+  "total_pass": 176,
+  "total_fail": 0,
+  "n_suites": 15,
+  "duration_s": 3.45,
+  "suites": [
+    {
+      "file": "test_anchor_pure.py",
+      "exit_code": 0,
+      "pass": 6,
+      "fail": 0,
+      "duration_s": 0.14,
+      "error": null
+    },
+    {
+      "file": "test_decision_pure.py",
+      "exit_code": 0,
+      "pass": 11,
+      "fail": 0,
+      "duration_s": 0.163,
+      "error": null
+    },
+    {
+      "file": "test_metrics_pure.py",
+      "exit_code": 0,
+      "pass": 9,
+      "fail": 0,
+      "duration_s": 0.128,
+      "error": null
+    },
+    {
+      "file": "test_opt_pure.py",
+      "exit_code": 0,
+      "pass": 10,
+      "fail": 0,
+      "duration_s": 0.153,
+      "error": null
+    },
+    {
+      "file": "test_tts_pure.py",
+      "exit_code": 0,
+      "pass": 10,
+      "fail": 0,
+      "duration_s": 0.152,
+      "error": null
+    },
+    {
+      "file": "test_x_p15_aggregate.py",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "duration_s": 0.04,
+      "error": null
+    },
+    {
+      "file": "test_x_p15_worker.py",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "duration_s": 0.036,
+      "error": null
+    },
+    {
+      "file": "test_x_rap_injector.py",
+      "exit_code": 0,
+      "pass": 11,
+      "fail": 0,
+      "duration_s": 0.135,
+      "error": null
+    },
+    {
+      "file": "test_x_rap_metrics.py",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "duration_s": 1.874,
+      "error": null
+    },
+    {
+      "file": "test_x_rap_prosody.py",
+      "exit_code": 0,
+      "pass": 14,
+      "fail": 0,
+      "duration_s": 0.063,
+      "error": null
+    },
+    {
+      "file": "test_x_rapsynth.py",
+      "exit_code": 0,
+      "pass": 4,
+      "fail": 0,
+      "duration_s": 0.072,
+      "error": null
+    },
+    {
+      "file": "test_x_rapsynth_core.py",
+      "exit_code": 0,
+      "pass": 16,
+      "fail": 0,
+      "duration_s": 0.07,
+      "error": null
+    },
+    {
+      "file": "test_x_rpg_resultparse.py",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "duration_s": 0.04,
+      "error": null
+    },
+    {
+      "file": "test_x_single_source_drift.py",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "duration_s": 0.165,
+      "error": null
+    },
+    {
+      "file": "test_x_speech_common.py",
+      "exit_code": 0,
+      "pass": 12,
+      "fail": 0,
+      "duration_s": 0.205,
+      "error": null
+    }
+  ]
+}

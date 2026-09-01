@@ -20,7 +20,7 @@ from datetime import datetime
 
 本目录 = os.path.dirname(os.path.abspath(__file__))
 状态路径 = os.path.join(本目录, "P6_调度状态.json")
-让路标记 = r"C:\P6临时盘\让路.flag"
+让路标记 = os.environ.get("让路标记", r"C:\P6临时盘\让路.flag")
 日志路径 = os.path.join(本目录, "P6_调度.log")
 
 步骤 = [

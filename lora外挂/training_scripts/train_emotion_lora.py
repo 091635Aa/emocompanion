@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 训练「情感外挂 v1」LoRA 适配器 — 基于情感数据集（high_ei_chat + multi_emotion + gentle）
 用法: python train_emotion_lora.py --model <基座模型路径>
 输出: f:\lora外挂\lora_adapters\emotion_v1\
 """
-import os
 import sys
 import json
 import argparse

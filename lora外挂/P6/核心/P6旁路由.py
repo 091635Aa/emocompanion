@@ -11,11 +11,8 @@
 - 重复率 = 2-gram token 重复率 = 1 - 唯一/总数
 - 平均熵 = 生成 token 的 softmax 熵均值（一次前向）
 """
-import math
 import os
-import re
 import sys
-from collections import Counter
 
 # ── 内存约束（低占用运行，避免挤占同机其他 AI 进程）──
 os.environ.setdefault("HF_HOME", r"C:\P6临时盘\hf")

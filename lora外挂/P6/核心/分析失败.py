@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import json, collections
-LJ = json.load(open(r'f:\lora外挂\P6\评测结果\P6_LLMJudge_30.json', encoding='utf-8'))
-G = json.load(open(r'f:\lora外挂\P6\评测结果\P6_生成_30.json', encoding='utf-8'))
+import json, collections, os
+LJ = json.load(open(os.environ.get("EMOTION_REPO_ROOT", r'f:\lora外挂\P6\评测结果\P6_LLMJudge_30.json'), encoding='utf-8'))
+G = json.load(open(os.environ.get("EMOTION_REPO_ROOT", r'f:\lora外挂\P6\评测结果\P6_生成_30.json'), encoding='utf-8'))
 G回 = G['回复']
 
 for 模式 in ('裸', 'P6_LoRA裸', 'P6_旁路由'):

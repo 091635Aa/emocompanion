@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """检查 P6 生成结果完整性 + 健康度预览"""
 import json
+import os
 import statistics
 
-路径 = r"f:\lora外挂\P6\评测结果\P6_生成_30.json"
+路径 = os.environ.get("EMOTION_REPO_ROOT", r"f:\lora外挂\P6\评测结果\P6_生成_30.json")
 d = json.load(open(路径, encoding="utf-8"))
 print("样本数", len(d["回复"]), "模式", d["模式"])
 

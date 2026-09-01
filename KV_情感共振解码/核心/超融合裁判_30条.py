@@ -24,7 +24,7 @@ from safetensors import safe_open
 if 工作目录 not in sys.path:
     sys.path.insert(0, 工作目录)
 
-模型空间 = r"c:\Users\Administrator\Documents\论文+临时目录\模型空间"
+模型空间 = os.environ.get("MODEL_SPACE_ROOT", r"c:\Users\Administrator\Documents\论文+临时目录\模型空间")
 裁判模型名 = "Qwen2.5-7B-Instruct"
 输出目录 = os.path.join(工作目录, "..", "评测结果")
 生成路径 = os.path.join(输出目录, "超融合_生成_30.json")

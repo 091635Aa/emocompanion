@@ -15,7 +15,7 @@ from datetime import datetime
 工作目录 = os.path.dirname(os.path.abspath(__file__))
 if 工作目录 not in sys.path:
     sys.path.insert(0, 工作目录)
-回响工程根 = r"i:\Desktop\语义回响"
+回响工程根 = os.environ.get("EMOTION_REPO_ROOT", r"i:\Desktop\语义回响")
 if 回响工程根 not in sys.path:
     sys.path.insert(0, 回响工程根)
 
@@ -27,7 +27,7 @@ from 锚点解码器 import 锚点解码器, 计算熵
 from 超融合解码器 import 超融合解码器
 from 情感共振解码器 import 情感共振解码器
 
-模型路径 = r"c:\Users\Administrator\Documents\论文+临时目录\模型空间\Qwen2.5-1.5B-Instruct"
+模型路径 = os.environ.get("QWEN_MODEL_PATH", r"c:\Users\Administrator\Documents\论文+临时目录\模型空间\Qwen2.5-1.5B-Instruct")
 输出目录 = os.path.join(工作目录, "..", "评测结果")
 os.makedirs(输出目录, exist_ok=True)
 
@@ -112,7 +112,7 @@ def main():
     锚库.构建()
     感知器, 潮汐决策 = None, None
     try:
-        sys.path.insert(0, r"h:\情感潮汐解码（Emotion Tidal Decoding, ETD）")
+        sys.path.insert(0, os.environ.get("ETD_REPO_ROOT", r"h:\情感潮汐解码（Emotion Tidal Decoding, ETD）"))
         from 潮汐感知器 import 潮汐感知器
         from 潮汐决策器 import 潮汐决策器
         感知器 = 潮汐感知器()

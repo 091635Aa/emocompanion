@@ -14,17 +14,11 @@ _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-import numpy as np
-
 from prosody_model.rules import predict_lyrics  # noqa: E402
 from eval import metrics  # noqa: E402
 from generate_rap import EXAMPLES  # noqa: E402
 
 SR = 24000
-_SCRIPTS = os.path.dirname(os.path.abspath(__file__))
-if _SCRIPTS not in sys.path and os.path.dirname(sys.executable) != _SCRIPTS:
-    sys.path.insert(0, _SCRIPTS)
-from generate_rap import EXAMPLES  # noqa: E402
 
 
 def _onsets_naive(neutral_durs):

@@ -170,7 +170,6 @@ def build_label_dataset(lyrics_lines, bpms, styles, base_f0=180.0):
     X, Y = [], []
     for line in lyrics_lines:
         n = max(count_syllables(line), 1)
-        line_energy = {"快嘴": 1.15, "旋律说唱": 0.95, "硬核": 1.35}.get("快嘴", 1.0)
         for style in styles:
             le = {"快嘴": 1.15, "旋律说唱": 0.95, "硬核": 1.35}[style]
             for bpm in bpms:

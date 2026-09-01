@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 训练「温柔语态」LoRA 适配器 — PEFT + transformers Trainer
 用法: python train_lora.py --model <基座模型路径>
 输出: f:\lora外挂\lora_adapters\gentle_v1\
@@ -17,7 +17,7 @@ sys.path.insert(0, str(项目根))
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer, DataCollatorForSeq2Seq
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from peft import LoraConfig, get_peft_model
 
 数据集路径 = 项目根 / "data" / "gentle_dataset.jsonl"
 输出目录 = 项目根 / "lora_adapters" / "gentle_v2"

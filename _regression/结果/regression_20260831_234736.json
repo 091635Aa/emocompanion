@@ -1,0 +1,51 @@
+{
+  "generated_at": "20260831_234736",
+  "total_pass": 57,
+  "total_fail": 0,
+  "n_suites": 6,
+  "duration_s": 0.82,
+  "suites": [
+    {
+      "file": "test_anchor_pure.py",
+      "exit_code": 0,
+      "pass": 6,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_decision_pure.py",
+      "exit_code": 0,
+      "pass": 11,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_metrics_pure.py",
+      "exit_code": 0,
+      "pass": 9,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_opt_pure.py",
+      "exit_code": 0,
+      "pass": 10,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_tts_pure.py",
+      "exit_code": 0,
+      "pass": 10,
+      "fail": 0,
+      "error": null
+    },
+    {
+      "file": "test_x_speech_common.py",
+      "exit_code": 0,
+      "pass": 11,
+      "fail": 0,
+      "error": null
+    }
+  ]
+}
