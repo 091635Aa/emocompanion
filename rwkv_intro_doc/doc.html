@@ -1,0 +1,5809 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+@page {
+  size: A4;
+  margin: 1.35cm 1.35cm 1.5cm 1.35cm;
+  @bottom-center { content: counter(page) " / " counter(pages); font-size: 8pt; color: #94a3b8; font-family: "Noto Sans CJK SC"; }
+  @top-right { content: "RWKV 架构详解 · 超全入门手册"; font-size: 7.5pt; color: #cbd5e1; font-family: "Noto Sans CJK SC"; }
+}
+@page cover { margin: 0; @bottom-center { content: none; } @top-right { content: none; } }
+* { box-sizing: border-box; }
+body {
+  font-family: "Noto Sans CJK SC", sans-serif;
+  font-size: 9.8pt;
+  line-height: 1.52;
+  color: #1e293b;
+  margin: 0;
+  text-align: justify;
+}
+h1 { font-size: 17pt; color: #1e3a8a; margin: 0.9em 0 0.5em; padding-bottom: 0.25em; border-bottom: 2.5px solid #2563eb; page-break-before: always; line-height: 1.25; }
+h1:first-of-type { page-break-before: auto; }
+h2 { font-size: 13pt; color: #1d4ed8; margin: 0.85em 0 0.4em; padding-left: 0.45em; border-left: 5px solid #2563eb; line-height: 1.3; page-break-after: avoid; }
+h3 { font-size: 11pt; color: #0f172a; margin: 0.7em 0 0.3em; page-break-after: avoid; }
+h4 { font-size: 10.2pt; color: #334155; margin: 0.6em 0 0.25em; page-break-after: avoid; }
+p { margin: 0.35em 0; }
+ul, ol { margin: 0.3em 0 0.45em; padding-left: 1.6em; }
+li { margin: 0.18em 0; }
+strong { color: #0f172a; }
+a { color: #2563eb; text-decoration: none; }
+code {
+  font-family: "DejaVu Sans Mono", monospace;
+  background: #f1f5f9; border: 0.5px solid #e2e8f0;
+  padding: 0.05em 0.3em; border-radius: 3px; font-size: 8.6pt; color: #b91c1c;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; border-radius: 6px;
+  padding: 0.55em 0.7em; font-size: 8.3pt; line-height: 1.42;
+  page-break-inside: avoid; white-space: pre-wrap; word-break: break-all;
+}
+pre code { background: transparent; border: none; color: inherit; padding: 0; font-size: inherit; }
+blockquote {
+  margin: 0.45em 0; padding: 0.4em 0.9em;
+  background: #eff6ff; border-left: 4px solid #2563eb; color: #1e3a8a; border-radius: 0 6px 6px 0;
+  page-break-inside: avoid;
+}
+blockquote p { margin: 0.2em 0; }
+table {
+  border-collapse: collapse; width: 100%; margin: 0.5em 0; font-size: 8.7pt;
+  page-break-inside: auto;
+}
+tr { page-break-inside: avoid; }
+th, td { page-break-inside: avoid; }
+th { background: #1e3a8a; color: #fff; padding: 0.32em 0.5em; text-align: left; font-weight: 600; }
+td { border: 0.5px solid #cbd5e1; padding: 0.28em 0.5em; vertical-align: top; }
+tr:nth-child(even) td { background: #f8fafc; }
+img { max-width: 100%; height: auto; display: block; margin: 0.45em auto; page-break-inside: avoid; }
+figure { margin: 0.45em auto; text-align: center; page-break-inside: avoid; }
+figcaption { font-size: 8.3pt; color: #64748b; margin-top: 0.2em; text-align: center; }
+hr { border: none; border-top: 1px dashed #cbd5e1; margin: 0.7em 0; }
+/* 提示卡片 */
+.note { background:#f0fdf4; border:1px solid #86efac; border-left:4px solid #16a34a; padding:0.45em 0.8em; border-radius:6px; margin:0.5em 0; page-break-inside:avoid; }
+.warn { background:#fefce8; border:1px solid #fde047; border-left:4px solid #ca8a04; padding:0.45em 0.8em; border-radius:6px; margin:0.5em 0; page-break-inside:avoid; }
+.tip { background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #2563eb; padding:0.45em 0.8em; border-radius:6px; margin:0.5em 0; page-break-inside:avoid; }
+.key { background:#fef2f2; border:1px solid #fca5a5; border-left:4px solid #dc2626; padding:0.45em 0.8em; border-radius:6px; margin:0.5em 0; page-break-inside:avoid; }
+.toc { font-size: 8.6pt; line-height: 1.35; columns: 2; column-gap: 1.6em; }
+.toc ul { list-style: none; padding-left: 0; margin: 0; }
+.toc li { margin: 0.12em 0; }
+.toc a { color: #1e293b; text-decoration: none; }
+.toc a::after { content: leader('.') target-counter(attr(href), page); color: #64748b; font-size: 8.2pt; }
+.toc .toc-chapter { font-weight: 600; color: #1e3a8a; margin-top: 0.5em; }
+.toc .toc-sub { padding-left: 1.15em; }
+.toc .toc-sub a { color: #475569; font-size: 8.2pt; }
+</style></head>
+<body>
+<div style="page: cover; width:100%; height:100%; padding:0; margin:0; position:relative; page-break-after: always;">
+  <div style="background:#0f172a; color:#fff; height:38%; padding:5cm 2cm 0 2cm;">
+    <div style="font-size:15pt; color:#93c5fd; letter-spacing:3px;">RECEPTANCE WEIGHTED KEY VALUE</div>
+    <div style="font-size:52pt; font-weight:bold; margin-top:0.6cm;">RWKV 架构详解</div>
+    <div style="font-size:22pt; color:#fbbf24; margin-top:0.4cm;">从入门到落地 · 超全图文手册</div>
+  </div>
+  <div style="padding:0.8cm 2cm;">
+    <div style="font-size:11pt; color:#334155; line-height:2.1;">
+      给完全零基础的小白：用大白话 + 24 张示意图 + 代码实战，<br/>
+      讲清楚 RWKV 是什么、为什么特殊、和 Transformer 有什么区别、怎么部署使用、<br/>
+      以及如何套用到我们自己的 AI 陪伴 / 情感智能体工程里。
+    </div>
+    <div style="font-size:10pt; color:#64748b; margin-top:0.6cm; line-height:1.9;">
+      涵盖内容：RNN / Transformer 基础 · RWKV 核心机制 · 架构拆解 · 与 Transformer 全面对比 ·<br/>
+      版本进化史（v1→v8）· 部署教程（Ollama / llama.cpp / HuggingFace / vLLM）· 代码实战 ·<br/>
+      微调与 State Tuning · 应用场景与工程套用 · 术语表 · 参考资料
+    </div>
+    <div style="border-top:1px solid #e2e8f0; margin:1cm 0 0.5cm;"></div>
+    <div style="font-size:9pt; color:#94a3b8;">版本：2026-09 · 本文基于公开资料整理，仅供学习参考</div>
+  </div>
+</div>
+
+<h1 style="page-break-before:always;">目录</h1>
+<div class="toc"><ul><li class="toc-chapter"><a href="#h1">第一章 一句话看懂 RWKV：写给完全零基础的你</a></li><li class="toc-chapter"><a href="#h7">第二章 基础铺垫：先认识 RNN 和 Transformer</a></li><li class="toc-chapter"><a href="#h14">第三章 RWKV 到底是什么</a></li><li class="toc-chapter"><a href="#h19">第四章 RWKV 的特殊之处：十大核心卖点</a></li><li class="toc-chapter"><a href="#h31">第五章 架构拆解：RWKV 内部长什么样</a></li><li class="toc-chapter"><a href="#h39">第六章 和 Transformer 到底差在哪：全面对比</a></li><li class="toc-chapter"><a href="#h62">第七章 版本进化史与"为什么它真的能行"</a></li><li class="toc-chapter"><a href="#h79">第八章 怎么用起来：部署方案总览与环境准备</a></li><li class="toc-chapter"><a href="#h95">第九章 推理实战：命令行、API 与采样参数</a></li><li class="toc-chapter"><a href="#h110">第十章 Python 代码实战：加载模型、对话与状态管理</a></li><li class="toc-chapter"><a href="#h119">第十一章 进阶：微调、State Tuning 与 RAG</a></li><li class="toc-chapter"><a href="#h135">第十二章 应用场景与工程套用：把它用到我们自己的 AI 陪伴项目</a></li><li class="toc-chapter"><a href="#h151">第十三章 常见问题、选型决策与术语表</a></li><li class="toc-chapter"><a href="#h166">第十四章 补课：文本是怎么变成数字的（Tokenizer 与数据流）</a></li><li class="toc-chapter"><a href="#h175">第十五章 它是怎么被训练出来的：训练原理与实战</a></li><li class="toc-chapter"><a href="#h187">第十六章 量化与性能优化：把 RWKV 压榨到极限</a></li><li class="toc-chapter"><a href="#h200">第十七章 公式通俗课：RWKV 的数学只讲直觉</a></li><li class="toc-chapter"><a href="#h210">第十八章 高效架构家族：RWKV vs Mamba vs RetNet</a></li><li class="toc-chapter"><a href="#h225">第十九章 多模态与未来方向：RWKV 还能走多远</a></li><li class="toc-chapter"><a href="#h235">第二十章 实战练习手册：12 个动手任务</a></li><li class="toc-chapter"><a href="#h250">第二十一章 提示词工程实战：让 RWKV 更听话</a></li><li class="toc-chapter"><a href="#h267">第二十二章 真实案例巡礼：别人怎么用 RWKV</a></li><li class="toc-chapter"><a href="#h276">第二十三章 社区生态：谁在做、去哪学、怎么参与</a></li><li class="toc-chapter"><a href="#h283">第二十四章 落地实战：把 RWKV 部署到真实产品</a></li><li class="toc-chapter"><a href="#h291">第二十五章 未来展望与进阶学习路线</a></li><li class="toc-chapter"><a href="#h298">第二十六章 端到端实战：从零搭一个"带记忆"的 AI 助手</a></li><li class="toc-chapter"><a href="#h309">第二十七章 常见报错与排查手册</a></li><li class="toc-chapter"><a href="#h317">附录 A 参考资料与命令速查</a></li></ul></div>
+<h1 id="h1">第一章 一句话看懂 RWKV：写给完全零基础的你</h1>
+<blockquote>
+<p>如果你完全不懂神经网络、不懂 Transformer，也没关系。这一章用大白话，把 RWKV 到底是什么、为什么值得你花时间了解，讲得明明白白。</p>
+</blockquote>
+<h2 id="h2">1.1 一段话讲清 RWKV</h2>
+<p><strong>RWKV</strong>（读作 "R-W-K-V"，全称 Receptance Weighted Key Value，中文名"元始智能"）是一种<strong>大语言模型（LLM）的底层架构</strong>。所谓"架构"，你可以理解为模型的大脑结构——就像人脑和电脑主板都有不同的设计一样，现在市面上的 AI 模型（ChatGPT、文心、通义、Llama 等）大多采用一种叫 <strong>Transformer（Transformer）</strong> 的结构；而 RWKV 是另一种设计，它想用更省资源的方式，达到和 Transformer 差不多的聪明程度。</p>
+<p>它的最大卖点可以浓缩成一句话：</p>
+<div class="key">
+
+**RWKV = 拥有 Transformer 级"聪明度"，但像老式 RNN 一样"又省内存、又省电、又能无限聊下去"的语言模型架构。**
+
+</div>
+
+<p>换句话说，Transformer 是"性能天花板高但很费钱"的豪车；RWKV 是"性能接近、但油耗低、还能在乡间小路（普通电脑、手机）上跑"的混动车。</p>
+<h2 id="h3">1.2 三个生活化的比喻</h2>
+<p>为了让你 30 秒内建立直觉，我们用三个比喻来理解 RWKV 的设计哲学：</p>
+<p><strong>比喻一：认真做笔记的学生 vs 每次重读整本书的学生。</strong></p>
+<ul>
+<li><strong>Transformer</strong> 回答问题时，会把"从开头到现在的所有原文"重新读一遍（自注意力）。这样记得准，但书越长，它翻书越累（算力按平方增长）。</li>
+<li><strong>RWKV</strong> 像一位认真做笔记的学生，一边读一边把重点浓缩成一张"小抄"（隐藏状态），回答问题时只看小抄。小抄永远那么厚（内存恒定），但书再长它也不累。</li>
+</ul>
+<p><strong>比喻二：记性超好的账房先生。</strong></p>
+<p>Transformer 把每一笔交易（每个词）都留着，随时能精确翻出"三个月前某天上午的一笔账"（所以它细节回忆强，但账本越堆越大）。RWKV 只记一本"流水账摘要"，越早的信息记得越淡（指数衰减），但账本体积永远不变。</p>
+<p><strong>比喻三：混动车。</strong></p>
+<p>城市里走走停停（短文本）用电机（RNN 模式）省油；上高速（长文本、大吞吐）用发动机（Transformer 模式）有劲。RWKV 就装了两套"驱动"：训练时像 Transformer 一样能并行加速，推理时像 RNN 一样省内存。</p>
+<h2 id="h4">1.3 为什么你需要关心它</h2>
+<p>现在大模型圈子里，几乎所有主流模型都是 Transformer。但 Transformer 有个"天生的痛"：</p>
+<div class="warn">
+
+**序列越长，Transformer 越贵。** 计算量和内存随文本长度呈"平方级"增长。聊 100 句和聊 1000 句，成本差的不是 10 倍，而是 100 倍。
+
+</div>
+
+<p>这个痛点带来了一系列现实问题：</p>
+<ul>
+<li><strong>显存不够</strong>：想本地跑大模型，动辄要几十 GB 显存，普通电脑跑不动。</li>
+<li><strong>长对话崩溃</strong>：多轮对话越聊越卡，甚至内存耗尽直接崩掉。</li>
+<li><strong>长文档难处理</strong>：想让它"读完整本小说再总结"，成本高得离谱。</li>
+<li><strong>部署成本高</strong>：云端推理的 GPU 费用按 token 算，长文本很烧钱。</li>
+</ul>
+<p>RWKV 恰恰是为了解决这些问题而生的：<strong>内存固定、速度恒定、显存友好、CPU 都能跑、开源免费可商用</strong>。这也是为什么它在"边缘设备、长对话、低资源部署"这些场景里特别受关注。</p>
+<h2 id="h5">1.4 本文阅读路线图</h2>
+<p>这本书是"图文并茂 + 由浅入深"的，你可以根据自己的基础选择路线：</p>
+<table>
+<thead>
+<tr>
+<th>你是谁</th>
+<th>建议阅读路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完全零基础的小白</td>
+<td>第一章 → 第二章 → 第三章 → 第四章 → 第六章 → 第八章</td>
+</tr>
+<tr>
+<td>懂一点深度学习的开发者</td>
+<td>第五章 → 第六章 → 第七章 → 第八章 → 第九章 → 第十章</td>
+</tr>
+<tr>
+<td>想马上用起来</td>
+<td>第八章 → 第九章 → 第十一章（部署 + 实战 + 套用）</td>
+</tr>
+<tr>
+<td>做技术选型的工程师</td>
+<td>第六章 → 第十二章 → 第十一章 → 第十三章</td>
+</tr>
+<tr>
+<td>研究架构原理的同学</td>
+<td>第五章 → 第六章 → 第七章 → 第十二章 → 附录</td>
+</tr>
+</tbody>
+</table>
+<p>建议从头到尾读一遍，哪怕跳着读，也不影响理解主线：<strong>它是什么 → 它特殊在哪 → 和 Transformer 差在哪 → 怎么用 → 怎么用到我们项目里</strong>。</p>
+<h2 id="h6">1.5 快速自测（读完第一章你应该能回答）</h2>
+<ol>
+<li>RWKV 四个字母分别代表什么？（答案：Receptance 感受态、Weight 权重衰减、Key 键、Value 值）</li>
+<li>它和 Transformer 最根本的区别是什么？（答案：RWKV 完全没有自注意力，用"状态记忆"代替）</li>
+<li>它的两大效率优势是什么？（答案：线性复杂度、恒定内存）</li>
+<li>它在哪类场景最占优势？（答案：长对话、长文档、低资源/边缘设备部署）</li>
+</ol>
+<p>如果这些问题你已经有感觉了，恭喜，你已经入门了。接下来，我们先补一点必要的背景知识。</p>
+<h1 id="h7">第二章 基础铺垫：先认识 RNN 和 Transformer</h1>
+<p>要理解 RWKV 为什么特殊，得先知道它站在谁的肩膀上。这一章我们用最通俗的方式，把两个"前辈"——<strong>RNN</strong> 和 <strong>Transformer</strong>——讲清楚。它们正是 RWKV 想要"取其精华、去其糟粕"的对象。</p>
+<h2 id="h8">2.1 什么是"序列"和"语言模型"</h2>
+<p>在进入架构之前，先明确两个概念：</p>
+<p><strong>序列（Sequence）</strong>：一串有先后顺序的数据。比如一句话"我喜欢吃苹果"，就是 5 个词组成的序列；一段心电图、一首歌的波形、一行股票价格，也都是序列。大语言模型要处理的，就是这种"有前后顺序"的文本。</p>
+<p><strong>语言模型（Language Model）</strong>：本质是一个"猜下一个词"的游戏。给它看"我喜欢吃____"，它预测下一个最可能是"苹果"还是"火锅"。GPT 能写文章、聊天，底层都是这一个动作：<strong>根据已看到的词，预测下一个词</strong>，然后不断重复。</p>
+<p>所以任何语言模型都要解决一个核心问题：<strong>如何利用"前面看过的内容"来预测"下一个词"</strong>。RNN 和 Transformer 给出了两种完全不同的答案，RWKV 给出了第三种。</p>
+<h2 id="h9">2.2 RNN：一边走一边记（循环神经网络）</h2>
+<p>RNN（Recurrent Neural Network，循环神经网络）是最早的答案之一，诞生于 1980-1990 年代，LSTM（长短期记忆网络）是它的著名改良版。</p>
+<p>RNN 的思路非常朴素：<strong>我一边读文本，一边把"印象"记在一个小本子上（隐藏状态），读下一个词时，既看这个词，也翻一翻小本子。</strong></p>
+<p><img alt="RNN 循环结构" src="img/fig01_rnn_loop.png" /></p>
+<p>上图就是 RNN 的核心：一个"网络 A"每吃进一个输入，就更新自己的记忆，并输出一个结果；而这个记忆又会被"传回给自己"，参与下一次计算。把它按时间展开，就是下面这张更直观的图：</p>
+<p><img alt="RNN 按时间展开" src="img/fig02_rnn_unfold.png" /></p>
+<p>注意看：x0→x1→x2… 是连续输入的词，A 是同一个网络（同一套参数）被反复使用。<strong>这正是 RNN 的招牌优点：参数少、天然有记忆、内存占用固定</strong>——因为不管序列多长，它只需要保留一份"隐藏状态"。</p>
+<p><strong>但 RNN 有三个著名缺点：</strong></p>
+<ol>
+<li><strong>健忘（梯度消失）</strong>：记性会随距离衰减，早期看的内容越传越淡，学不会"长距离依赖"。比如让它读一篇万字小说，它常常忘了开头。</li>
+<li><strong>不能并行（串行计算）</strong>：必须一个词一个词按顺序算，第 5 个词必须等第 4 个词算完。训练大模型时，GPU 无法同时发力，慢得离谱。</li>
+<li><strong>训练不稳</strong>：深层 RNN 容易出现梯度爆炸等问题。</li>
+</ol>
+<p>所以 RNN 虽然"省"，但"笨且慢"，在大模型时代被 Transformer 取代了。</p>
+<h2 id="h10">2.3 隐藏状态：理解 RWKV 的钥匙</h2>
+<p>"隐藏状态（hidden state / state）"这个词非常重要，因为 <strong>RWKV 的整套设计都是围绕它展开的</strong>。请务必理解：</p>
+<blockquote>
+<p><strong>隐藏状态 = 模型对"到目前为止看到的一切"的压缩摘要，相当于模型的"心理状态 / 记忆"。</strong></p>
+</blockquote>
+<p>想象你在追一部剧：你不需要记住每一帧画面，大脑里留下的是一份"剧情摘要"——主角是谁、发生了哪些关键事件、现在进展到哪。这份摘要会随着剧情不断更新。隐藏状态就是这个"剧情摘要"。</p>
+<p>RNN 每读一个词，就更新一次隐藏状态；RWKV 也完全一样。<strong>理解"隐藏状态"就理解了 RWKV 的一半</strong>，因为 RWKV 的核心创新，就是设计了一套"特别会做摘要、摘要又能并行生成"的隐藏状态更新规则。</p>
+<h2 id="h11">2.4 Transformer：注意力机制的颠覆者</h2>
+<p>2017 年，Google 发表《Attention Is All You Need》，提出 Transformer，彻底改变了 NLP 领域。它的核心是<strong>自注意力（Self-Attention）</strong>。</p>
+<p>自注意力的直觉是：<strong>每个词在理解自己时，都要"看看"序列里所有其他词，并判断谁跟它关系大。</strong> 比如在"银行"这个词出现时，模型要判断上下文里的"存钱"还是"河岸"，来理解这里是"银行"还是"河岸"。</p>
+<p>实现上，每个词会生成三个向量：</p>
+<ul>
+<li><strong>Query（查询）</strong>：我到底在找什么信息？</li>
+<li><strong>Key（键）</strong>：我是谁，我携带什么"检索标签"？</li>
+<li><strong>Value（值）</strong>：我携带的具体内容是什么？</li>
+</ul>
+<p><img alt="Transformer 单层结构" src="img/fig03_transformer_block.png" /></p>
+<p>然后每个 Query 会跟所有词的 Key 算相似度（打分），分数经过 softmax 变成"注意力权重"，再用这些权重去加权求和所有 Value。谁跟当前词关系大，谁的 Value 就贡献得多。</p>
+<p><img alt="自注意力与 N×N 矩阵" src="img/fig04_attention.png" /></p>
+<p><strong>这样做的最大好处是：</strong></p>
+<ol>
+<li><strong>记忆精确</strong>：每个词都能直接"翻旧账"，看任意远的词，没有"健忘"问题。</li>
+<li><strong>完全可并行</strong>：所有词之间的配对关系可以同时计算，GPU 全力开火，训练飞快。</li>
+</ol>
+<p>正因如此，Transformer 成了 ChatGPT、Llama 等几乎所有现代大模型的基础，横扫 NLP。</p>
+<h2 id="h12">2.5 Transformer 的痛：O(N²) 和 KV Cache</h2>
+<p>Transformer 再强，也有一个绕不开的代价——<strong>复杂度随序列长度 N 呈平方级增长（O(N²)）</strong>。</p>
+<ul>
+<li><strong>计算上</strong>：N 个词两两配对，需要算 N×N 个分数。序列长度翻倍，计算量变 4 倍；翻 4 倍，计算量变 16 倍。</li>
+<li><strong>内存上（KV Cache）</strong>：推理时，为了不再重复计算历史，模型会把每个历史词的 Key 和 Value 都缓存起来（叫 <strong>KV Cache</strong>），随对话/文本变长，缓存线性增长，最终吃掉所有显存。</li>
+</ul>
+<p>这就是为什么"长文本"和"多轮长对话"对 Transformer 是噩梦：<strong>要么贵得离谱，要么内存爆掉。</strong></p>
+<p><img alt="KV Cache 增长 vs 恒定状态" src="img/fig05_kv_cache.png" /></p>
+<p><img alt="计算复杂度曲线" src="img/fig06_complexity.png" /></p>
+<h2 id="h13">2.6 两大架构优缺点一表流</h2>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>RNN（LSTM 等）</th>
+<th>Transformer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>记忆机制</td>
+<td>隐藏状态（固定大小）</td>
+<td>自注意力 + KV Cache</td>
+</tr>
+<tr>
+<td>训练并行</td>
+<td>不能并行，串行慢</td>
+<td>完全并行，训练快</td>
+</tr>
+<tr>
+<td>推理内存</td>
+<td>固定（O(1)）</td>
+<td>随上下文增长（KV Cache）</td>
+</tr>
+<tr>
+<td>长距离记忆</td>
+<td>差（健忘/梯度消失）</td>
+<td>强（任意距离直接关联）</td>
+</tr>
+<tr>
+<td>计算复杂度</td>
+<td>O(N) 线性</td>
+<td>O(N²) 平方</td>
+</tr>
+<tr>
+<td>记忆精确度</td>
+<td>低（压缩摘要）</td>
+<td>高（完整保留原文）</td>
+</tr>
+</tbody>
+</table>
+<p>现在你应该看出来了：<strong>RNN 省但不强，Transformer 强但不省。</strong> 那能不能造一个"又强又省"的架构？这正是 RWKV 诞生的动机——它的所有设计，都是在回答这个问题。</p>
+<div class="tip">
+
+**本页小结**：序列模型要解决"怎么记住前面看过的内容"。RNN 用"固定大小的隐藏状态"（省但记不牢）；Transformer 用"自注意力 + KV Cache"（记牢但费钱）。RWKV 想用 RNN 的"隐藏状态"思路，同时做到 Transformer 级别的效果和并行训练。
+
+</div>
+<h1 id="h14">第三章 RWKV 到底是什么</h1>
+<p>有了 RNN 和 Transformer 的基础，现在我们可以正式认识 RWKV 了。这一章讲清楚它的名字、定义、出身和"家族归属"。</p>
+<h2 id="h15">3.1 名字的含义：R-W-K-V</h2>
+<p>RWKV 这个名字不是随便取的，它来自架构中四个核心组件——而且这四个组件，恰好能帮你记住这个模型是怎么工作的：</p>
+<p><img alt="RWKV 名字的含义" src="img/fig07_rwkv_name.png" /></p>
+<table>
+<thead>
+<tr>
+<th>字母</th>
+<th>英文</th>
+<th>中文</th>
+<th>通俗理解</th>
+<th>类比传统注意力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R</strong></td>
+<td>Receptance</td>
+<td>感受态</td>
+<td>控制"过去的信息"要被接受多少，像一个开关/门控</td>
+<td>类似 Q（查询）</td>
+</tr>
+<tr>
+<td><strong>W</strong></td>
+<td>Weight</td>
+<td>权重衰减</td>
+<td>可训练的"遗忘系数"，决定记忆随时间衰减多快</td>
+<td>相当于位置权重</td>
+</tr>
+<tr>
+<td><strong>K</strong></td>
+<td>Key</td>
+<td>键</td>
+<td>代表"当前这个词是什么"，用于检索记忆</td>
+<td>同注意力里的 K</td>
+</tr>
+<tr>
+<td><strong>V</strong></td>
+<td>Value</td>
+<td>值</td>
+<td>代表"这个词携带什么信息内容"</td>
+<td>同注意力里的 V</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话记法</strong>：RWKV 用"K 和 V"把信息写进记忆，用"W"决定忘得多快，用"R"决定读出来多少——四个字母正好串起"写入→衰减→读出"的完整流程。</p>
+<blockquote>
+<p>顺带一提：RWKV 项目的中文名叫<strong>"元始智能"</strong>。它也是<strong>中国第一个达到 GPT 级性能的开源语言模型</strong>。</p>
+</blockquote>
+<h2 id="h16">3.2 一个准确的定义</h2>
+<p>用一句话定义它：</p>
+<div class="key">
+
+**RWKV 是一种"注意力免费（attention-free）"的循环神经网络（RNN）变体：它完全不含自注意力，用"可并行计算的线性注意力 + 固定大小的隐藏状态"来建模序列，从而同时获得 Transformer 的并行训练能力和 RNN 的恒定内存推理能力。**
+
+</div>
+
+<p>拆开看三个关键词：</p>
+<ol>
+<li><strong>注意力免费（attention-free）</strong>：架构里 100% 没有传统自注意力，这是它和 Transformer 最根本的区别。</li>
+<li><strong>循环神经网络变体</strong>：它在推理时以"循环/递归"方式工作，每步只保留一份状态。</li>
+<li><strong>可并行训练</strong>：训练时又能把整个序列"摊开"并行计算，不牺牲训练速度。</li>
+</ol>
+<h2 id="h17">3.3 出身与社区</h2>
+<ul>
+<li><strong>创始人</strong>：彭博（网名 BlinkDL），最初是独立研究者，后来项目并入 EleutherAI 社区协作。</li>
+<li><strong>起点</strong>：2020 年，彭博研究 Transformer 时发现两个改进方向——引入显式"衰减（decay）"和"Token-shift（短卷积）"，并受到 Apple 提出的 Attention Free Transformer（AFT）论文启发。</li>
+<li><strong>诞生</strong>：2021 年 8 月，RWKV 首个版本（v1）在 GitHub 的 RWKV-LM 仓库提交。</li>
+<li><strong>里程碑</strong>：</li>
+<li>2022 年底：发布首个正式模型；</li>
+<li>2023 年：论文被 EMNLP 2023 收录；同年 9 月，RWKV 开源项目加入 <strong>Linux 基金会</strong>（AI &amp; Data 基金会下的首个生成式 AI 托管项目）；</li>
+<li>2024 年：发布 RWKV-6 World 14B 多语言模型；安装量快速增长；</li>
+<li>2025 年：发布 RWKV-7 "Goose" 架构，论文 3 月 18 日公开，在 3B 规模多语言任务上刷新 SOTA；</li>
+<li>2025 年后：RWKV-8 进入实验阶段，同时出现 RWKV-X 等混合架构。</li>
+</ul>
+<h2 id="h18">3.4 它属于哪一类架构（家族定位）</h2>
+<p>在大模型架构演化的版图上，RWKV 站在"高效序列模型"这一支里。理解这个定位，能帮你更好地看懂后面的对比：</p>
+<p><img alt="高效序列模型家族地图" src="img/fig23_family_map.png" /></p>
+<ul>
+<li><strong>Transformer 阵营</strong>（GPT、Llama、Qwen、DeepSeek 等）：用自注意力，性能天花板高，但 O(N²) 代价大。</li>
+<li><strong>RNN / 状态空间模型（SSM）阵营</strong>（LSTM、Mamba 等）：用状态代替注意力，线性/常数开销，但早期训练并行难。</li>
+<li><strong>RWKV 及同族</strong>（RWKV、Mamba、RetNet、Gated DeltaNet 等）：都试图"用状态记忆替代注意力"，在效率和性能之间找平衡。RWKV 的特点是把"训练并行"和"推理恒定开销"同时做到，并且是从 0.1B 到 7.2B <strong>全系开源</strong>、能直接跑的模型之一。</li>
+</ul>
+<div class="tip">
+
+**记住这句话**：RWKV 不是要"干掉" Transformer，而是提供另一种选择——在"长文本、低资源、边缘部署、超长对话"这些 Transformer 最吃力的地方，RWKV 的性价比优势会非常明显。
+
+</div>
+<h1 id="h19">第四章 RWKV 的特殊之处：十大核心卖点</h1>
+<p>这一章我们把 RWKV"特殊在哪"讲透。这十条卖点，既是它吸引人的地方，也是和 Transformer 拉开差距的关键。建议逐条看，每条后面都配了"小白版解释"。</p>
+<h2 id="h20">4.1 卖点一：100% 无自注意力</h2>
+<p>这是 RWKV 最根本、最反直觉的一条。Transformer 的灵魂是自注意力，而 RWKV <strong>完全没有</strong>它，靠"时间混合（Time Mixing）+ 通道混合（Channel Mixing）"两个模块替代。</p>
+<ul>
+<li><strong>小白版</strong>：别的模型靠"每个词和所有词互相打招呼"来理解；RWKV 不打招呼，靠一本不断更新的"笔记"。</li>
+<li><strong>意义</strong>：正因为没有注意力，才没有"两两配对"的平方级计算，才引出了后面所有效率优势。</li>
+</ul>
+<h2 id="h21">4.2 卖点二：线性复杂度 O(N)</h2>
+<p>RWKV 的时间复杂度随序列长度 <strong>线性增长（O(N)）</strong>，而 Transformer 是平方级（O(N²)）。</p>
+<ul>
+<li><strong>小白版</strong>：读 2 倍长的书，RWKV 花约 2 倍力气；Transformer 花约 4 倍力气。书越长差距越大。</li>
+<li><strong>数据对比</strong>：4K 上下文时差距约 4 倍，32K 时差距可达 30 倍以上。</li>
+</ul>
+<h2 id="h22">4.3 卖点三：恒定内存、没有 KV Cache</h2>
+<p>推理时 Transformer 要存"KV Cache"（历史每个词的键值），随对话增长线性膨胀；RWKV 只需一份<strong>固定大小的隐藏状态</strong>，无论上下文多长，内存占用不变。</p>
+<ul>
+<li><strong>小白版</strong>：Transformer 是"越聊记事本越厚"，RWKV 是"永远同一本小抄"。</li>
+<li><strong>实测</strong>：在 8GB 内存、无 GPU 的迷你主机上，RWKV-7 2.9B 连续 10 轮对话速度恒定，而同规模 Transformer 在第 6 轮就内存耗尽崩溃。</li>
+</ul>
+<p><img alt="多轮对话速度稳定性对比" src="img/fig22_speed_stable.png" /></p>
+<h2 id="h23">4.4 卖点四：恒定生成速度</h2>
+<p>因为没有 KV Cache，RWKV <strong>每个 token 的生成时间与上下文长度无关</strong>——聊到第 100 轮和第 1 轮一样快。Transformer 越聊越慢（因为每生成一个新词，都要重新处理越来越长的缓存）。</p>
+<ul>
+<li><strong>小白版</strong>：同样一句话，RWKV 第 1 句和第 1000 句回复速度一样；Transformer 越往后越卡。</li>
+</ul>
+<h2 id="h24">4.5 卖点五：双模式（训练像 Transformer，推理像 RNN）</h2>
+<p>这是 RWKV 最巧妙的工程设计：<strong>同一套权重，有两种跑法。</strong></p>
+<p><img alt="双模式：训练并行 / 推理循环" src="img/fig11_dual_mode.png" /></p>
+<ul>
+<li><strong>训练（GPT 模式 / 时间并行）</strong>：把整段文本一次性摊开，所有 token 并行计算 → 训练速度和 Transformer 相当。</li>
+<li>
+<p><strong>推理（RNN 模式 / 时间顺序）</strong>：一个词一个词地走，每步带上一步的状态 → 内存固定、延迟恒定。</p>
+</li>
+<li>
+<p><strong>小白版</strong>：一辆车两种开法——高速用"并行巡航"，堵车用"单车道慢行"，都省油。</p>
+</li>
+</ul>
+<h2 id="h25">4.6 卖点六：长上下文 / "无限"上下文</h2>
+<p>理论上，因为内存固定、速度恒定，RWKV 可以处理<strong>非常长</strong>的上下文（社区常宣传"无限 ctxlen"），特别适合长文档和超长多轮对话。注意，这是"推理成本不随长度暴涨"，但模型对超长上下文的"实际记忆质量"仍有限制（这一点在第六章会详细讲）。</p>
+<ul>
+<li><strong>小白版</strong>：它能"读完整本书再跟你聊"，而且读多长的书都不额外耗内存。</li>
+</ul>
+<h2 id="h26">4.7 卖点七：State Tuning（状态微调）——独家绝活</h2>
+<p>RWKV 的隐藏状态可以直接被微调！这叫 <strong>State Tuning（状态微调）</strong>：不动模型权重，只微调"隐藏状态"，就能让模型在特定任务上表现更好。</p>
+<ul>
+<li><strong>小白版</strong>：不用给模型"换脑子"，只给它"调整心情/记忆"，任务就变好了——又快又省。</li>
+<li><strong>意义</strong>：这是 RNN 系架构独有的能力，Transformer 做不到（它没有这种可调的固定状态）。对个性化、角色扮演类应用特别有价值（第十一章会用到）。</li>
+</ul>
+<h2 id="h27">4.8 卖点八：对硬件极友好</h2>
+<p>RWKV 推理时<strong>只做矩阵×向量运算，不需要 KV Cache</strong>，因此：</p>
+<ul>
+<li>支持 <strong>CPU 直接跑</strong>（无需 GPU）；</li>
+<li>量化友好，2.9B 的 Q8 量化模型约 3GB，Q4 更小；</li>
+<li>8GB 内存的旧电脑、树莓派都能跑起来；</li>
+<li>显存占用恒定，单卡可部署更大模型。</li>
+</ul>
+<h2 id="h28">4.9 卖点九：开源、可商用</h2>
+<p>RWKV 模型、训练代码、推理内核均以 <strong>Apache 2.0 协议</strong>开源，属于 Linux 基金会项目。这意味着你可以<strong>自由使用、修改、商用</strong>，没有闭源模型的授权成本。对企业和个人项目都很友好。</p>
+<h2 id="h29">4.10 卖点十：免费好用的句嵌入（Sentence Embedding）</h2>
+<p>RWKV 还能输出高质量的句子向量（句嵌入），可直接用于语义搜索、文本聚类、检索增强（RAG）等任务，相当于"语言模型 + 向量模型"二合一，省下一套嵌入模型的钱。</p>
+<h2 id="h30">4.11 十大卖点一表流</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>卖点</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>无自注意力</td>
+<td>架构里 100% 没有 attention</td>
+</tr>
+<tr>
+<td>2</td>
+<td>线性复杂度</td>
+<td>计算量 O(N)，不随长度平方爆炸</td>
+</tr>
+<tr>
+<td>3</td>
+<td>恒定内存</td>
+<td>无 KV Cache，状态固定</td>
+</tr>
+<tr>
+<td>4</td>
+<td>恒定速度</td>
+<td>每个词生成耗时与长度无关</td>
+</tr>
+<tr>
+<td>5</td>
+<td>双模式</td>
+<td>训练并行、推理循环，一套权重两用</td>
+</tr>
+<tr>
+<td>6</td>
+<td>长上下文</td>
+<td>成本不随长度暴涨，适合超长文本</td>
+</tr>
+<tr>
+<td>7</td>
+<td>State Tuning</td>
+<td>可微调隐藏状态，又快又省</td>
+</tr>
+<tr>
+<td>8</td>
+<td>硬件友好</td>
+<td>CPU 可跑、量化友好、显存低</td>
+</tr>
+<tr>
+<td>9</td>
+<td>开源可商用</td>
+<td>Apache 2.0，Linux 基金会项目</td>
+</tr>
+<tr>
+<td>10</td>
+<td>句嵌入</td>
+<td>自带语义向量，可做检索</td>
+</tr>
+</tbody>
+</table>
+<div class="note">
+
+**客观提示**：这些卖点主要针对"效率与成本"。在"极致长上下文的精确回忆""复杂推理的某些 benchmark"上，Transformer 仍有优势。选型不是"谁更好"，而是"谁更适合你的场景"（见第六章和第十二章）。
+
+</div>
+<h1 id="h31">第五章 架构拆解：RWKV 内部长什么样</h1>
+<p>这一章我们钻进 RWKV 的内部，把它的"零件"一个个拆开看。别怕，我们会一直用"记忆"和"笔记"的比喻，公式只是顺便提一下。</p>
+<h2 id="h32">5.1 整体结构：堆叠的残差块</h2>
+<p>RWKV 的整体骨架和 Transformer 很像：<strong>输入被切成 token → 向量化 → 经过 N 层相同的"块（block）"堆叠 → 输出预测。</strong> 每一层块都由两个子块组成：</p>
+<ol>
+<li><strong>Time Mixing（时间混合）</strong>：负责"在时间轴上混合信息"，相当于注意力层的角色，是 RWKV 的记忆核心。</li>
+<li><strong>Channel Mixing（通道混合）</strong>：负责"在每个位置上做特征加工"，相当于前馈网络（FFN）的角色。</li>
+</ol>
+<p><img alt="RWKV 残差块结构" src="img/fig08_rwkv_block.png" /></p>
+<p>从上图可以看到，两个子块之间都有<strong>残差连接（Residual）+ LayerNorm</strong>，和 Transformer 的"残差 + 归一化"套路一致。<strong>残差连接的意义</strong>：让信息能"抄近路"绕过复杂模块，既帮助训练稳定，也让深层网络可训练。</p>
+<h2 id="h33">5.2 第一个零件：Token Shift（词元转移 / 短卷积）</h2>
+<p>这是 RWKV 的一个小但关键的技巧。<strong>在每个子块计算前，它会把"上一个时刻的输入"和"当前时刻的输入"按比例混合一下。</strong></p>
+<p><img alt="Token Shift 示意图" src="img/fig09_token_shift.png" /></p>
+<p>数学上就是线性插值：</p>
+<pre><code class="language-text">Shift(x[t]) = μ · x[t] + (1 - μ) · x[t-1]
+</code></pre>
+<p>其中 μ 是混合系数（不同通道可以不同）。直观地说，它让每个位置"自带一点上一时刻的影子"，从而让模型在计算时能"摸到"邻近的历史信息。</p>
+<ul>
+<li><strong>小白版</strong>：相当于每次动笔前，先瞥一眼自己刚写的上一句话，让上下文更连贯。</li>
+<li><strong>为什么叫"短卷积"</strong>：它等价于一个核长度只有 2 的卷积，计算量几乎为零，却显著提升了性能。</li>
+<li><strong>进阶版</strong>：在 RWKV-5/6 中，Token Shift 升级为"数据相关"的版本，让模型按内容决定混合比例。</li>
+</ul>
+<h2 id="h34">5.3 第二个零件：Time Mixing / WKV 算子（记忆核心）</h2>
+<p>这是 RWKV 最重要的发明，用"<strong>WKV 算子</strong>"替代了注意力。它的流程可以拆成三步：</p>
+<p><img alt="WKV 计算流程" src="img/fig10_wkv_flow.png" /></p>
+<ol>
+<li><strong>写入</strong>：当前词的 K（键）和 V（值）被写进"记忆状态 S"；</li>
+<li><strong>衰减</strong>：旧的记忆按"W（可学习的衰减系数）"指数级淡忘——越早的信息权重越低；</li>
+<li><strong>读出</strong>：用 R（感受态，类似查询）从记忆里加权读出信息，再经过门控得到输出。</li>
+</ol>
+<p>用公式表达（RWKV-4 的经典形式）：</p>
+<pre><code class="language-text">WKV 核心：output_t = R_t · ( Σ_{i&lt;t}  exp(-w·(t-i)) · (K_i · V_i) + exp(u)·(K_t·V_t) ) / 分母
+</code></pre>
+<ul>
+<li><code>exp(-w·(t-i))</code> 就是<strong>按时间距离打折</strong>：离得越远，权重越小（但不会完全消失）。</li>
+<li>中间那个 <code>u</code> 是"当前时刻的额外权重"（因为当前信息通常最重要）。</li>
+<li>R_t 决定"这条信息要不要影响我"。</li>
+</ul>
+<p><strong>为什么这样能代替注意力？</strong> 注意力是"每个词和所有历史词两两打分"；而 WKV 把历史<strong>预先压缩进一个固定大小的状态 S</strong>，读的时候不再逐个比对，而是"一把抓出来再按新旧打折"。前者精确但贵，后者省但略微"糊"。</p>
+<blockquote>
+<p>公式中的"分母"用于归一化，避免状态不断累加而爆炸。RWKV-4 用一个单独的状态保存归一化因子；RWKV-7 改进了归一化方式，这里不展开。</p>
+</blockquote>
+<h2 id="h35">5.4 第三个零件：Channel Mixing（通道混合）</h2>
+<p>如果说 Time Mixing 管"时间"，那 Channel Mixing 就管"特征"。它在<strong>同一个时刻上</strong>，对词向量的各个维度（通道）做非线性加工，作用类似 Transformer 的前馈网络 FFN。</p>
+<p>它同样用 R、K、V 结构，但"混合"发生在通道之间而非时间之间：</p>
+<pre><code class="language-text">Channel Mixing：out = sigmoid(R) ⊙ ( W2 · gelu(W1 · K) ⊙ V )
+</code></pre>
+<ul>
+<li>先用 <code>gelu</code> 做非线性变换；</li>
+<li>再用 R（感受态）做门控，决定"这些特征要不要被激活"；</li>
+<li>作用和 FFN 一样：<strong>提升模型的表达能力</strong>（把特征空间映射到更高维再压回来）。</li>
+</ul>
+<h2 id="h36">5.5 它为什么"无注意力也能行"：三件套合力</h2>
+<p>把上面的零件拼起来，你就明白 RWKV 的记忆逻辑了：</p>
+<p><img alt="无注意力也能行的三件套" src="img/fig24_why_works.png" /></p>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>角色</th>
+<th>负责的记忆类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token Shift</td>
+<td>短程记忆</td>
+<td>刚看到的邻近词</td>
+</tr>
+<tr>
+<td>指数衰减状态（WKV）</td>
+<td>长程记忆</td>
+<td>整段历史的压缩摘要</td>
+</tr>
+<tr>
+<td>R 感受态门控</td>
+<td>选择性注意</td>
+<td>决定"要不要理会某条信息"</td>
+</tr>
+</tbody>
+</table>
+<p>三个机制合起来，用一份<strong>固定大小的状态</strong>装下整个上下文，需要哪段按权重调出来——这就是它没有注意力却"记得住"的原因。</p>
+<h2 id="h37">5.6 与 Transformer 逐层"翻译"对照</h2>
+<p>为了方便学过 Transformer 的人理解，我们做一张"翻译表"：</p>
+<table>
+<thead>
+<tr>
+<th>Transformer</th>
+<th>RWKV 对应物</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自注意力（Self-Attention）</td>
+<td>Time Mixing（WKV）</td>
+<td>都做"序列信息聚合"</td>
+</tr>
+<tr>
+<td>Q/K/V</td>
+<td>R（感受态）+ K + V</td>
+<td>角色类似，机制不同</td>
+</tr>
+<tr>
+<td>位置编码（Positional）</td>
+<td>W 衰减 + Token Shift</td>
+<td>用"时间衰减"隐含位置信息</td>
+</tr>
+<tr>
+<td>前馈网络 FFN</td>
+<td>Channel Mixing</td>
+<td>都做逐位置非线性变换</td>
+</tr>
+<tr>
+<td>残差 + LayerNorm</td>
+<td>残差 + LayerNorm</td>
+<td>几乎一样</td>
+</tr>
+<tr>
+<td>KV Cache（推理）</td>
+<td>隐藏状态 S</td>
+<td>一个是"完整历史"，一个是"压缩摘要"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心差异浓缩成一句话</strong>：Transformer 靠"保存所有历史 + 两两比对"来记忆；RWKV 靠"压缩成一份状态 + 按新旧打折"来记忆。</p>
+<h2 id="h38">5.7 双模式背后的数学视角</h2>
+<p>为什么"同一套权重"既能并行训练又能循环推理？关键在 WKV 的可分解性：</p>
+<ul>
+<li><strong>推理（循环形式）</strong>：状态按步更新 <code>S_t = f(S_{t-1}, x_t)</code>，每步只依赖上一步 → 天然串行、固定内存。</li>
+<li><strong>训练（并行形式）</strong>：因为衰减系数 <code>w</code> 与输入无关（RWKV-4 及以前），整条时间轴上的 WKV 可以写成"前缀和"（cumulative sum），一次性并行算出所有位置的输出 → GPU 全开。</li>
+</ul>
+<p>RWKV-6/7 引入了"数据相关"的衰减和更复杂的更新，并行不再那么简单，官方用专门的 CUDA 内核（WKV kernel）来高效实现——这也是为什么用 RWKV 时通常建议开启官方内核加速（第九章会讲）。</p>
+<div class="tip">
+
+**本页小结**：RWKV 块 = 输入 → Token Shift → Time Mixing（WKV 记忆）→ 残差+LN → Token Shift → Channel Mixing（特征加工）→ 残差+LN → 输出。记忆靠"写入(K,V)→衰减(W)→读出(R)"三步完成，固定大小、可并行训练、可循环推理。
+
+</div>
+<h1 id="h39">第六章 和 Transformer 到底差在哪：全面对比</h1>
+<p>这一章我们做一次"体检式"对比，把 RWKV 和 Transformer 从机制、复杂度、显存、训练、推理、效果、生态等各个维度掰开揉碎比较一遍。读完这一章，你对"什么时候选 RWKV、什么时候选 Transformer"会有一个清晰的判断。</p>
+<h2 id="h40">6.1 一句话总结差异</h2>
+<p>先给你一个"总纲"，后面的所有细节都是它的展开：</p>
+<blockquote>
+<p><strong>Transformer：记忆靠"保存全部历史 + 两两比对"，精确但昂贵（O(N²)）。</strong>
+<strong>RWKV：记忆靠"压缩成一份固定状态 + 按新旧打折"，便宜（O(N)）但略"糊"。</strong></p>
+</blockquote>
+<ul>
+<li>Transformer 像"图书馆"，每一本书（每个 token 的 K/V）都原样保留，查资料时逐本翻阅，越大的图书馆越贵。</li>
+<li>RWKV 像"读书笔记"，把读过的内容浓缩成固定厚度的笔记本，随时翻、越翻越薄的成本，但记的是"摘要"而不是"原文"。</li>
+</ul>
+<h2 id="h41">6.2 机制层面的对比：注意力 vs 状态</h2>
+<h3 id="h42">6.2.1 信息聚合方式</h3>
+<p><strong>Transformer（自注意力）</strong>：</p>
+<ol>
+<li>每个词生成 Q（查询）、K（键）、V（值）三个向量；</li>
+<li>每个词用 Q 与"序列里所有词的 K"逐一打分（点积），得到 N 个注意力分数；</li>
+<li>softmax 归一化成权重；</li>
+<li>用权重对 N 个 V 做加权求和，得到该词的输出。</li>
+</ol>
+<p>这个过程对"序列内任意两个词"都做了一遍配对，所以叫"全对全（all-to-all）"。它的好处是<strong>任意距离都能直接关联</strong>（远亲也能翻到），坏处是<strong>计算量和内存随 N 平方增长</strong>。</p>
+<p><strong>RWKV（WKV 线性注意力）</strong>：</p>
+<ol>
+<li>每个词用 K、V 把信息"写进"一个固定大小的记忆状态 S；</li>
+<li>旧记忆按可学习的衰减系数 W <strong>指数级淡忘</strong>；</li>
+<li>每个词用 R（感受态，类似 Q）从状态 S 中"读出"信息，再经门控输出。</li>
+</ol>
+<p>它不需要两两配对，只维护一份状态，所以计算量是 <strong>O(N)</strong>、内存是 <strong>O(1)</strong>。</p>
+<p><img alt="显存对比：KV Cache 增长 vs 恒定状态" src="img/fig12_memory_compare.png" /></p>
+<h3 id="h43">6.2.2 记忆的"精确度"差异</h3>
+<p>这是两者最本质的取舍：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Transformer</th>
+<th>RWKV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>记忆载体</td>
+<td>全部历史 token 的 K/V（KV Cache）</td>
+<td>固定大小的隐藏状态 S</td>
+</tr>
+<tr>
+<td>能否精确"翻旧账"</td>
+<td>能，任意位置的原文都能精确加权</td>
+<td>不能，只保存压缩后的摘要</td>
+</tr>
+<tr>
+<td>长文本信息密度</td>
+<td>越高（原文都在）</td>
+<td>受状态容量限制</td>
+</tr>
+<tr>
+<td>检索方式</td>
+<td>逐个 token 两两打分</td>
+<td>从状态中一次读出 + 衰减加权</td>
+</tr>
+<tr>
+<td>类比</td>
+<td>完整录音 / 完整账本</td>
+<td>会议纪要 / 流水摘要</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一个重要的事实</strong>：Transformer 的"精确回忆"在长上下文里是优势，但代价是"贵"。RWKV 用"摘要"换来了"便宜"，在大多数实际任务里，摘要已经够用；只有少数需要"逐字精确引用原文"的任务（比如某些法律文书检索），Transformer 仍占优。</p>
+<h2 id="h44">6.3 复杂度对比：O(N²) vs O(N)</h2>
+<h3 id="h45">6.3.1 为什么 Transformer 是 O(N²)</h3>
+<p>自注意力要算一个 <strong>N×N 的注意力矩阵</strong>：N 个词，每个词要和 N 个词打分。所以：</p>
+<ul>
+<li>序列长度 N=1K → 需要约 100 万次配对；</li>
+<li>N=4K → 约 1600 万次；</li>
+<li>N=32K → 约 10 亿次。</li>
+</ul>
+<p>长度翻倍，计算量变 4 倍（平方）；长度翻 4 倍，计算量变 16 倍。</p>
+<h3 id="h46">6.3.2 为什么 RWKV 是 O(N)</h3>
+<p>RWKV 的 WKV 算子每来一个 token，只做一次"固定大小的状态更新 + 一次读出"，和"之前有多少词"无关。所以：</p>
+<ul>
+<li>N=1K → 约 1K 次操作；</li>
+<li>N=32K → 约 32K 次操作。</li>
+</ul>
+<p>长度翻倍，计算量约翻倍（线性），这才是"长上下文不心疼"的根本原因。</p>
+<p><img alt="计算复杂度曲线" src="img/fig06_complexity.png" /></p>
+<h3 id="h47">6.3.3 数字对照表（示意）</h3>
+<table>
+<thead>
+<tr>
+<th>上下文长度</th>
+<th>Transformer 相对成本</th>
+<th>RWKV 相对成本</th>
+<th>差距</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1K</td>
+<td>1</td>
+<td>1</td>
+<td>持平</td>
+</tr>
+<tr>
+<td>4K</td>
+<td>16</td>
+<td>4</td>
+<td>约 4 倍</td>
+</tr>
+<tr>
+<td>16K</td>
+<td>256</td>
+<td>16</td>
+<td>约 16 倍</td>
+</tr>
+<tr>
+<td>64K</td>
+<td>4096</td>
+<td>64</td>
+<td>约 64 倍</td>
+</tr>
+<tr>
+<td>256K</td>
+<td>65536</td>
+<td>256</td>
+<td>约 256 倍</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注意：这是"注意力部分"的理论复杂度对比，实际推理中 Transformer 有 FlashAttention 等优化、RWKV 有专用 CUDA 内核，比例会有所变化，但"随长度增长的趋势"不变——<strong>长度越长，RWKV 的性价比优势越大</strong>。</p>
+</blockquote>
+<h2 id="h48">6.4 推理资源对比：KV Cache vs 隐藏状态</h2>
+<h3 id="h49">6.4.1 KV Cache 是什么</h3>
+<p>Transformer 推理时，为避免重复计算历史，会把每个已处理 token 的 K、V 向量缓存下来，这就是 <strong>KV Cache</strong>。它的大小随序列长度线性增长：上下文 4K 的 7B 模型，KV Cache 可能占数 GB 显存；64K 时就非常可观。</p>
+<h3 id="h50">6.4.2 RWKV 为什么没有 KV Cache</h3>
+<p>RWKV 推理时只保留一份<strong>固定大小的隐藏状态 S</strong>（比如 7B 模型约 1-2GB，且与上下文长度无关）。无论你聊 100 句还是 10000 句，内存占用不变。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>Transformer</th>
+<th>RWKV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每轮新增内存</td>
+<td>新增每个 token 的 K/V</td>
+<td>无（状态原地更新）</td>
+</tr>
+<tr>
+<td>长对话表现</td>
+<td>越聊越慢，可能内存耗尽</td>
+<td>速度、内存恒定</td>
+</tr>
+<tr>
+<td>单次生成延迟</td>
+<td>随上下文增长</td>
+<td>恒定</td>
+</tr>
+<tr>
+<td>极端长上下文</td>
+<td>容易 OOM 崩溃</td>
+<td>稳定可续</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="多轮对话稳定性对比" src="img/fig22_speed_stable.png" /></p>
+<h3 id="h51">6.4.3 实战含义</h3>
+<p>对"多轮长对话"这类场景，差别是<strong>能不能用</strong>的区别：RWKV 聊到第 100 轮和第 1 轮一样快；Transformer 则在某轮开始后逐轮变慢，最终显存耗尽报错。这也是我们后续要把它套用到"AI 陪伴 / 情感智能体"上的核心原因之一。</p>
+<h2 id="h52">6.5 训练方式对比：都支持并行，但代价不同</h2>
+<h3 id="h53">6.5.1 Transformer：天然并行</h3>
+<p>自注意力对序列内所有 token 同时计算，训练时 GPU 可以"全开"，所以训练效率极高。这是它统治大模型时代的核心竞争力。</p>
+<h3 id="h54">6.5.2 RWKV：双模式并行</h3>
+<p>RWKV 的巧妙之处在于"同一套权重，两种跑法"：</p>
+<ul>
+<li><strong>训练（GPT 模式）</strong>：把整段序列"摊开"，利用 WKV 的可分解性（前缀和），一次性并行算出所有位置的输出 → 训练速度和 Transformer 相当；</li>
+<li><strong>推理（RNN 模式）</strong>：一个词一个词走，每步更新状态 → 内存固定、延迟恒定。</li>
+</ul>
+<p><img alt="双模式：训练并行 / 推理循环" src="img/fig11_dual_mode.png" /></p>
+<h3 id="h55">6.5.3 训练显存对比</h3>
+<p>因为 RWKV 不需要保存"每个 token 的 K/V 用于反向传播"（Transformer 训练时要保存大量中间激活），RWKV 的训练显存通常明显低于同规模 Transformer，这让<strong>单卡微调</strong>变得可行。</p>
+<table>
+<thead>
+<tr>
+<th>训练维度</th>
+<th>Transformer</th>
+<th>RWKV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>序列并行</td>
+<td>支持</td>
+<td>支持（GPT 模式）</td>
+</tr>
+<tr>
+<td>反向传播中间量</td>
+<td>大（每层每 token）</td>
+<td>相对小（状态式）</td>
+</tr>
+<tr>
+<td>单卡微调友好度</td>
+<td>一般（常用 LoRA）</td>
+<td>好（显存更低）</td>
+</tr>
+<tr>
+<td>长序列训练</td>
+<td>昂贵</td>
+<td>更省</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h56">6.6 效果对比：谁更强？</h2>
+<p>"谁更强"不能脱离场景和规模。客观地看：</p>
+<h3 id="h57">6.6.1 RWKV 的强项</h3>
+<ul>
+<li><strong>多语言</strong>：RWKV-7 在 3B 规模的多语言 benchmark 上刷新 SOTA，非英语语言尤其突出；</li>
+<li><strong>状态追踪类推理</strong>：RWKV-7 论文证明它能完成"状态追踪"、识别所有正则语言，理论上能表达超出 Transformer 受限复杂度类（TC0）的一些任务；</li>
+<li><strong>少样本学习（in-context learning）</strong>：RWKV-7 是一个"元上下文学习器"，在每个 token 上对状态做"上下文梯度下降"式的自我调整；</li>
+<li><strong>稳定长程依赖</strong>：因指数衰减+Token Shift，长文本的连贯性表现稳定。</li>
+</ul>
+<h3 id="h58">6.6.2 Transformer 的强项</h3>
+<ul>
+<li><strong>极致长上下文的精确回忆</strong>：能精确引用任意位置的原文；</li>
+<li><strong>复杂推理 benchmark（如某些数学、代码题）</strong>：在超大模型规模下，Transformer 生态更成熟、效果天花板更高；</li>
+<li><strong>生态成熟度</strong>：训练框架、算子、工具链、文档、第三方支持都远超 RWKV。</li>
+</ul>
+<h3 id="h59">6.6.3 一句话选型</h3>
+<table>
+<thead>
+<tr>
+<th>你的诉求</th>
+<th>推荐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>要最先进效果、算力充足、不在乎成本</td>
+<td>Transformer</td>
+</tr>
+<tr>
+<td>长对话、低显存、边缘部署、成本敏感</td>
+<td>RWKV</td>
+</tr>
+<tr>
+<td>要私有化、离线、可控</td>
+<td>RWKV（更省）</td>
+</tr>
+<tr>
+<td>要丰富生态、成熟工具链</td>
+<td>Transformer</td>
+</tr>
+<tr>
+<td>低成本做个性化微调</td>
+<td>RWKV（显存低 + State Tuning）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h60">6.7 生态与工具链对比</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Transformer</th>
+<th>RWKV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型数量</td>
+<td>极多（Llama/Qwen/DeepSeek…）</td>
+<td>较少但全系开源（0.1B–7.2B）</td>
+</tr>
+<tr>
+<td>推理框架</td>
+<td>极多（vLLM/TGI/llama.cpp/Ollama…）</td>
+<td>已支持 Ollama/llama.cpp/vLLM/Runner 等</td>
+</tr>
+<tr>
+<td>训练框架</td>
+<td>成熟</td>
+<td>RWKV-LM / RWKV-PEFT</td>
+</tr>
+<tr>
+<td>微调手段</td>
+<td>LoRA/QLoRA/全参</td>
+<td>LoRA/全参 + 独有的 State Tuning</td>
+</tr>
+<tr>
+<td>文档社区</td>
+<td>海量</td>
+<td>官方 wiki + 中文社区（rwkv.cn）</td>
+</tr>
+<tr>
+<td>许可</td>
+<td>各异</td>
+<td>Apache 2.0（Linux 基金会项目）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h61">6.8 一张大表：全维度终极对比</h2>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>Transformer</th>
+<th>RWKV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心机制</td>
+<td>自注意力</td>
+<td>WKV 线性注意力 + Token Shift</td>
+</tr>
+<tr>
+<td>记忆方式</td>
+<td>KV Cache（完整历史）</td>
+<td>固定隐藏状态（压缩摘要）</td>
+</tr>
+<tr>
+<td>时间复杂度</td>
+<td>O(N²)</td>
+<td>O(N)</td>
+</tr>
+<tr>
+<td>推理内存</td>
+<td>随上下文增长</td>
+<td>恒定</td>
+</tr>
+<tr>
+<td>推理延迟</td>
+<td>随上下文增长</td>
+<td>恒定</td>
+</tr>
+<tr>
+<td>训练并行</td>
+<td>支持</td>
+<td>支持（GPT 模式）</td>
+</tr>
+<tr>
+<td>位置编码</td>
+<td>显式（RoPE 等）</td>
+<td>隐式（W 衰减 + Token Shift）</td>
+</tr>
+<tr>
+<td>精确回忆</td>
+<td>强</td>
+<td>弱（受状态容量限制）</td>
+</tr>
+<tr>
+<td>长上下文成本</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>硬件门槛</td>
+<td>高（显存大）</td>
+<td>低（CPU/边缘可跑）</td>
+</tr>
+<tr>
+<td>独家能力</td>
+<td>—</td>
+<td>State Tuning（微调隐藏状态）</td>
+</tr>
+<tr>
+<td>开源许可</td>
+<td>各异</td>
+<td>Apache 2.0</td>
+</tr>
+<tr>
+<td>表达力上限</td>
+<td>强（大模型时代主流）</td>
+<td>正在逼近（RWKV-7 已超 TC0）</td>
+</tr>
+<tr>
+<td>生态成熟度</td>
+<td>极成熟</td>
+<td>快速成长</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：RWKV 与 Transformer 的差异可以浓缩为"图书馆 vs 读书笔记"。前者精确但贵，后者便宜但略"糊"。在"长对话、低资源、边缘、私有化"这些场景里，RWKV 的性价比优势极其明显；在"极致效果、成熟生态、极致长上下文精确回忆"场景里，Transformer 仍是主流。没有绝对好坏，只有适不适合。
+
+</div>
+<h1 id="h62">第七章 版本进化史与"为什么它真的能行"</h1>
+<p>这一章回答两个问题：<strong>RWKV 是怎么一步步进化到今天这个样子的？</strong> 以及<strong>为什么一套"没有注意力"的循环网络，能取得接近 Transformer 的效果？</strong> 理解这两点，你就真正"懂"了 RWKV。</p>
+<h2 id="h63">7.1 进化时间线总览</h2>
+<p>RWKV 从 2021 年到现在经历了 8 个主要版本，每个版本都在解决上一代的核心瓶颈：</p>
+<p><img alt="RWKV 版本进化时间线" src="img/fig13_timeline.png" /></p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>代号/年份</th>
+<th>核心突破</th>
+<th>一句话说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1</td>
+<td>2021</td>
+<td>长卷积替代注意力</td>
+<td>首次提出 Time-mix + Channel-mix 结构，验证方向</td>
+</tr>
+<tr>
+<td>v2/v3</td>
+<td>2022</td>
+<td>实现 RNN 推理模式</td>
+<td>让模型真正以"循环"方式工作，发布首个可用模型</td>
+</tr>
+<tr>
+<td>v4</td>
+<td>2023</td>
+<td>首个 GPT 级大模型</td>
+<td>性能达到 GPT 同级别，论文被 EMNLP 2023 收录</td>
+</tr>
+<tr>
+<td>v5</td>
+<td>Eagle，2024</td>
+<td>多粒度注意力、矩阵状态</td>
+<td>把状态从"向量"升级为"矩阵"，表达能力更强</td>
+</tr>
+<tr>
+<td>v6</td>
+<td>Finch，2024</td>
+<td>数据相关衰减、World 14B</td>
+<td>引入动态衰减与更多语言覆盖，开源 14B 多语言模型</td>
+</tr>
+<tr>
+<td>v7</td>
+<td>Goose，2025</td>
+<td>动态状态演化（DSE）</td>
+<td>突破线性注意力表达力上限，3B 多语 SOTA</td>
+</tr>
+<tr>
+<td>v8</td>
+<td>实验阶段，2025~</td>
+<td>DeepEmbed / ROSA 等</td>
+<td>探索稀疏化、混合架构（RWKV-7s）、在线后缀自动机</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h64">7.2 v1–v3：概念验证期</h2>
+<ul>
+<li><strong>v1（2021）</strong>：彭博在研究中发现"显式衰减"和"Token Shift（短卷积）"能显著提升 Transformer，之后又借鉴了 Apple 的 AFT（Attention Free Transformer）论文思路，把两者结合，提出了 RWKV 的第一个版本。此时它更接近"线性 Transformer"，每个时间步仍依赖全部历史。</li>
+<li><strong>v2/v3（2022）</strong>：关键转变——把模型改成真正的 <strong>RNN 推理模式</strong>：只保留一份隐藏状态，一个词一个词往下走。这让内存从"随历史增长"变成了"恒定"，为后续所有效率优势打下基础。</li>
+</ul>
+<p><strong>这一时期的意义</strong>：证明了"去掉注意力 + 用状态记忆"这条路能走通，且参数量可以很小（如 27M）也能有不错的效果。</p>
+<h2 id="h65">7.3 v4：里程碑——首个 GPT 级 RNN</h2>
+<p>RWKV-4 是整个项目最重要的里程碑：</p>
+<ul>
+<li>把 Time-mix 的公式固定为经典的"指数衰减 + 当前项额外权重"形式；</li>
+<li>首次做到<strong>与 GPT 同级别的效果</strong>（在部分 benchmark 上）；</li>
+<li>发布 1.5B、3B、7B 等规模的开源模型；</li>
+<li>2023 年论文被 EMNLP 2023 收录，同年 9 月项目加入 <strong>Linux 基金会</strong>。</li>
+</ul>
+<p><strong>它的意义</strong>：证明了"无注意力架构"不只是玩具，而是能真正达到大模型水平的产品级方案。</p>
+<h2 id="h66">7.4 v5 Eagle：从"向量状态"到"矩阵状态"</h2>
+<p>RWKV-5 引入<strong>多粒度注意力</strong>，把状态从"向量"升级为"矩阵"：</p>
+<ul>
+<li>更多通道独立管理自己的记忆，类似"分了很多本笔记，每本记录不同方面的信息"；</li>
+<li>表达能力提升，但也带来更大的状态和更复杂的实现；</li>
+<li>是迈向"动态状态"的重要中间步骤。</li>
+</ul>
+<h2 id="h67">7.5 v6 Finch：数据相关的衰减 + World 模型</h2>
+<p>RWKV-6 的关键词是<strong>"动态"</strong>：</p>
+<ul>
+<li>衰减系数不再是一成不变的固定值，而是<strong>根据输入内容动态决定</strong>（数据相关衰减）——模型可以自己决定"这条信息该记多久"；</li>
+<li>发布 <strong>RWKV-6 World 14B</strong> 多语言模型，覆盖中英日德法等大量语言；</li>
+<li>社区在此期间发展了 <strong>State Tuning（状态微调）</strong> 技术（见第十一章）。</li>
+</ul>
+<p><strong>它的意义</strong>：RWKV 从"通用高效架构"走向"多语言、多任务的世界模型"，应用面大幅扩展。</p>
+<h2 id="h68">7.6 v7 Goose：动态状态演化（Dynamic State Evolution）</h2>
+<p>RWKV-7 是目前社区公认的基准，论文于 2025 年 3 月公开，官方称其为 <strong>RWKV-7 "Goose"</strong>。它解决了线性注意力长期以来的"表达力天花板"问题。</p>
+<h3 id="h69">7.6.1 旧线性注意力的局限</h3>
+<p>在 v4–v6 里，状态更新是"写进去就固定"：</p>
+<pre><code class="language-text">S[t] = 衰减 · S[t-1] + K · V
+</code></pre>
+<p>问题在于：<strong>记忆只能"写进去"，不能"改错"</strong>。如果模型一开始记错了某条信息，后面无法修正，这会限制它在某些推理任务上的表现。</p>
+<p><img alt="RWKV-7 动态状态演化" src="img/fig14_rwkv7_state.png" /></p>
+<h3 id="h70">7.6.2 动态状态演化（DSE）</h3>
+<p>RWKV-7 的核心创新是 <strong>Dynamic State Evolution（动态状态演化）</strong>，本质是<strong>广义 Delta 规则（generalized delta rule）</strong>：</p>
+<pre><code class="language-text">S[t] = S[t-1] · D[t] + 基于“误差”的更新
+</code></pre>
+<p>直觉是：模型每一步会先<strong>从状态里"读出"一个预测</strong>，然后拿真实输入和预测对比，算出<strong>误差</strong>，再<strong>用误差修正记忆</strong>——就像学生做完题对答案，发现错了就"改作业"。这样一来：</p>
+<ul>
+<li>记忆可以<strong>自我修正</strong>，而不是只进不出；</li>
+<li>模型变成"<strong>元上下文学习器</strong>"：在每个 token 上对状态做类似"上下文梯度下降"的调整；</li>
+<li>论文证明它能完成"<strong>状态追踪</strong>"，可识别所有正则语言 → 表达力超过注意力受限的 TC0 复杂度类。</li>
+</ul>
+<h3 id="h71">7.6.3 v7 的效果</h3>
+<ul>
+<li>在 3B 规模的多语言任务上刷新 SOTA；</li>
+<li>在"状态追踪"类推理任务上表现突出；</li>
+<li>同时保持了训练可并行、推理常数开销的优势；</li>
+<li>官方称它适合 LLM 与多模态应用。</li>
+</ul>
+<h2 id="h72">7.7 v8 与未来：实验与混合</h2>
+<p>截至 2026 年，RWKV-8 仍处于实验阶段，公开的方向包括：</p>
+<ul>
+<li><strong>DeepEmbed</strong>：面向边缘设备的稀疏设计，解决 MoE（专家混合）显存占用问题；</li>
+<li><strong>DeepEmbedAttention</strong>：精简 KV Cache，特别适合混合架构（RWKV-7s）；</li>
+<li><strong>ROSA（RWKV Online Suffix Automaton）机制</strong>：为更强大的记忆与检索铺路；</li>
+<li>同时社区出现 <strong>RWKV-X</strong> 等混合架构（RWKV + 稀疏注意力），用于补强"极端细节的精确回忆"。</li>
+</ul>
+<p><strong>趋势判断</strong>：RWKV 正在走"纯 RNN → 动态状态 → 混合/稀疏化"的路线，未来大概率会是"状态记忆为主 + 必要处稀疏注意力"的混合形态。</p>
+<h2 id="h73">7.8 为什么"没有注意力"也能行：理论直觉</h2>
+<p>很多人的第一反应是：没有注意力，怎么捕捉词与词的关系？答案藏在三件事的合力里。</p>
+<h3 id="h74">7.8.1 三个机制各司其职</h3>
+<p><img alt="无注意力也能行的三件套" src="img/fig24_why_works.png" /></p>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>负责的记忆类型</th>
+<th>通俗类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token Shift</td>
+<td>短程记忆（邻近词）</td>
+<td>动笔前瞥一眼上一句</td>
+</tr>
+<tr>
+<td>指数衰减状态（WKV）</td>
+<td>长程记忆（整段历史）</td>
+<td>一直更新的读书笔记</td>
+</tr>
+<tr>
+<td>R 感受态门控</td>
+<td>选择性注意</td>
+<td>决定"这条要不要影响我"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h75">7.8.2 为什么 RNN 会"健忘"，而 RWKV 不会</h3>
+<p>传统 RNN（如 LSTM）的"健忘"源于<strong>梯度在时间轴上连乘</strong>导致梯度消失。RWKV 用"<strong>指数衰减 + 显式可学习的 W</strong>"直接控制了信息在时间上的保留程度，而不是靠训练中去隐式学习——这让长程信息<strong>有保障地</strong>被保留，且 Token Shift 保证邻近信息不丢。</p>
+<h3 id="h76">7.8.3 表达力：从"写死"到"可修正"</h3>
+<ul>
+<li>v4–v6 的状态更新是"只写不改"，表达力有上限；</li>
+<li>v7 的 DSE 让状态<strong>可修正、可演化</strong>，表达力大幅提升；</li>
+<li>论文证明其能表达超出 TC0 的任务，这是线性注意力家族首次被证明可以做到。</li>
+</ul>
+<h3 id="h77">7.8.4 训练为什么能并行（可分解性）</h3>
+<p>关键在于衰减结构可以写成"前缀和"：</p>
+<ul>
+<li>当衰减系数与输入无关时（v4 及以前），整条时间轴的 WKV 可以一次性并行算出来；</li>
+<li>v6/v7 引入数据相关衰减后，并行不再平凡，官方用<strong>专门的 CUDA 内核（WKV kernel）</strong>高效实现；</li>
+<li>所以"用 RWKV 时通常建议开启官方内核加速"（详见第九章）。</li>
+</ul>
+<h2 id="h78">7.9 为什么社区会关注它：一句话总结</h2>
+<p>RWKV 的价值不在于"替代所有模型"，而在于它证明了：</p>
+<blockquote>
+<p><strong>"聪明 + 便宜 + 省内存"可以同时存在。</strong> 它把 RNN 的省、Transformer 的强，用一套优雅的"状态记忆"设计统一了起来，并持续在表达力上逼近甚至超越注意力受限的模型。</p>
+</blockquote>
+<div class="note">
+
+**本章小结**：RWKV 从 2021 年的概念验证，到 v4 达到 GPT 级，再到 v7 "Goose" 的动态状态演化与超 TC0 表达力，一步步解决了"线性注意力的表达力天花板"。它之所以"没有注意力也能行"，靠的是 Token Shift（短程）+ 指数衰减状态（长程）+ R 门控（选择）+ v7 的可修正状态四者合力。
+
+</div>
+<h1 id="h79">第八章 怎么用起来：部署方案总览与环境准备</h1>
+<p>从这一章开始进入"实战"。我们会先给你一张"部署选型地图"，再手把手教你装好环境，为后面的命令行、API、Python 调用铺路。<strong>目标是：让一个完全没部署过模型的小白，也能把 RWKV 跑起来。</strong></p>
+<h2 id="h80">8.1 先搞清楚：你要用哪种方式？</h2>
+<p>RWKV 目前有非常多种跑法，适合不同的人。先看这张流程图，选一个适合自己的入口：</p>
+<p><img alt="部署选型流程图" src="img/fig15_deploy_flow.png" /></p>
+<table>
+<thead>
+<tr>
+<th>入口</th>
+<th>适合谁</th>
+<th>难度</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ollama</strong></td>
+<td>新手、想最快跑起来</td>
+<td>★☆☆</td>
+<td>一条命令下载+运行，自动提供 OpenAI 兼容 API</td>
+</tr>
+<tr>
+<td><strong>RWKV-Runner</strong></td>
+<td>想要图形界面、可调参数</td>
+<td>★☆☆</td>
+<td>桌面 GUI，一键加载 .pth，支持挂载 State</td>
+</tr>
+<tr>
+<td><strong>llama.cpp（GGUF）</strong></td>
+<td>低配设备、CPU 用户</td>
+<td>★★☆</td>
+<td>量化模型，内存极省，命令行/服务两种模式</td>
+</tr>
+<tr>
+<td><strong>HuggingFace + Python</strong></td>
+<td>开发者、要自定义逻辑</td>
+<td>★★★</td>
+<td>直接用 transformers / rwkv 库加载，最灵活</td>
+</tr>
+<tr>
+<td><strong>vLLM / SGLang</strong></td>
+<td>生产环境、高并发服务</td>
+<td>★★★</td>
+<td>OpenAI 兼容服务，吞吐高</td>
+</tr>
+<tr>
+<td><strong>RWKV Pip / Albatross</strong></td>
+<td>研究、想用官方内核</td>
+<td>★★★</td>
+<td>官方 .pth 直接推理，支持 State 读写</td>
+</tr>
+</tbody>
+</table>
+<p><strong>新手建议</strong>：先从 <strong>Ollama</strong> 或 <strong>RWKV-Runner</strong> 入手，1 分钟跑起来有感觉了，再去看 Python 或服务化方案。</p>
+<h2 id="h81">8.2 模型大小怎么选</h2>
+<p>RWKV 全系开源，规模从 0.1B 到 7.2B 都有。选多大取决于你的硬件：</p>
+<table>
+<thead>
+<tr>
+<th>模型规模</th>
+<th>参数量</th>
+<th>量化为 Q8 后大小</th>
+<th>适合硬件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RWKV-7 1.5B</td>
+<td>15 亿</td>
+<td>约 1.6GB</td>
+<td>4GB 内存/显存即可</td>
+</tr>
+<tr>
+<td>RWKV-7 2.9B</td>
+<td>29 亿</td>
+<td>约 3GB</td>
+<td>8GB 内存/显存</td>
+</tr>
+<tr>
+<td>RWKV-6 7B</td>
+<td>70 亿</td>
+<td>约 7GB</td>
+<td>12GB+ 内存/显存</td>
+</tr>
+<tr>
+<td>RWKV-6 14B</td>
+<td>140 亿</td>
+<td>约 14GB</td>
+<td>24GB+ 显存（多语最强）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>选型口诀</strong>：先选一个"跑得动的最小模型"验证流程，再逐步升级。CPU 用户优先考虑 1.5B / 2.9B 的 GGUF 量化版；有 NVIDIA GPU 再上更大规模。</p>
+</blockquote>
+<h2 id="h82">8.3 方式一：Ollama（最推荐给新手）</h2>
+<h3 id="h83">8.3.1 安装 Ollama</h3>
+<ul>
+<li><strong>Windows / macOS</strong>：去 <a href="https://ollama.com">ollama.com</a> 下载安装包，双击安装即可；</li>
+<li><strong>Linux</strong>：</li>
+</ul>
+<pre><code class="language-bash">curl -fsSL https://ollama.com/install.sh | sh
+</code></pre>
+<p>安装完成后，在终端输入 <code>ollama --version</code> 能输出版本号即成功。</p>
+<h3 id="h84">8.3.2 拉取并运行 RWKV 模型</h3>
+<p>RWKV 社区成员 @MollySophia 维护了官方的 RWKV-7 模型库。直接运行：</p>
+<pre><code class="language-bash"># 运行 RWKV-7 G1 2.9B（推荐，默认带思考模式）
+ollama run mollysama/rwkv-7-g1:2.9b
+</code></pre>
+<p>Ollama 会自动下载模型并进入对话界面，像和 ChatGPT 聊天一样直接打字。常见参数：</p>
+<table>
+<thead>
+<tr>
+<th>模型 tag</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mollysama/rwkv-7-g1:2.9b</code></td>
+<td>2.9B，Q8_0 量化，默认带思考模式</td>
+</tr>
+<tr>
+<td><code>mollysama/rwkv-7-g1:1.5b</code></td>
+<td>1.5B，更轻量</td>
+</tr>
+<tr>
+<td><code>mollysama/rwkv-7-g1:2.9b-thinkdisabled</code></td>
+<td>关闭思考模式（更快）</td>
+</tr>
+<tr>
+<td><code>mollysama/rwkv-7-world:2.9b</code></td>
+<td>老版 World 模型（不推荐，G1 更全面）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>提示：默认思考模式下，可以用 <code>/set nothink</code> 和 <code>/set think</code> 在终端里随时切换思考模式开关。</p>
+</blockquote>
+<h3 id="h85">8.3.3 Ollama 的 OpenAI 兼容 API</h3>
+<p>Ollama 默认在 <code>http://localhost:11434</code> 提供 API，几乎和 OpenAI 接口一致，方便程序调用：</p>
+<pre><code class="language-bash">curl http://localhost:11434/api/chat -d '{
+  &quot;model&quot;: &quot;mollysama/rwkv-7-g1:2.9b&quot;,
+  &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;用一句话介绍 RWKV&quot;}],
+  &quot;stream&quot;: false
+}'
+</code></pre>
+<h2 id="h86">8.4 方式二：RWKV-Runner（图形界面）</h2>
+<p>如果你更习惯"点鼠标"，用 <strong>RWKV-Runner</strong>（rwkv.cn 提供）体验最好：</p>
+<ol>
+<li>去 rwkv.cn 下载 RWKV-Runner 安装包（支持 Win/macOS/Linux）；</li>
+<li>打开软件，选择模型文件（.pth 或 .gguf 都支持）；</li>
+<li>选择"后端/Strategy"：
+   - 默认用 <strong>RWKV Pip</strong>（<code>cuda fp16</code> 或 <code>cpu fp32</code>）；
+   - NVIDIA 显卡 + RWKV-7 可切换 <strong>Albatross</strong>（<code>albatross workers=1 batch=32</code>）做性能对比；
+   - GGUF 量化模型用 <strong>llama.cpp</strong> 后端；
+   - 苹果/AMD 等 WebGPU 设备用 <strong>WebGPU</strong> 后端；</li>
+<li>点击启动，即可在自带聊天界面使用，还能挂载 State、调整 Temperature 等参数。</li>
+</ol>
+<blockquote>
+<p><strong>后端小知识</strong>：后端（Backend）决定"哪套程序加载并运行模型"；Strategy 是"加载配置"（设备、精度、上下文长度）；量化是"权重的保存精度"。三者不要混淆。</p>
+</blockquote>
+<h2 id="h87">8.5 方式三：llama.cpp + GGUF（低配设备最爱）</h2>
+<p>llama.cpp 是 CPU 也能高效跑模型的老牌工具，RWKV 的 GGUF 量化模型对它支持良好。</p>
+<h3 id="h88">8.5.1 获取 GGUF 模型</h3>
+<p>RWKV 的 GGUF 模型可以从 Hugging Face 集合（如 <code>zhiyuan8/models</code>）下载，推荐用 <code>FP16</code> 或 <code>Q8_0</code> 量化档（更低的 Q5/Q4 会明显降低回复质量）。</p>
+<h3 id="h89">8.5.2 命令行运行</h3>
+<pre><code class="language-bash"># llama-cli 交互式对话
+./llama-cli -m path/to/model.Q8_0.gguf -p &quot;你好&quot;
+
+# 或启动一个 OpenAI 兼容的服务（llama-server）
+./llama-server -m path/to/model.Q8_0.gguf --port 8080 --ctx-size 8192
+</code></pre>
+<p>启动服务后，可用 <code>http://localhost:8080/v1/chat/completions</code> 调用，和 OpenAI 格式一致。</p>
+<h2 id="h90">8.6 方式四：HuggingFace + Python（开发者的首选）</h2>
+<p>要用代码做自定义逻辑（对话机器人、RAG、State 保存等），直接在 Python 里加载最灵活。</p>
+<h3 id="h91">8.6.1 安装依赖</h3>
+<pre><code class="language-bash">pip install rwkv rwkv_tokenizer
+# 或（用 transformers 生态时）
+pip install transformers huggingface_hub
+</code></pre>
+<h3 id="h92">8.6.2 从 HuggingFace 下载模型</h3>
+<pre><code class="language-bash">huggingface-cli download BlinkDL/rwkv7-g1 \
+  rwkv7-g1b-1.5b-20251202-ctx8192.pth \
+  --local-dir /path/to/models
+</code></pre>
+<p>或用 Python：</p>
+<pre><code class="language-python">from huggingface_hub import hf_hub_download
+model_path = hf_hub_download(
+    repo_id=&quot;BlinkDL/rwkv7-g1&quot;,
+    filename=&quot;rwkv7-g1b-1.5b-20251202-ctx8192.pth&quot;,
+    local_dir=&quot;/path/to/models&quot;,
+)
+</code></pre>
+<blockquote>
+<p>国内网络慢的话，可以设置镜像：<code>export HF_ENDPOINT=https://hf-mirror.com</code>。</p>
+</blockquote>
+<h2 id="h93">8.7 方式五：vLLM（生产环境高并发）</h2>
+<p>要在生产环境提供服务、支撑高并发，用 vLLM（官方支持 RWKV）：</p>
+<pre><code class="language-bash">pip install vllm
+
+python -m vllm.entrypoints.openai.api_server \
+  --model BlinkDL/rwkv7-g1 \
+  --host 0.0.0.0 --port 8000 \
+  --max-model-len 8192 \
+  --gpu-memory-utilization 0.85
+</code></pre>
+<p>启动后即获得 OpenAI 兼容的 <code>/v1/chat/completions</code> 接口，吞吐量高、适合多用户场景。</p>
+<h2 id="h94">8.8 通用环境检查清单</h2>
+<p>无论你选哪条路，先确认环境是好的：</p>
+<pre><code class="language-bash"># 1. Python 版本（建议 3.10+）
+python3 --version
+
+# 2. 显卡（有 NVIDIA GPU 才需要）
+nvidia-smi
+
+# 3. pip 本身
+pip install --upgrade pip setuptools wheel
+
+# 4. 磁盘空间（模型通常 2~15GB）
+df -h
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>硬件情况</th>
+<th>推荐方案</th>
+<th>预期体验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无 GPU，仅 CPU</td>
+<td>llama.cpp GGUF / Ollama CPU</td>
+<td>1.5B 约 5-10 tok/s，够聊天</td>
+</tr>
+<tr>
+<td>8GB 内存的迷你主机</td>
+<td>Ollama 2.9B 量化</td>
+<td>稳定 4-5 tok/s，长对话不崩</td>
+</tr>
+<tr>
+<td>NVIDIA 8GB 显存</td>
+<td>RWKV Pip / Albatross fp16i8</td>
+<td>2.9B 流畅，可上 7B 量化</td>
+</tr>
+<tr>
+<td>NVIDIA 24GB+ 显存</td>
+<td>vLLM / Albatross</td>
+<td>7B/14B 高吞吐服务</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：跑 RWKV 有五种主流方式——Ollama（最易）、RWKV-Runner（图形界面）、llama.cpp（CPU/低配）、HuggingFace+Python（灵活）、vLLM（生产）。新手从 Ollama 起步，开发者用 Python，生产用 vLLM。模型先选跑得动的最小档，验证流程后再升级。
+
+</div>
+<h1 id="h95">第九章 推理实战：命令行、API 与采样参数</h1>
+<p>这一章我们把"怎么用"讲透：从一次推理的内部流程，到命令行交互、API 调用、以及那些"温度、Top_P"到底怎么调。读完这一章，你能熟练地让 RWKV 干各种活。</p>
+<h2 id="h96">9.1 一次推理的内部流程</h2>
+<p>无论是命令行还是 API，一次推理都要走下面这条流水线：</p>
+<p><img alt="一次推理的完整数据流" src="img/fig16_api_flow.png" /></p>
+<ol>
+<li><strong>Tokenize（分词）</strong>：把文本切成 token（词元/子词），比如"我喜欢吃苹果"切成若干 token；</li>
+<li><strong>前向计算（forward）</strong>：把 token 序列喂给 RWKV，逐层更新状态，输出下一个 token 的概率分布；</li>
+<li><strong>采样（sample）</strong>：按概率（结合温度、Top_P 等参数）选出一个 token；</li>
+<li><strong>Decode（解码）</strong>：把选出的 token 拼回文本，输出；</li>
+<li>重复 2–4，直到生成结束标记（EOS）或达到最大长度。</li>
+</ol>
+<blockquote>
+<p><strong>RWKV 的关键细节</strong>：多轮对话时，"状态 S"会一直往下传——所以它不需要每次都重新处理整段历史，这也是它"聊得再久也不慢"的秘密。</p>
+</blockquote>
+<h2 id="h97">9.2 命令行交互：Ollama 实战</h2>
+<h3 id="h98">9.2.1 基础对话</h3>
+<pre><code class="language-bash">ollama run mollysama/rwkv-7-g1:2.9b
+</code></pre>
+<p>进入后直接输入即可。常用终端命令：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/set temperature 0.8</code></td>
+<td>调整温度</td>
+</tr>
+<tr>
+<td><code>/set num_ctx 8192</code></td>
+<td>设置上下文长度</td>
+</tr>
+<tr>
+<td><code>/set think</code> / <code>/set nothink</code></td>
+<td>打开/关闭思考模式</td>
+</tr>
+<tr>
+<td><code>/bye</code></td>
+<td>退出</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h99">9.2.2 用自定义人设（Modelfile）</h3>
+<p>想让 RWKV 扮演特定角色（比如"温柔的心理咨询师"），写一个 <code>Modelfile</code>：</p>
+<pre><code class="language-dockerfile">FROM mollysama/rwkv-7-g1:2.9b
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER num_ctx 8192
+
+SYSTEM &quot;&quot;&quot;
+你是一位温柔耐心的心理咨询师，名叫小暖。
+你擅长倾听，用简短温暖的话语回应来访者。
+永远不要说教，先共情，再给建议。
+&quot;&quot;&quot;
+</code></pre>
+<p>然后创建并运行：</p>
+<pre><code class="language-bash">ollama create my-therapist -f Modelfile
+ollama run my-therapist
+</code></pre>
+<p>这就是后面"套用到我们自己的 AI 陪伴工程"最直接的一步（见第十二章）。</p>
+<h2 id="h100">9.3 API 调用：OpenAI 兼容接口</h2>
+<h3 id="h101">9.3.1 用 curl 测试</h3>
+<pre><code class="language-bash">curl http://localhost:11434/api/chat -d '{
+  &quot;model&quot;: &quot;mollysama/rwkv-7-g1:2.9b&quot;,
+  &quot;messages&quot;: [
+    {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;你是友好的中文助手&quot;},
+    {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;什么是 RWKV？&quot;}
+  ],
+  &quot;stream&quot;: false,
+  &quot;options&quot;: {&quot;temperature&quot;: 0.7, &quot;top_p&quot;: 0.9}
+}'
+</code></pre>
+<h3 id="h102">9.3.2 用 Python 的 openai 库调用</h3>
+<p>因为接口是 OpenAI 兼容的，所以直接用 openai 库即可：</p>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI(
+    base_url=&quot;http://localhost:11434/v1&quot;,
+    api_key=&quot;ollama&quot;,  # 本地服务不校验 key
+)
+
+resp = client.chat.completions.create(
+    model=&quot;mollysama/rwkv-7-g1:2.9b&quot;,
+    messages=[
+        {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;你是一个温柔的心理陪伴助手。&quot;},
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;我今天好累，工作太多了……&quot;},
+    ],
+    temperature=0.8,
+    max_tokens=300,
+)
+print(resp.choices[0].message.content)
+</code></pre>
+<h3 id="h103">9.3.3 流式输出（Streaming）</h3>
+<p>大段回答时，用流式输出体验更好（一个字一个字往外蹦）：</p>
+<pre><code class="language-python">stream = client.chat.completions.create(
+    model=&quot;mollysama/rwkv-7-g1:2.9b&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;讲个睡前故事&quot;}],
+    stream=True,
+)
+for chunk in stream:
+    delta = chunk.choices[0].delta.content
+    if delta:
+        print(delta, end=&quot;&quot;, flush=True)
+</code></pre>
+<h2 id="h104">9.4 采样参数详解：怎么让 AI"听话"</h2>
+<p>这些参数决定生成的"随机性 vs 稳定"，非常重要：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>temperature</code></td>
+<td>温度：越高越随机、越有创意；越低越确定</td>
+<td>0.6–0.9 创作；0.1–0.3 事实/代码</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>核采样：只从累计概率前 P 的 token 里选</td>
+<td>0.8–0.95 常用</td>
+</tr>
+<tr>
+<td><code>top_k</code></td>
+<td>只从概率最高的 K 个 token 里选</td>
+<td>40–80 常用</td>
+</tr>
+<tr>
+<td><code>repeat_penalty</code></td>
+<td>重复惩罚：抑制说车轱辘话</td>
+<td>1.0–1.3</td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>单次最多生成多少个 token</td>
+<td>按需求设置</td>
+</tr>
+<tr>
+<td><code>num_ctx</code></td>
+<td>上下文窗口长度</td>
+<td>RWKV 可放心开大</td>
+</tr>
+</tbody>
+</table>
+<p><strong>调参口诀</strong>：</p>
+<ul>
+<li>想要<strong>稳定、专业</strong>的回答（客服、代码、事实问答）→ <code>temperature</code> 调低（0.2–0.4）；</li>
+<li>想要<strong>有创意、会聊天</strong>（写故事、闲聊、情感陪伴）→ <code>temperature</code> 调高（0.7–1.0）；</li>
+<li>发现<strong>重复啰嗦</strong> → 调大 <code>repeat_penalty</code> 或适当降 <code>temperature</code>。</li>
+</ul>
+<h2 id="h105">9.5 长上下文实战：让 RWKV 读完整本书</h2>
+<p>RWKV 的长上下文优势，在"让模型读长文档"时体现得最明显。</p>
+<h3 id="h106">9.5.1 一次性塞入长文本</h3>
+<pre><code class="language-python">long_text = open(&quot;一本小说.txt&quot;, encoding=&quot;utf-8&quot;).read()  # 比如 3 万字
+resp = client.chat.completions.create(
+    model=&quot;mollysama/rwkv-7-g1:2.9b&quot;,
+    messages=[
+        {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;你是一个文学分析助手。&quot;},
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;请阅读以下文本并概括主线剧情：\n\n{long_text}&quot;},
+    ],
+    max_tokens=1000,
+)
+print(resp.choices[0].message.content)
+</code></pre>
+<p>对 Transformer 来说，3 万字可能已经让 KV Cache 爆掉；RWKV 因为状态固定，可以轻松处理。这也是后面 RAG（第十二章）的基础。</p>
+<h3 id="h107">9.5.2 超长输入的注意点</h3>
+<ul>
+<li>模型对"超长上下文的记忆质量"仍有限制（毕竟是压缩摘要），太长时建议分段总结；</li>
+<li>实际使用时建议搭配"先分段摘要 → 再全局整合"的策略，效果更好。</li>
+</ul>
+<h2 id="h108">9.6 用 vLLM 服务生产环境</h2>
+<p>高并发场景下，用 vLLM 把 RWKV 包装成标准 OpenAI 服务：</p>
+<pre><code class="language-bash">python -m vllm.entrypoints.openai.api_server \
+  --model BlinkDL/rwkv7-g1 \
+  --port 8000 \
+  --max-model-len 8192 \
+  --gpu-memory-utilization 0.85
+</code></pre>
+<pre><code class="language-python">from openai import OpenAI
+client = OpenAI(base_url=&quot;http://localhost:8000/v1&quot;, api_key=&quot;none&quot;)
+resp = client.chat.completions.create(
+    model=&quot;BlinkDL/rwkv7-g1&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你好&quot;}],
+)
+</code></pre>
+<h2 id="h109">9.7 常见调用问题速查</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出乱码/全是特殊字符</td>
+<td>模型文件与 tokenizer 不匹配</td>
+<td>确认用了配套的 tokenizer</td>
+</tr>
+<tr>
+<td>回复质量低</td>
+<td>量化档太低（Q4 以下）</td>
+<td>换 Q8_0 / FP16</td>
+</tr>
+<tr>
+<td>速度太慢</td>
+<td>CPU 推理 + 模型太大</td>
+<td>换更小模型 / GGUF 量化</td>
+</tr>
+<tr>
+<td>上下文太短</td>
+<td><code>num_ctx</code> 没设大</td>
+<td>调大上下文长度</td>
+</tr>
+<tr>
+<td>多轮对话"失忆"</td>
+<td>每次请求没带状态</td>
+<td>用流式/状态保存方案（第十章）</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：一次推理 = Tokenize → 前向 → 采样 → Decode，循环直到结束。命令行走 Ollama，程序调用走 OpenAI 兼容 API（支持流式）。温度/Top_P 决定"随机性 vs 稳定"，按用途调参。RWKV 的长上下文优势让"读完整本书再回答"变得轻松。
+
+</div>
+<h1 id="h110">第十章 Python 代码实战：加载模型、对话与状态管理</h1>
+<p>这一章我们用真实可运行的 Python 代码，带你实现一个完整的 RWKV 应用：加载模型 → 对话 → 流式输出 → <strong>状态保存/恢复</strong>（这是 RWKV 独有的杀手锏）。代码尽量简单，注释齐全，跟着敲一遍就能跑。</p>
+<h2 id="h111">10.1 环境准备</h2>
+<pre><code class="language-bash"># 核心依赖
+pip install rwkv rwkv_tokenizer torch
+
+# 若用 HuggingFace 生态
+pip install transformers huggingface_hub
+</code></pre>
+<blockquote>
+<p>提示：<code>rwkv</code> 库是官方推理库，支持 .pth 直接加载、State 读写；<code>transformers</code> 适合想用统一接口的人。下面以官方 <code>rwkv</code> 库为主。</p>
+</blockquote>
+<h2 id="h112">10.2 最小可用：加载模型并生成一句话</h2>
+<pre><code class="language-python">from rwkv.model import RWKV
+from rwkv.utils import PIPELINE, PIPELINE_ARGS
+import torch
+
+# 1. 指定模型文件（.pth）与策略
+model_path = &quot;models/rwkv7-g1-2.9b-20250519-ctx4096.pth&quot;
+strategy = &quot;cuda fp16&quot;          # 有 NVIDIA 显卡用这个
+# strategy = &quot;cpu fp32&quot;         # 纯 CPU 用这个
+
+model = RWKV(model=model_path, strategy=strategy)
+pipeline = PIPELINE(model, &quot;rwkv_vocab_v304&quot;)   # 配套 tokenizer
+
+# 2. 生成参数
+args = PIPELINE_ARGS(
+    temperature=0.8,
+    top_p=0.9,
+    top_k=80,
+    repetition_penalty=1.1,
+    max_gen=200,          # 最多生成 200 个 token
+)
+
+# 3. 生成一段文本
+print(pipeline.generate(&quot;请用一句话介绍 RWKV：&quot;, token_count=200, args=args))
+</code></pre>
+<h2 id="h113">10.3 多轮对话：用"状态 S"实现真正的连续记忆</h2>
+<p>RWKV 最大的魅力在于：<strong>状态 S 可以在多轮之间传递</strong>。这样模型不是靠"把所有历史再喂一遍"，而是带着压缩后的记忆继续聊。</p>
+<pre><code class="language-python">from rwkv.model import RWKV
+from rwkv.utils import PIPELINE, PIPELINE_ARGS
+
+model = RWKV(model=&quot;models/rwkv7-g1-2.9b.pth&quot;, strategy=&quot;cuda fp16&quot;)
+pipeline = PIPELINE(model, &quot;rwkv_vocab_v304&quot;)
+
+state = None  # 状态从空开始
+
+def chat(user_msg, state):
+    # 组装提示：system + 当前用户消息
+    prompt = f&quot;你是一个温柔的心理陪伴助手。\n\n用户：{user_msg}\n助手：&quot;
+    args = PIPELINE_ARGS(temperature=0.85, top_p=0.95, max_gen=150,
+                         repetition_penalty=1.1)
+    # generate 会返回 (文本, 更新后的 state)
+    text, state = pipeline.generate(prompt, token_count=150, args=args,
+                                    state=state)
+    return text.strip(), state
+
+# 第一轮
+reply1, state = chat(&quot;我今天加班到很晚，好累……&quot;, state)
+print(&quot;助手：&quot;, reply1)
+
+# 第二轮：模型还记得上一轮的情绪
+reply2, state = chat(&quot;能不能给我讲个放松的小故事？&quot;, state)
+print(&quot;助手：&quot;, reply2)
+</code></pre>
+<p><strong>为什么这是"记忆"而不是"复读"？</strong> 因为 <code>state</code> 是压缩后的摘要，不是把原文再抄一遍。这既省内存，又让"越聊越懂你"成为可能。</p>
+<h2 id="h114">10.4 状态保存与恢复：跨会话续聊（杀手锏）</h2>
+<p>RWKV 的状态可以<strong>序列化保存到硬盘</strong>，下次启动时直接恢复——相当于"模型记得你是谁、你们聊过什么"。</p>
+<pre><code class="language-python">import pickle
+
+def save_state(state, path=&quot;my_chat_state.pkl&quot;):
+    # state 通常是 list/tuple 结构，pickle 即可
+    with open(path, &quot;wb&quot;) as f:
+        pickle.dump(state, f)
+    print(f&quot;状态已保存到 {path}&quot;)
+
+def load_state(path=&quot;my_chat_state.pkl&quot;):
+    with open(path, &quot;rb&quot;) as f:
+        return pickle.load(f)
+</code></pre>
+<p><strong>完整的多会话流程：</strong></p>
+<pre><code class="language-python"># 场景：AI 陪伴机器人，每个用户有专属记忆
+def get_state_for(user_id):
+    try:
+        return load_state(f&quot;state_{user_id}.pkl&quot;)
+    except FileNotFoundError:
+        return None  # 新用户，从空白记忆开始
+
+def on_user_message(user_id, msg):
+    state = get_state_for(user_id)          # 取出该用户的记忆
+    reply, new_state = chat(msg, state)     # 带着记忆对话
+    save_state(new_state, f&quot;state_{user_id}.pkl&quot;)  # 存回记忆
+    return reply
+</code></pre>
+<blockquote>
+<p>这一步就是"<strong>角色记忆可持续</strong>"的工程实现——Transformer 要实现类似效果，要么把历史全喂进去（越来越贵），要么自己做一套记忆系统；RWKV 直接给你原生状态，天然适合"陪伴/长期关系"类产品。</p>
+</blockquote>
+<h2 id="h115">10.5 流式输出：打字机效果</h2>
+<pre><code class="language-python">def chat_stream(user_msg, state):
+    prompt = f&quot;用户：{user_msg}\n助手：&quot;
+    args = PIPELINE_ARGS(temperature=0.85, top_p=0.95,
+                         max_gen=150, repetition_penalty=1.1)
+
+    out = &quot;&quot;
+    for chunk in pipeline.generate(prompt, token_count=150, args=args,
+                                   state=state, stream=True):
+        # 每次只返回新增的几个 token
+        print(chunk, end=&quot;&quot;, flush=True)
+        out += chunk
+    print()
+    return out
+</code></pre>
+<p>流式输出的价值：长回答时用户不需要干等，体验和 ChatGPT 一样"一个字一个字蹦出来"。</p>
+<h2 id="h116">10.6 完整版：一个可用的"陪伴聊天机器人"</h2>
+<p>把上面的拼起来，写一个最小可用的完整脚本：</p>
+<pre><code class="language-python">&quot;&quot;&quot;rwkv_chatbot.py —— 一个带长期记忆的最小陪伴机器人&quot;&quot;&quot;
+import pickle
+from rwkv.model import RWKV
+from rwkv.utils import PIPELINE, PIPELINE_ARGS
+
+MODEL_PATH = &quot;models/rwkv7-g1-2.9b-20250519-ctx4096.pth&quot;
+STRATEGY = &quot;cuda fp16&quot;
+
+model = RWKV(model=MODEL_PATH, strategy=STRATEGY)
+pipeline = PIPELINE(model, &quot;rwkv_vocab_v304&quot;)
+SYSTEM = &quot;你是小暖，一个温柔耐心、善于倾听的心理陪伴助手。&quot;
+
+
+def make_state(user_id):
+    try:
+        with open(f&quot;state_{user_id}.pkl&quot;, &quot;rb&quot;) as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return None
+
+
+def keep_state(user_id, state):
+    with open(f&quot;state_{user_id}.pkl&quot;, &quot;wb&quot;) as f:
+        pickle.dump(state, f)
+
+
+def respond(user_id, user_msg):
+    state = make_state(user_id)
+    prompt = f&quot;{SYSTEM}\n\n用户：{user_msg}\n小暖：&quot;
+    args = PIPELINE_ARGS(temperature=0.85, top_p=0.95,
+                         max_gen=200, repetition_penalty=1.1)
+    reply, state = pipeline.generate(prompt, token_count=200,
+                                     args=args, state=state)
+    keep_state(user_id, state)
+    return reply.strip()
+
+
+if __name__ == &quot;__main__&quot;:
+    uid = &quot;alice&quot;
+    while True:
+        msg = input(&quot;你：&quot;)
+        if msg in (&quot;exit&quot;, &quot;quit&quot;):
+            break
+        print(&quot;小暖：&quot;, respond(uid, msg))
+</code></pre>
+<p><strong>这个 40 行的脚本，已经实现了</strong>：</p>
+<ul>
+<li>多轮对话的连续记忆（状态传递）；</li>
+<li>跨会话的长期记忆（状态持久化到磁盘）；</li>
+<li>角色人设（system prompt）；</li>
+<li>可扩展：加 TTS 语音、情感检测、情绪追踪，就是一个完整的 AI 陪伴产品原型（第十二章展开）。</li>
+</ul>
+<h2 id="h117">10.7 用 transformers 生态加载（备选）</h2>
+<p>如果你更习惯 transformers，RWKV 也有对应的集成：</p>
+<pre><code class="language-python">from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+model_name = &quot;BlinkDL/rwkv-7-3b&quot;   # 以实际 repo 为准
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name).half().cuda().eval()
+
+inputs = tokenizer(&quot;你好，介绍一下自己：&quot;, return_tensors=&quot;pt&quot;).to(&quot;cuda&quot;)
+out = model.generate(**inputs, max_new_tokens=100, do_sample=True,
+                     temperature=0.8, top_p=0.9)
+print(tokenizer.decode(out[0], skip_special_tokens=True))
+</code></pre>
+<h2 id="h118">10.8 性能与内存观测</h2>
+<table>
+<thead>
+<tr>
+<th>观测点</th>
+<th>方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>显存占用</td>
+<td><code>nvidia-smi</code>，观察是否恒定</td>
+</tr>
+<tr>
+<td>生成速度</td>
+<td>记录生成 token 数 / 耗时</td>
+</tr>
+<tr>
+<td>多轮是否变慢</td>
+<td>对比第 1 轮与第 20 轮速度</td>
+</tr>
+<tr>
+<td>状态大小</td>
+<td>打印 <code>sys.getsizeof</code> / 查看 .pkl 文件大小</td>
+</tr>
+</tbody>
+</table>
+<p>RWKV 的特点：<strong>只要模型不变，状态大小不变，显存不变，速度不变</strong>——你可以亲手验证这一点，这也是它最惊艳的地方。</p>
+<div class="tip">
+
+**本章小结**：用官方 `rwkv` 库，核心就三步——加载模型、用 pipeline.generate 生成、把返回的 state 传下去/存起来。多轮记忆靠"状态传递"，跨会话记忆靠"状态持久化"，这两招是 Transformer 很难低成本复制的，也是我们做 AI 陪伴产品的根基。
+
+</div>
+<h1 id="h119">第十一章 进阶：微调、State Tuning 与 RAG</h1>
+<p>想让 RWKV"更懂你的业务"，主要有三条路：<strong>微调（Fine-tuning）</strong>、<strong>State Tuning（状态微调，RWKV 独有）</strong> 和 <strong>RAG（检索增强）</strong>。这一章把三者讲清楚，并给出实践建议。</p>
+<h2 id="h120">11.1 先搞清三种手段的区别</h2>
+<table>
+<thead>
+<tr>
+<th>手段</th>
+<th>改的是什么</th>
+<th>成本</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提示工程（Prompt）</td>
+<td>不改模型，改输入</td>
+<td>最低</td>
+<td>一般，受上下文限制</td>
+</tr>
+<tr>
+<td>RAG（检索增强）</td>
+<td>不改模型，动态塞入资料</td>
+<td>低</td>
+<td>好，适合"查资料回答问题"</td>
+</tr>
+<tr>
+<td>微调（Fine-tuning）</td>
+<td>改模型权重</td>
+<td>高（需 GPU）</td>
+<td>强，改变模型"能力/性格"</td>
+</tr>
+<tr>
+<td>State Tuning</td>
+<td>只改隐藏状态</td>
+<td>低（更快更省）</td>
+<td>强，像"调整心理状态"，个性化/对齐效果好</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：RAG 是"外挂知识"，微调是"改造大脑"，State Tuning 是"调整心情"。</p>
+<h2 id="h121">11.2 微调流程总览</h2>
+<p>微调就是"拿你自己的数据，再训练一会儿模型"，让它学会你的领域/风格：</p>
+<p><img alt="微调流程" src="img/fig17_finetune_flow.png" /></p>
+<ol>
+<li><strong>准备数据集</strong>：问答/对话/指令数据（如"用户问题 → 期望回答"）；</li>
+<li><strong>格式化 + Tokenize</strong>：把数据按模型的对话模板组织好；</li>
+<li><strong>微调训练</strong>：可选全参微调、LoRA（低秩适配，更省显存）、PEFT；</li>
+<li><strong>导出权重</strong>：.pth 或转 GGUF；</li>
+<li><strong>部署 + 验证</strong>：上线前用测试集评估。</li>
+</ol>
+<h2 id="h122">11.3 数据格式：先准备"喂什么"</h2>
+<p>微调效果好不好，80% 取决于数据。RWKV 微调常用的数据格式（JSON Lines，每行一条）：</p>
+<pre><code class="language-json">{&quot;text&quot;: &quot;用户：我今天很沮丧。\n小暖：我能感觉到你今天很不好受，愿意和我聊聊发生了什么吗？&quot;}
+{&quot;text&quot;: &quot;用户：工作被领导批评了。\n小暖：被批评确实会让人难过。你先别急着自责，这次具体是因为什么呢？&quot;}
+</code></pre>
+<p>要点：</p>
+<ul>
+<li>数据要<strong>多轮、真实、贴合你的业务</strong>；</li>
+<li>每条要<strong>有明确期望的风格/回答</strong>；</li>
+<li>数量从几百条到几万条都可以，先从小数据集验证流程。</li>
+</ul>
+<h2 id="h123">11.4 三种微调方式的取舍</h2>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>改的权重</th>
+<th>显存需求</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全参微调（Full FT）</td>
+<td>所有参数</td>
+<td>高</td>
+<td>数据多、算力足、要彻底改造</td>
+</tr>
+<tr>
+<td>LoRA 微调</td>
+<td>少量低秩矩阵</td>
+<td>中</td>
+<td>大多数场景，兼顾效果与成本</td>
+</tr>
+<tr>
+<td>State Tuning</td>
+<td>仅隐藏状态</td>
+<td>低</td>
+<td>个性化/对齐/角色扮演，又快又省</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h124">11.5 State Tuning：RWKV 的独家绝活</h2>
+<h3 id="h125">11.5.1 它是什么</h3>
+<p><strong>State Tuning（状态微调）</strong> 是 RWKV 社区在 v6 迭代中发明的技术：<strong>不修改模型权重，只微调"隐藏状态的初始值"</strong>。</p>
+<ul>
+<li>模型权重 = "大脑的神经连接"（决定基本能力）；</li>
+<li>隐藏状态初始值 = "大脑此刻的心理状态 / 情绪 / 记忆基调"。</li>
+</ul>
+<p>State Tuning 就是给模型"调整好心情再上场"：通过微调初始状态，让模型在特定任务/角色上表现更好。</p>
+<h3 id="h126">11.5.2 为什么它很厉害</h3>
+<ul>
+<li><strong>极其高效</strong>：只调一个状态向量，参数极少，训练快、显存低；</li>
+<li><strong>效果相当</strong>：被称为"最有效的 prompt tuning"，在<strong>对齐（alignment）</strong>任务上表现优秀；</li>
+<li><strong>迁移性好</strong>：训练好的 State 可以迁移到别的同架构模型上复用；</li>
+<li><strong>Transformer 做不到</strong>：Transformer 没有这种"可调且固定大小"的隐藏状态，这是 RNN 系架构独有的能力。</li>
+</ul>
+<h3 id="h127">11.5.3 一句话理解</h3>
+<blockquote>
+<p>微调 = 给模型"换脑子"（改权重，重）；State Tuning = 给模型"调整心理状态"（改初始状态，轻），但都能让它在某类任务上表现更好。</p>
+</blockquote>
+<h3 id="h128">11.5.4 使用方式（示意）</h3>
+<ul>
+<li>社区有 <strong>RWKV-PEFT</strong> 工具库提供 State Tuning 脚本；</li>
+<li>训练得到的是一个 <code>.st</code> 格式的"状态文件"；</li>
+<li>使用时在 RWKV-Runner / 推理代码里"挂载"这个 State（架构与参数规模必须与基底模型一致，如 x060 配 x060、7B 配 7B）。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>检查项</th>
+<th>基底模型</th>
+<th>State</th>
+<th>要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>架构</td>
+<td>RWKV-6（x060）</td>
+<td>x060</td>
+<td>必须一致</td>
+</tr>
+<tr>
+<td>参数规模</td>
+<td>7B</td>
+<td>7B</td>
+<td>必须一致</td>
+</tr>
+<tr>
+<td>作用</td>
+<td>提供完整模型权重</td>
+<td>提供训练后的状态</td>
+<td>两者配合使用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h129">11.6 RAG：让模型"查资料"再回答</h2>
+<p>RAG（Retrieval-Augmented Generation，检索增强生成）解决的是"模型不知道你私有资料"的问题：<strong>先从知识库里检索相关资料，再塞给模型生成回答</strong>。</p>
+<p><img alt="RAG 应用架构" src="img/fig18_app_rag.png" /></p>
+<h3 id="h130">11.6.1 完整流程</h3>
+<ol>
+<li><strong>离线建库</strong>：把企业文档/知识库切成小段 → 向量化（embedding）→ 存入向量数据库；</li>
+<li><strong>在线问答</strong>：用户提问 → 把问题向量化 → 在向量库检索最相关的片段；</li>
+<li><strong>注入生成</strong>：把检索到的片段拼进提示词 → 交给 RWKV 生成回答。</li>
+</ol>
+<h3 id="h131">11.6.2 最小实现（用 Python）</h3>
+<pre><code class="language-python">import chromadb
+from sentence_transformers import SentenceTransformer
+
+# 1. 准备向量库
+client = chromadb.Client()
+col = client.get_or_create_collection(&quot;kb&quot;)
+
+# 2. 文档分块 + 入库（这里用简单的段落切分示意）
+docs = [&quot;RWKV 是一种无注意力 RNN 架构。&quot;, &quot;RWKV-7 支持动态状态演化。&quot;, &quot;...&quot;]
+chunks = [d.strip() for d in docs if d.strip()]
+col.add(ids=[str(i) for i in range(len(chunks))], documents=chunks)
+
+# 3. 检索 + 生成
+def rag_answer(question):
+    hits = col.query(query_texts=[question], n_results=3)
+    context = &quot;\n&quot;.join(hits[&quot;documents&quot;][0])
+    prompt = f&quot;请根据以下资料回答问题：\n{context}\n\n问题：{question}\n回答：&quot;
+    return chat(prompt)   # 复用第十章里的 chat 函数
+</code></pre>
+<h3 id="h132">11.6.3 为什么 RWKV 特别适合 RAG</h3>
+<ul>
+<li><strong>长上下文便宜</strong>：检索出的多段资料可以一起塞进去，RWKV 不心疼；</li>
+<li><strong>显存恒定</strong>：即使知识片段很长，内存也不膨胀；</li>
+<li><strong>自带句嵌入</strong>：RWKV 能输出高质量的句子向量，甚至可以直接当 embedding 模型用，省一套模型。</li>
+</ul>
+<blockquote>
+<p>注意：RWKV-7 的 <code>/v1/embeddings</code> 返回的是随模型结构变化的多维状态数组，不能直接当作通用一维文本向量，需要按官方 API 说明处理。</p>
+</blockquote>
+<h2 id="h133">11.7 三者的组合拳（推荐姿势）</h2>
+<p>在生产项目中，三者往往组合使用：</p>
+<ol>
+<li><strong>基础能力</strong>：用开源 RWKV-7 基底模型；</li>
+<li><strong>领域知识</strong>：用 RAG 接入私有知识库（成本低、更新快）；</li>
+<li><strong>风格/角色</strong>：用 State Tuning 或 LoRA 微调出想要的"性格"；</li>
+<li><strong>即时控制</strong>：用系统提示词做日常的"人设开关"。</li>
+</ol>
+<p>这种"基底模型 + 检索 + 轻量微调"的架构，成本最低、效果最好、迭代最快，也是我们第十二章工程套用的主线。</p>
+<h2 id="h134">11.8 微调避坑指南</h2>
+<table>
+<thead>
+<tr>
+<th>坑</th>
+<th>现象</th>
+<th>解决办法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据太少</td>
+<td>微调后变"复读机"</td>
+<td>数据量至少几百条；或改用 State Tuning</td>
+</tr>
+<tr>
+<td>格式不对</td>
+<td>训练崩/回答乱</td>
+<td>严格按对话模板格式化</td>
+</tr>
+<tr>
+<td>过拟合</td>
+<td>只会背训练集</td>
+<td>加正则、降学习率、增数据多样性</td>
+</tr>
+<tr>
+<td>显存不足</td>
+<td>OOM</td>
+<td>用 LoRA / QLoRA / State Tuning</td>
+</tr>
+<tr>
+<td>量化后变笨</td>
+<td>回复质量下降</td>
+<td>用 Q8_0 或更高精度微调/推理</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：想让 RWKV 懂业务，三件套——RAG 管"知识"（外挂资料）、微调管"能力"（改权重）、State Tuning 管"个性"（改状态，RWKV 独有且又快又省）。推荐组合：基底模型 + RAG + 轻量微调/State Tuning + 提示词控制。
+
+</div>
+<h1 id="h135">第十二章 应用场景与工程套用：把它用到我们自己的 AI 陪伴项目</h1>
+<p>这是全书的"落地章"。前面讲清了 RWKV 是什么、强在哪，这一章回答最重要的问题：<strong>在我们的"AI 陪伴 / 情感智能体"工程里，RWKV 能怎么用？怎么接？</strong> 我们会给出整体架构、模块拆解、以及可直接落地的实现思路。</p>
+<h2 id="h136">12.1 先看应用全景：RWKV 适合哪四类场景</h2>
+<p><img alt="四类典型应用场景" src="img/fig21_app_us.png" /></p>
+<p>在动手之前，先建立"RWKV 擅长什么"的全局观：</p>
+<h3 id="h137">12.1.1 场景一：长会话 / 角色扮演 / 陪伴对话（核心）</h3>
+<ul>
+<li>用户与 AI 长期、高频、多轮交流；</li>
+<li>需要"越聊越懂你"，且希望成本可控；</li>
+<li><strong>RWKV 的恒定内存 + 状态持久化</strong>正好命中痛点。</li>
+</ul>
+<p><img alt="长会话与状态持久化" src="img/fig19_app_chat.png" /></p>
+<h3 id="h138">12.1.2 场景二：RAG 知识问答 / 智能客服</h3>
+<ul>
+<li>要基于私有文档回答；</li>
+<li>长上下文 + 自带句嵌入，让 RAG 又好又省。</li>
+</ul>
+<h3 id="h139">12.1.3 场景三：边缘 / 低配设备部署</h3>
+<ul>
+<li>树莓派、旧笔记本、手机、离线场景；</li>
+<li>8GB 内存都能跑，隐私数据不出本地。</li>
+</ul>
+<p><img alt="边缘设备部署" src="img/fig20_app_edge.png" /></p>
+<h3 id="h140">12.1.4 场景四：个性化微调 / 低成本定制</h3>
+<ul>
+<li>让模型"变成某个性格/人设"；</li>
+<li>State Tuning 让个性化几乎零成本。</li>
+</ul>
+<h2 id="h141">12.2 我们的场景：AI 陪伴 / 情感智能体的痛点</h2>
+<p>假设我们正在做一个 <strong>AI 陪伴 / 情感智能体产品</strong>（比如"虚拟朋友、心理陪伴、角色扮演伙伴"）。它有几个非常典型的痛点：</p>
+<table>
+<thead>
+<tr>
+<th>痛点</th>
+<th>具体表现</th>
+<th>Transformer 的困境</th>
+<th>RWKV 的解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>长会话成本高</td>
+<td>用户每天聊几十轮，长期陪伴</td>
+<td>KV Cache 越聊越贵，最终爆内存</td>
+<td>状态固定，聊多久都便宜</td>
+</tr>
+<tr>
+<td>需要长期记忆</td>
+<td>记住用户性格、过往、偏好</td>
+<td>要么全喂历史（贵），要么自建记忆</td>
+<td>原生状态可持久化，天然"记得"</td>
+</tr>
+<tr>
+<td>部署成本敏感</td>
+<td>C 端产品要控制硬件成本</td>
+<td>显存要求高</td>
+<td>8GB 都能跑，CPU 可跑</td>
+</tr>
+<tr>
+<td>隐私合规</td>
+<td>聊天内容敏感</td>
+<td>上云有合规风险</td>
+<td>本地/私有化部署更容易</td>
+</tr>
+<tr>
+<td>个性化人设</td>
+<td>不同用户要不同"性格"</td>
+<td>每个都要微调，贵</td>
+<td>State Tuning，几乎零成本换人设</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong>：AI 陪伴 / 情感智能体，几乎就是为 RWKV 的优缺点量身定做的场景。</p>
+<h2 id="h142">12.3 整体架构设计：一张图看懂</h2>
+<p>我们把产品拆成"用户层 → 智能体应用层 → 模型层 → 能力层"四层：</p>
+<p><img alt="套用我们场景的整体架构" src="img/fig21_app_us.png" /></p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>组件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户层</td>
+<td>App / 微信 / 网页 / 语音</td>
+<td>用户入口</td>
+</tr>
+<tr>
+<td>智能体应用层</td>
+<td>角色人设挂载、情感状态追踪、长期记忆、注入控制</td>
+<td>业务逻辑</td>
+</tr>
+<tr>
+<td>模型层</td>
+<td>RWKV-7（本地/边缘部署）</td>
+<td>对话生成核心</td>
+</tr>
+<tr>
+<td>能力层</td>
+<td>TTS 语音、多模态、向量库（RAG）</td>
+<td>扩展能力</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h143">12.3.1 模块拆解</h3>
+<ol>
+<li><strong>角色人设挂载</strong>：用系统提示词或 State Tuning 设定"小暖"的性格；</li>
+<li><strong>情感状态追踪</strong>：记录用户当前情绪（高兴/难过/焦虑），动态调整回复风格；</li>
+<li><strong>长期记忆（状态持久化）</strong>：用 RWKV 的状态 S 存档用户的"人生故事"；</li>
+<li><strong>注入控制</strong>：按需注入 RAG 片段 / 情境 / 知识；</li>
+<li><strong>TTS 语音</strong>：把文字回复变成语音，提升陪伴感。</li>
+</ol>
+<h2 id="h144">12.4 模块一：角色人设挂载（两种方式）</h2>
+<p><strong>方式 A：提示词（最快）</strong></p>
+<pre><code class="language-python">SYSTEM = &quot;&quot;&quot;你叫小暖，是一个温柔耐心的 AI 伙伴。
+你的说话风格：简短、温暖、先共情再建议。
+你永远记得：用户需要的是被理解，而不是被说教。&quot;&quot;&quot;
+</code></pre>
+<p><strong>方式 B：State Tuning（更"入戏"）</strong></p>
+<ul>
+<li>用 RWKV-PEFT 对"小暖"风格的对话做 State Tuning；</li>
+<li>得到 <code>.st</code> 状态文件，推理时挂载；</li>
+<li>好处：人设更稳定，不依赖每轮塞一大段提示词，也更省 token。</li>
+</ul>
+<p><strong>工程建议</strong>：先用提示词快速验证人设，稳定后转 State Tuning 固化，省成本、效果更好。</p>
+<h2 id="h145">12.5 模块二：情感状态追踪</h2>
+<p>让 AI 不只是"会聊天"，还能"察觉情绪"：</p>
+<pre><code class="language-python">EMOTION_PROMPT = &quot;&quot;&quot;
+请分析用户这句话的情绪，只输出一个词：开心/平静/难过/焦虑/愤怒/疲惫。
+用户说：&quot;{msg}&quot;
+&quot;&quot;&quot;
+
+def detect_emotion(msg):
+    r = chat(EMOTION_PROMPT.format(msg=msg))
+    return r.strip().split()[0] if r else &quot;平静&quot;
+
+# 根据情绪调整回复风格
+def respond_with_emotion(user_id, msg):
+    emo = detect_emotion(msg)
+    if emo in (&quot;难过&quot;, &quot;焦虑&quot;, &quot;疲惫&quot;):
+        sys = &quot;用户现在情绪低落，请先充分共情，语气更温柔，避免说教和玩笑。&quot;
+    else:
+        sys = &quot;用户情绪不错，可以更轻松活泼一些。&quot;
+    return chat_with_system(user_id, sys, msg)
+</code></pre>
+<h2 id="h146">12.6 模块三：长期记忆 = 状态持久化</h2>
+<p>这是 RWKV 相对其他架构的"降维打击"：</p>
+<pre><code class="language-python"># 每个用户一个状态文件 = 一份&quot;专属人生记忆&quot;
+def get_memory(user_id):
+    return load_state(f&quot;memory_{user_id}.pkl&quot;)
+
+def remember(user_id, new_state):
+    save_state(new_state, f&quot;memory_{user_id}.pkl&quot;)
+
+# 使用
+state = get_memory(user_id)
+reply, state = pipeline.generate(prompt, state=state)
+remember(user_id, state)   # 记忆自动&quot;续上&quot;
+</code></pre>
+<p><strong>对比 Transformer 的做法</strong>：Transformer 通常要把全部历史消息重新喂进去（token 成本随记忆长度爆炸），或引入外部向量记忆库做检索；RWKV 直接把"记忆"压缩在状态里，随聊随存，几乎零额外成本。</p>
+<h2 id="h147">12.7 模块四：注入控制与多模态扩展</h2>
+<ul>
+<li><strong>RAG 注入</strong>：当用户问到产品、知识类问题时，检索知识库片段注入（见第十一章）；</li>
+<li><strong>情境注入</strong>：比如白天/深夜、忙碌/闲暇，动态调整语气；</li>
+<li><strong>TTS 语音</strong>：把回复文本交给 TTS（如 Edge-TTS、开源 TTS），输出语音；</li>
+<li><strong>多模态</strong>：RWKV 官方支持多模态方向，未来可接入语音/视觉。</li>
+</ul>
+<h2 id="h148">12.8 部署选型：我们的产品该用哪条路</h2>
+<p>结合产品阶段：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>推荐部署</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Demo/原型</td>
+<td>Ollama 或 RWKV-Runner 本地跑</td>
+<td>最快跑通，验证产品</td>
+</tr>
+<tr>
+<td>内测（少量用户）</td>
+<td>llama.cpp / Ollama + OpenAI 兼容 API</td>
+<td>低成本支撑几十个并发</td>
+</tr>
+<tr>
+<td>正式（多用户）</td>
+<td>vLLM 服务化 + 状态持久化层</td>
+<td>高吞吐、可水平扩展</td>
+</tr>
+<tr>
+<td>隐私敏感</td>
+<td>本地/私有化部署</td>
+<td>数据不出域，合规</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注意：RWKV 的"状态"是每个会话独立的一份。多用户产品里，要么用"每会话一个状态"的方式（天然隔离），要么由应用层管理状态 ID 与用户映射——这是工程上需要设计好的点。</p>
+</blockquote>
+<h2 id="h149">12.9 一套可落地的技术栈参考</h2>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>选型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型</td>
+<td>RWKV-7 G1 2.9B（8GB 机器）或 1.5B（更低配）</td>
+</tr>
+<tr>
+<td>推理</td>
+<td>Ollama / llama.cpp / vLLM</td>
+</tr>
+<tr>
+<td>状态管理</td>
+<td>每用户一份 .pkl / 数据库 blob 字段</td>
+</tr>
+<tr>
+<td>对话框架</td>
+<td>自研几十行 Python，或对接 LangChain</td>
+</tr>
+<tr>
+<td>知识库（可选）</td>
+<td>Chroma + RWKV 句嵌入 / BGE</td>
+</tr>
+<tr>
+<td>语音（可选）</td>
+<td>Edge-TTS / 开源 TTS</td>
+</tr>
+<tr>
+<td>前端</td>
+<td>微信/App/Web + WebSocket 流式输出</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h150">12.10 从"会聊"到"陪伴"：产品化清单</h2>
+<ul>
+<li>[ ] 接入 RWKV，实现多轮对话（第十章）；</li>
+<li>[ ] 加入角色人设 + 情绪感知（12.4 / 12.5）；</li>
+<li>[ ] 实现每用户状态持久化（12.6）；</li>
+<li>[ ] 接入 TTS，支持语音（12.7）；</li>
+<li>[ ] 加入知识库 RAG，回答产品/知识问题（12.7）；</li>
+<li>[ ] 用 State Tuning 固化人设，降低成本（12.4）；</li>
+<li>[ ] 用 vLLM 服务化，支撑多用户（12.8）；</li>
+<li>[ ] 隐私合规：敏感数据本地/私有化部署（12.8）。</li>
+</ul>
+<div class="tip">
+
+**本章小结**：AI 陪伴/情感智能体的痛点（长会话贵、要记忆、成本敏感、隐私、个性化）几乎全部被 RWKV 的特性命中。落地架构 = 用户层 + 智能体应用层（人设/情绪/记忆/注入）+ 模型层（RWKV-7）+ 能力层（TTS/RAG/多模态），核心杀手锏是"状态持久化 = 原生长期记忆"。
+
+</div>
+<h1 id="h151">第十三章 常见问题、选型决策与术语表</h1>
+<p>最后一章：把大家最常见的疑问集中解答，给出"到底选不选 RWKV"的决策框架，并附上一份可直接查阅的术语表。到这里，你就从"小白"升级成"能独立判断和动手"的 RWKV 使用/选型者了。</p>
+<h2 id="h152">13.1 常见问题 FAQ</h2>
+<h3 id="h153">Q1：RWKV 是 RNN 还是 Transformer？</h3>
+<p><strong>RNN 变体。</strong> RWKV 推理时以循环方式工作（每步只带一份状态），但训练时又能像 Transformer 一样并行。它是"RNN 的身板 + Transformer 的训练效率"，但不含任何自注意力。</p>
+<h3 id="h154">Q2：RWKV 会取代 Transformer 吗？</h3>
+<p><strong>不会立刻取代，而是多一种选择。</strong> 在长对话、低资源、边缘、私有化场景，RWKV 性价比更高；在极致效果、成熟生态、极致长上下文精确回忆场景，Transformer 仍是主流。两者互补。</p>
+<h3 id="h155">Q3：RWKV 的"无限上下文"是真的吗？</h3>
+<p><strong>推理成本上接近无限</strong>（内存/速度不随长度暴涨），但<strong>记忆质量有上限</strong>——毕竟是压缩摘要，极长时会有信息损失。工程上建议"长上下文 + 分段总结/检索"配合。</p>
+<h3 id="h156">Q4：RWKV 和 Mamba 有什么区别？</h3>
+<p>都属于"状态空间/线性注意力"家族，但实现不同：Mamba 用连续系统离散化 + 输入相关选择机制；RWKV 用显式可学习衰减（W）+ 感受态门控（R）+ Token Shift，且是 100% 无注意力、全系开源可跑。RWKV 的独特卖点还包括 State Tuning。</p>
+<h3 id="h157">Q5：我的电脑能跑吗？</h3>
+<ul>
+<li>8GB 内存：跑 1.5B / 2.9B 量化没问题；</li>
+<li>8GB 显存：可跑 2.9B fp16 或 7B 量化；</li>
+<li>只有 CPU：跑 1.5B 量化能聊天（约 5-10 tok/s）。</li>
+</ul>
+<h3 id="h158">Q6：RWKV 商用要钱吗？</h3>
+<p><strong>免费。</strong> RWKV 模型、代码、内核均为 Apache 2.0 开源，属于 Linux 基金会项目，可自由使用、修改、商用。</p>
+<h3 id="h159">Q7：为什么要开启官方 CUDA 内核？</h3>
+<p>RWKV-6/7 的数据相关衰减让并行计算变复杂，官方 WKV 内核能大幅提速。用 RWKV Pip / Albatross / vLLM 等方案会自动利用，建议保持开启。</p>
+<h3 id="h160">Q8：RWKV 的多语言效果怎么样？</h3>
+<p><strong>很好，且是强项。</strong> RWKV-7 在 3B 规模多语言 benchmark 上刷新 SOTA，非英语语言尤其突出；RWKV-6 World 14B 覆盖大量语言。</p>
+<h3 id="h161">Q9：我想让 RWKV 变成某个角色，最省的方法是什么？</h3>
+<p><strong>State Tuning。</strong> 不动权重、只调状态，几乎零成本换"性格"，效果甚至比提示词更稳定，还能迁移复用。</p>
+<h3 id="h162">Q10：RWKV 现在有哪些模型可以选？</h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>规模</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RWKV-7 G1</td>
+<td>1.5B / 2.9B</td>
+<td>最新，带思考模式，推荐</td>
+</tr>
+<tr>
+<td>RWKV-7 World</td>
+<td>1.5B / 2.9B</td>
+<td>老版 World 系列</td>
+</tr>
+<tr>
+<td>RWKV-6 World</td>
+<td>7B / 14B</td>
+<td>多语言，14B 最强</td>
+</tr>
+<tr>
+<td>RWKV-6 / v4 系列</td>
+<td>0.1B–7B</td>
+<td>社区广泛使用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h163">13.2 选型决策框架：我到底该不该用 RWKV？</h2>
+<p>用一个"打钩表"帮你快速决策：</p>
+<table>
+<thead>
+<tr>
+<th>判断问题</th>
+<th>是 → 倾向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>场景是长对话/多轮陪伴？</td>
+<td>RWKV</td>
+</tr>
+<tr>
+<td>硬件资源有限（低显存/CPU/边缘）？</td>
+<td>RWKV</td>
+</tr>
+<tr>
+<td>需要私有化/离线/合规？</td>
+<td>RWKV</td>
+</tr>
+<tr>
+<td>要低成本做个性化人设？</td>
+<td>RWKV</td>
+</tr>
+<tr>
+<td>需要极致长上下文的精确回忆？</td>
+<td>Transformer</td>
+</tr>
+<tr>
+<td>需要最先进效果、算力充足？</td>
+<td>Transformer</td>
+</tr>
+<tr>
+<td>需要丰富生态/成熟工具链？</td>
+<td>Transformer</td>
+</tr>
+<tr>
+<td>生产高并发服务？</td>
+<td>两者都可（RWKV 也能 vLLM）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>决策口诀</strong>：省、快、私、长会话 → RWKV；准、全、顶、成熟生态 → Transformer。绝大多数"AI 陪伴/情感智能体"属于前者。</p>
+<h2 id="h164">13.3 术语表（速查）</h2>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>中文/全称</th>
+<th>一句话解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RWKV</td>
+<td>Receptance Weighted Key Value</td>
+<td>无注意力、状态式 RNN 大模型架构</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Receptance 感受态</td>
+<td>门控，决定过去信息接受多少</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Weight 权重衰减</td>
+<td>可学习的遗忘系数</td>
+</tr>
+<tr>
+<td>K / V</td>
+<td>Key / Value</td>
+<td>写入记忆的键与值</td>
+</tr>
+<tr>
+<td>Time Mixing</td>
+<td>时间混合</td>
+<td>在时间轴上混合信息，替代注意力</td>
+</tr>
+<tr>
+<td>Channel Mixing</td>
+<td>通道混合</td>
+<td>逐位置特征加工，类似 FFN</td>
+</tr>
+<tr>
+<td>WKV 算子</td>
+<td>—</td>
+<td>RWKV 的线性注意力核心</td>
+</tr>
+<tr>
+<td>Token Shift</td>
+<td>词元转移/短卷积</td>
+<td>混合相邻 token 信息的技巧</td>
+</tr>
+<tr>
+<td>隐藏状态 S</td>
+<td>Hidden State</td>
+<td>压缩后的记忆摘要</td>
+</tr>
+<tr>
+<td>双模式</td>
+<td>GPT 模式 / RNN 模式</td>
+<td>训练并行、推理循环</td>
+</tr>
+<tr>
+<td>KV Cache</td>
+<td>键值缓存</td>
+<td>Transformer 的历史缓存</td>
+</tr>
+<tr>
+<td>O(N²) / O(N)</td>
+<td>时间复杂度</td>
+<td>平方 vs 线性增长</td>
+</tr>
+<tr>
+<td>State Tuning</td>
+<td>状态微调</td>
+<td>微调隐藏状态，RWKV 独有</td>
+</tr>
+<tr>
+<td>DSE</td>
+<td>动态状态演化</td>
+<td>RWKV-7 的可修正状态机制</td>
+</tr>
+<tr>
+<td>TC0</td>
+<td>复杂度类</td>
+<td>注意力受限模型的理论复杂度上界</td>
+</tr>
+<tr>
+<td>SSM</td>
+<td>状态空间模型</td>
+<td>Mamba 等高效序列模型</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>检索增强生成</td>
+<td>外挂知识库再回答</td>
+</tr>
+<tr>
+<td>LoRA</td>
+<td>低秩适配</td>
+<td>省显存的微调方法</td>
+</tr>
+<tr>
+<td>GGUF</td>
+<td>—</td>
+<td>llama.cpp 的量化模型格式</td>
+</tr>
+<tr>
+<td>.pth</td>
+<td>PyTorch 权重</td>
+<td>RWKV 官方权重格式</td>
+</tr>
+<tr>
+<td>.st</td>
+<td>State 文件</td>
+<td>状态微调产物，挂载使用</td>
+</tr>
+<tr>
+<td>Albatross</td>
+<td>—</td>
+<td>RWKV-7 的 CUDA/ROCm 推理内核</td>
+</tr>
+<tr>
+<td>Apache 2.0</td>
+<td>开源协议</td>
+<td>可自由商用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h165">13.4 全书一句话回顾</h2>
+<p>如果你只记住一点，请记住这句：</p>
+<blockquote>
+<p><strong>RWKV 是一种"没有自注意力、用固定大小状态记忆一切"的大模型架构——它用"笔记式记忆"换来了 Transformer 的并行训练和 RNN 的恒定成本，在长对话、低资源、个性化、私有化场景里，是把"够聪明 + 够便宜"同时做到的最优解之一。</strong></p>
+</blockquote>
+<p>从第一章到现在，我们已经走完了：<strong>它是什么（第1-3章）→ 它特殊在哪（第4-5章）→ 和 Transformer 差在哪（第6章）→ 为什么能行（第7章）→ 怎么用（第8-10章）→ 怎么定制（第11章）→ 怎么落地到我们的项目（第12章）</strong>。剩下的，就是动手了。</p>
+<div class="note">
+
+**给读者的最后建议**：别停留在读，去跑一个最小的 RWKV——用 Ollama 一句话把它跑起来，试着让它陪你聊几轮，再把状态存下来重启试试"它还记得你"。亲自体验过"状态记忆"之后，你会对这本手册讲的一切有更深的体感。
+
+</div>
+<h1 id="h166">第十四章 补课：文本是怎么变成数字的（Tokenizer 与数据流）</h1>
+<p>前面我们一直在说"token"，但可能有些小白还不清楚：<strong>AI 读的并不是文字，而是一串数字。</strong> 这一章专门补上这块拼图，讲清楚"文本 → token → 向量 → 模型 → 文本"的完整数据流，以及 RWKV 的 tokenizer 有什么特别之处。</p>
+<h2 id="h167">14.1 为什么模型不能直接读文字</h2>
+<p>计算机里的神经网络只能处理<strong>数字</strong>，不能直接处理汉字、英文单词。所以我们要先把文字翻译成"模型能懂的数字表示"。这个过程分两步：</p>
+<ol>
+<li><strong>Tokenize（分词）</strong>：把句子切成若干"词元（token）"；</li>
+<li><strong>Embedding（向量化）</strong>：把每个 token 映射成一个高维数字向量。</li>
+</ol>
+<p>模型拿到的是"一串向量"，处理完再反向解码成文字。</p>
+<h2 id="h168">14.2 什么是 Token：最小处理单位</h2>
+<p>Token 是"模型处理文字的最小单位"。它可能是：</p>
+<table>
+<thead>
+<tr>
+<th>文本</th>
+<th>可能的切分方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一个汉字"爱"</td>
+<td>1 个 token（中文常按字/词切）</td>
+</tr>
+<tr>
+<td>"人工智能"</td>
+<td>可能是 1 个 token（整词）或 4 个 token（逐字）</td>
+</tr>
+<tr>
+<td>"hello"</td>
+<td>可能是 1 个 token</td>
+</tr>
+<tr>
+<td>"world"</td>
+<td>1 个 token</td>
+</tr>
+<tr>
+<td>"unbelievable"</td>
+<td>可能切成 "un" + "believ" + "able" 多个 token</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>词级切分</strong>：按空格/词切。缺点：词汇表巨大，且没见过的新词无法处理；</li>
+<li><strong>字符级切分</strong>：按字母/字切。缺点：序列太长，效率低；</li>
+<li><strong>子词切分（主流）</strong>：在"词"和"字"之间取平衡。常见的有 BPE（Byte Pair Encoding）、WordPiece、SentencePiece 等。</li>
+</ul>
+<blockquote>
+<p>一个通用规律：<strong>英文大约 1 个单词 ≈ 1.3 个 token；中文大约 1 个汉字 ≈ 1~2 个 token。</strong> 这也解释了为什么"同样字数，中文模型的 token 开销往往更高"。</p>
+</blockquote>
+<h2 id="h169">14.3 Tokenize 之后：Embedding（向量化）</h2>
+<p>切好 token 后，每个 token 会通过一张"查找表（embedding 表）"映射成一个固定维度的向量：</p>
+<ul>
+<li>比如维度 d=768 或 d=4096；</li>
+<li>"爱" 和 "喜欢" 因为语义相近，它们的向量在高维空间里也会<strong>靠得比较近</strong>；</li>
+<li>这张表是<strong>模型训练时学出来的</strong>。</li>
+</ul>
+<blockquote>
+<p><strong>小白版</strong>：Token 是"字"，Embedding 是"这个字的含义坐标"。相似含义的词，坐标也相近。模型处理的就是这些"含义坐标"。</p>
+</blockquote>
+<h2 id="h170">14.4 完整数据流：一段文字在模型里走一趟</h2>
+<p><img alt="一次推理的完整数据流" src="img/fig16_api_flow.png" /></p>
+<p>用"我喜欢吃苹果"这句话举例：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>发生了什么</th>
+<th>数据形态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 原始文本</td>
+<td>"我喜欢吃苹果"</td>
+<td>字符串</td>
+</tr>
+<tr>
+<td>2. Tokenize</td>
+<td>["我","喜欢","吃","苹果"]</td>
+<td>一串 token id（整数）</td>
+</tr>
+<tr>
+<td>3. Embedding</td>
+<td>每个 id 查表得向量</td>
+<td>[4, d] 的矩阵</td>
+</tr>
+<tr>
+<td>4. 模型前向</td>
+<td>逐层计算，更新状态 S</td>
+<td>隐藏状态 + 输出分布</td>
+</tr>
+<tr>
+<td>5. 采样</td>
+<td>按概率选下一个 token</td>
+<td>一个 token id</td>
+</tr>
+<tr>
+<td>6. Decode</td>
+<td>把 id 查回文字</td>
+<td>字符串</td>
+</tr>
+<tr>
+<td>7. 循环</td>
+<td>把新 token 接回输入，继续</td>
+<td>直到结束</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h171">14.5 RWKV 的 Tokenizer 有什么特别</h2>
+<p>RWKV 使用社区自研的 tokenizer（如 <code>rwkv_vocab_v304</code>），并与 <code>rwkv</code> 库绑定使用。要点：</p>
+<ul>
+<li><strong>与模型配套</strong>：加载模型时必须用配套的 tokenizer，否则会乱码（这是新手最常见的坑之一）；</li>
+<li><strong>多语言友好</strong>：RWKV 的 tokenizer 对中文等多语言支持不错，这是它多语言表现好的基础之一；</li>
+<li><strong>字节级覆盖</strong>：能处理各种 Unicode 字符（emoji、特殊符号等）。</li>
+</ul>
+<pre><code class="language-python"># 用 rwkv 库时，tokenizer 已经内置在 pipeline 里
+from rwkv.utils import PIPELINE
+pipeline = PIPELINE(model, &quot;rwkv_vocab_v304&quot;)  # tokenizer 名称
+
+# 看看&quot;文字 → token&quot;长什么样
+ids = pipeline.encode(&quot;我喜欢吃苹果&quot;)
+print(ids)          # [t1, t2, t3, t4, ...] token 整数序列
+
+# 看看&quot;token → 文字&quot;（解码）
+text = pipeline.decode(ids)
+print(text)         # 我喜欢吃苹果
+</code></pre>
+<h2 id="h172">14.6 为什么"上下文长度"是以 token 计的</h2>
+<p>所有大模型的"上下文长度"（context length）都是用 <strong>token 数</strong>来衡量的，而不是字数。因为模型真正"看过"的是 token 序列：</p>
+<ul>
+<li>一个模型的上下文是 4096 token，意味着它能"同时记住"最近约 4096 个 token 的内容；</li>
+<li>中文一句约 20 字 ≈ 20-40 token，所以 4096 token ≈ 一百多句中文；</li>
+<li>RWKV 因为内存恒定，把上下文长度调大<strong>几乎不增加推理成本</strong>——这是它和 Transformer 的又一大区别（Transformer 上下文翻倍，KV Cache 也翻倍）。</li>
+</ul>
+<pre><code class="language-bash"># Ollama 里设置上下文长度
+/set num_ctx 32768   # 例如把上下文调到 32K token
+</code></pre>
+<h2 id="h173">14.7 采样输出：模型如何"说下一个字"</h2>
+<p>模型前向计算的最后，会输出一个"<strong>下一个 token 的概率分布</strong>"——对词汇表里每个 token 都给出一个概率（比如"苹"40%、"火"30%、"鸡"20%……）。然后：</p>
+<ul>
+<li><strong>贪心采样</strong>：永远选概率最高的那个 → 稳定但死板；</li>
+<li><strong>温度采样</strong>：把概率分布"压扁"或"拉尖"后采样 → 温度越高越随机；</li>
+<li><strong>Top-P / Top-K</strong>：先砍掉概率太低的候选，再采样 → 避免选到离谱的 token。</li>
+</ul>
+<p><img alt="采样决定&quot;随机性 vs 稳定&quot;" src="img/fig16_api_flow.png" /></p>
+<p>这就是第九章讲的参数（temperature/top_p）发挥作用的地方。</p>
+<h2 id="h174">14.8 新手常见问题</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出全是乱码/问号</td>
+<td>tokenizer 与模型不匹配</td>
+<td>用配套 tokenizer</td>
+</tr>
+<tr>
+<td>英文很好、中文很怪</td>
+<td>tokenizer 中文覆盖率低</td>
+<td>换多语言 tokenizer / World 模型</td>
+</tr>
+<tr>
+<td>生成的文字超长不停止</td>
+<td>没设 max_tokens 或没触发 EOS</td>
+<td>设置 max_tokens、增加停止词</td>
+</tr>
+<tr>
+<td>输入被截断</td>
+<td>超过上下文长度</td>
+<td>调大 num_ctx，或分段处理</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：AI 读的是数字不是文字。流程 = 文本 → tokenize 成 token → embedding 成向量 → 模型前向（更新状态 S）→ 采样 → decode 回文字，循环生成。RWKV 的 tokenizer 需与模型配套，中文约占 1-2 token/字，且上下文长度以 token 计。
+
+</div>
+<h1 id="h175">第十五章 它是怎么被训练出来的：训练原理与实战</h1>
+<p>"部署 + 使用"讲完了，这一章回答一个更底层的问题：<strong>RWKV 是怎么被训练出来的？</strong> 理解了训练原理，你就明白为什么"双模式"如此巧妙，也知道了以后想自己训练/微调时该做什么。</p>
+<h2 id="h176">15.1 训练的目标：预测下一个词</h2>
+<p>大语言模型的训练目标朴素得惊人：<strong>给定前面的文字，预测下一个词。</strong> 这叫"自监督学习"——不需要人工标注，互联网上的海量文本本身就是"答案"。</p>
+<ul>
+<li>给模型看"今天天气真"，让它预测下一个词"好"；</li>
+<li>看"我喜欢吃"，预测"苹果/火锅/香蕉……"；</li>
+<li>看完几万亿 token 之后，模型就"内化"了语言规律和大量世界知识。</li>
+</ul>
+<p>这个任务叫 <strong>next-token prediction（下一个词预测）</strong>，是所有 GPT 系模型（包括 RWKV）的基础。</p>
+<h2 id="h177">15.2 双模式是怎么在训练中工作的</h2>
+<p>回忆第五章：RWKV 同一套权重有"GPT 模式（并行）"和"RNN 模式（循环）"两种跑法。<strong>训练时用 GPT 模式，推理时用 RNN 模式</strong>：</p>
+<p><img alt="双模式：训练并行 / 推理循环" src="img/fig11_dual_mode.png" /></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>训练（GPT 模式）</th>
+<th>推理（RNN 模式）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>处理方式</td>
+<td>整段序列一次摊开并行算</td>
+<td>一个 token 一个 token 串行走</td>
+</tr>
+<tr>
+<td>计算对象</td>
+<td>一次算出所有位置的输出</td>
+<td>每步只算当前 token 的输出</td>
+</tr>
+<tr>
+<td>状态处理</td>
+<td>用"前缀和"技巧一次性模拟</td>
+<td>显式维护一个状态 S</td>
+</tr>
+<tr>
+<td>为什么能</td>
+<td>WKV 可分解（衰减与输入无关时可并行）</td>
+<td>状态式 RNN 天然支持</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心洞察</strong>：训练时的"并行"不需要真的一个个更新状态——因为 WKV 的衰减结构可以写成前缀和（cumulative sum），整条时间轴一次性并行算出。这就是"RNN 居然能并行训练"的秘密。</p>
+<h2 id="h178">15.3 损失函数与反向传播</h2>
+<p>训练时，模型每个位置都会输出一个预测分布，我们要让它和"真实的下一个词"尽量一致：</p>
+<ul>
+<li>用<strong>交叉熵损失（cross-entropy）</strong>衡量"预测得有多不准"；</li>
+<li>误差通过<strong>反向传播（backpropagation）</strong>更新模型参数；</li>
+<li>训练数据按 <strong>batch（一批一批）</strong> 喂给模型，用 <strong>梯度下降</strong> 逐步优化。</li>
+</ul>
+<blockquote>
+<p><strong>小白版</strong>：模型猜错了 → 告诉它"正确答案是啥" → 它调整自己的参数，下次更接近 → 反复几万亿次，就变聪明了。</p>
+</blockquote>
+<h2 id="h179">15.4 RWKV 训练的三个特点</h2>
+<h3 id="h180">15.4.1 特点一：训练显存更低</h3>
+<p>Transformer 训练时要保存大量中间激活（每层、每个 token 的注意力分数等）用于反向传播；RWKV 因为状态式结构，中间量更少，<strong>训练/微调的显存占用明显更低</strong>。这让你"单卡微调"成为可能。</p>
+<h3 id="h181">15.4.2 特点二：天然适合长序列训练</h3>
+<p>长序列训练对 Transformer 是噩梦（显存随长度平方涨，需要各种分片技巧）；RWKV 是线性，<strong>训练长上下文更省</strong>。</p>
+<h3 id="h182">15.4.3 特点三：需要专用内核加速</h3>
+<p>v6/v7 引入了"数据相关衰减"后，WKV 不能再简单写成前缀和，并行实现变复杂。官方提供<strong>专用 CUDA 内核（WKV kernel）</strong>高效实现，训练和推理都应尽量开启。</p>
+<pre><code class="language-bash"># RWKV-LM 训练脚本里，用 --cuda_on 或 strategy 开启官方内核
+# 例如用 RWKV-LM 的 train.py：
+# python train.py --load_model ... --wandb ... --ctx_len 4096 ...
+</code></pre>
+<h2 id="h183">15.5 训练的三个阶段</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>做什么</th>
+<th>数据</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>预训练（Pretrain）</td>
+<td>从零学语言规律和世界知识</td>
+<td>海量网页/书籍（万亿 token）</td>
+<td>让模型"会说话、懂知识"</td>
+</tr>
+<tr>
+<td>指令微调（SFT）</td>
+<td>学会"听指令回答问题"</td>
+<td>人工编写的问答数据</td>
+<td>让模型"能对话、会干活"</td>
+</tr>
+<tr>
+<td>对齐（RLHF 等）</td>
+<td>让回答更符合人类偏好</td>
+<td>人类反馈打分</td>
+<td>让模型"更友善、更有用"</td>
+</tr>
+</tbody>
+</table>
+<p>RWKV 的开源模型（如 RWKV-6 World、RWKV-7 G1）都已完成了这三个阶段，开箱即用。我们自己动手时，通常做的是<strong>指令微调</strong>或<strong>State Tuning</strong>（见第十一章）。</p>
+<h2 id="h184">15.6 从零训练 vs 微调：成本和选择</h2>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>数据量</th>
+<th>算力</th>
+<th>时间成本</th>
+<th>适合谁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>从零预训练</td>
+<td>万亿级 token</td>
+<td>大量 GPU 集群</td>
+<td>极高</td>
+<td>大厂/研究机构</td>
+</tr>
+<tr>
+<td>继续预训练</td>
+<td>百亿级 token</td>
+<td>多卡</td>
+<td>高</td>
+<td>特定领域（医疗/法律）</td>
+</tr>
+<tr>
+<td>全参微调</td>
+<td>百万级</td>
+<td>单卡/多卡</td>
+<td>中</td>
+<td>有数据的团队</td>
+</tr>
+<tr>
+<td>LoRA 微调</td>
+<td>万级</td>
+<td>单卡</td>
+<td>低</td>
+<td>大多数开发者</td>
+</tr>
+<tr>
+<td>State Tuning</td>
+<td>千级</td>
+<td>单卡</td>
+<td>极低</td>
+<td>个性化/人设</td>
+</tr>
+</tbody>
+</table>
+<p><strong>对绝大多数人</strong>：不要从零训练，用开源的 RWKV + 轻量微调/State Tuning 就够了。</p>
+<h2 id="h185">15.7 一个迷你训练示例（示意）</h2>
+<p>以 RWKV-LM 仓库的训练脚本为例，理解训练入口大概长什么样（不必真跑）：</p>
+<pre><code class="language-bash"># 克隆官方训练库
+git clone https://github.com/BlinkDL/RWKV-LM
+cd RWKV-LM/RWKV-v7
+
+# 单卡微调示意（具体参数以官方 README 为准）
+python train.py \
+  --load_model path/to/base.pth \
+  --wandb off \
+  --data_file path/to/my_data.txt \
+  --ctx_len 1024 \
+  --micro_bsz 4 \
+  --epoch_steps 100 \
+  --lr_init 1e-5 \
+  --accumulate_grad_batches 4
+</code></pre>
+<p>要点：</p>
+<ul>
+<li><code>--load_model</code>：加载基底模型（续训）；</li>
+<li><code>--data_file</code>：你的训练数据（纯文本即可做继续预训练；做指令微调通常用 JSONL）；</li>
+<li><code>--ctx_len</code>：序列长度；</li>
+<li><code>--lr_init</code>：学习率（微调要调小，如 1e-5，避免破坏原模型）；</li>
+<li>显存不足就调小 <code>micro_bsz</code> 或 <code>ctx_len</code>。</li>
+</ul>
+<blockquote>
+<p>更友好的微调路径：用 <strong>RWKV-PEFT</strong>（支持 LoRA 与 State Tuning，脚本开箱即用），或直接用我们第十一章的方法。</p>
+</blockquote>
+<h2 id="h186">15.8 训练数据：质量比数量更重要</h2>
+<p>无论预训练还是微调，数据质量都决定效果：</p>
+<table>
+<thead>
+<tr>
+<th>原则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>去重去噪</td>
+<td>去掉重复、乱码、低质内容</td>
+</tr>
+<tr>
+<td>多样</td>
+<td>覆盖各种领域、风格、语言</td>
+</tr>
+<tr>
+<td>干净格式</td>
+<td>统一换行、编码（UTF-8）</td>
+</tr>
+<tr>
+<td>任务对齐</td>
+<td>微调数据要和"上线场景"一致</td>
+</tr>
+</tbody>
+</table>
+<p><strong>黄金法则</strong>：与其堆 100 万条低质数据，不如用 1 万条高质量、贴合场景的数据。</p>
+<div class="tip">
+
+**本章小结**：RWKV 的训练目标就是"预测下一个词"。训练用 GPT 模式（靠 WKV 可分解性并行），推理用 RNN 模式。三大特点：显存低、适合长序列、需专用内核。对绝大多数人，直接使用开源模型 + 轻量微调（LoRA/State Tuning）即可，无需从零训练。
+
+</div>
+<h1 id="h187">第十六章 量化与性能优化：把 RWKV 压榨到极限</h1>
+<p>RWKV 已经很"省"了，但还能更省。这一章讲清楚<strong>量化</strong>是什么、怎么选，以及各种<strong>提速/省内存</strong>的实用技巧，让你在有限的硬件上发挥 RWKV 的最大威力。</p>
+<h2 id="h188">16.1 什么是量化：用更小的数存模型</h2>
+<p>模型权重默认用 32 位浮点数（FP32）或 16 位（FP16）存储，占用空间大。<strong>量化</strong>就是把这些"大数"用更小的精度表示，从而显著减少内存、加快速度。</p>
+<table>
+<thead>
+<tr>
+<th>精度</th>
+<th>每参数比特</th>
+<th>7B 模型体积（约）</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td>32 bit</td>
+<td>28 GB</td>
+<td>最准，最贵</td>
+</tr>
+<tr>
+<td>FP16</td>
+<td>16 bit</td>
+<td>14 GB</td>
+<td>精度无损，常用</td>
+</tr>
+<tr>
+<td>INT8（Q8_0）</td>
+<td>8 bit</td>
+<td>7 GB</td>
+<td>精度损失小，强烈推荐</td>
+</tr>
+<tr>
+<td>INT4（Q4_K_M 等）</td>
+<td>4 bit</td>
+<td>4 GB</td>
+<td>更省，质量略降</td>
+</tr>
+<tr>
+<td>NF4 / Q3</td>
+<td>3-4 bit</td>
+<td>3 GB</td>
+<td>极致省，质量下降明显</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>RWKV 的量化建议</strong>：社区实测推荐 <code>FP16</code> 或 <code>Q8_0</code> 档。更低的 Q5/Q4 虽能大幅省内存，但会明显降低回复质量——"够用"和"好用"之间要权衡。</p>
+</blockquote>
+<h2 id="h189">16.2 常见量化格式与工具</h2>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>说明</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GGUF</td>
+<td>llama.cpp 生态的量化格式</td>
+<td>llama.cpp / Ollama</td>
+</tr>
+<tr>
+<td>GPTQ</td>
+<td>面向 GPU 的量化</td>
+<td>vLLM 等 GPU 推理</td>
+</tr>
+<tr>
+<td>AWQ</td>
+<td>面向 GPU 的量化</td>
+<td>激活感知量化</td>
+</tr>
+<tr>
+<td>fp16i8</td>
+<td>RWKV Pip 的混合精度</td>
+<td>官方推理</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h190">16.3 推理提速技巧（按性价比排序）</h2>
+<h3 id="h191">16.3.1 技巧一：开启官方 WKV 内核</h3>
+<p>这是<strong>最重要的一条</strong>。RWKV-6/7 的数据相关衰减需要专用 CUDA/ROCm 内核才能高效并行：</p>
+<ul>
+<li>用 RWKV Pip：NVIDIA 显卡选 <code>cuda fp16</code>，显存不足用 <code>cuda fp16i8</code>；</li>
+<li>用 RWKV-Runner：RWKV-7 + CUDA 可切 <strong>Albatross</strong> 内核做性能对比；</li>
+<li>用 vLLM：自动启用优化内核。</li>
+</ul>
+<blockquote>
+<p>很多"RWKV 很慢"的反馈，都是因为没开官方内核、在 CPU 上裸跑导致的。</p>
+</blockquote>
+<h3 id="h192">16.3.2 技巧二：选对模型规模</h3>
+<table>
+<thead>
+<tr>
+<th>硬件</th>
+<th>推荐模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4GB 内存</td>
+<td>RWKV-7 1.5B（Q8）</td>
+</tr>
+<tr>
+<td>8GB 内存</td>
+<td>RWKV-7 2.9B（Q8）</td>
+</tr>
+<tr>
+<td>8GB 显存</td>
+<td>RWKV-7 2.9B fp16 / 7B 量化</td>
+</tr>
+<tr>
+<td>24GB 显存</td>
+<td>7B fp16 / 14B 量化</td>
+</tr>
+</tbody>
+</table>
+<p><strong>先小后大</strong>：先用跑得动的最小模型验证，再逐步升级。</p>
+<h3 id="h193">16.3.3 技巧三：控制上下文长度</h3>
+<p>虽然 RWKV 长上下文"免费"，但过长会消耗更多预填充时间。按需设置：</p>
+<pre><code class="language-bash"># Ollama
+/set num_ctx 8192
+
+# llama-server
+./llama-server -m model.gguf --ctx-size 8192
+
+# vLLM
+--max-model-len 8192
+</code></pre>
+<h3 id="h194">16.3.4 技巧四：利用流式输出提升体验</h3>
+<p>生成是逐 token 的，流式输出（Streaming）让用户<strong>边生成边看</strong>，体感速度快很多（见第十章）。</p>
+<h3 id="h195">16.3.5 技巧五：批量推理 / 服务化</h3>
+<p>生产场景用 vLLM 的 <strong>continuous batching（连续批处理）</strong>，把多个请求拼在一起算，GPU 利用率大幅提升，吞吐翻数倍。</p>
+<h2 id="h196">16.4 省内存技巧（低配设备）</h2>
+<table>
+<thead>
+<tr>
+<th>技巧</th>
+<th>做法</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>量化模型</td>
+<td>用 Q8/Q5 GGUF</td>
+<td>体积减半以上</td>
+</tr>
+<tr>
+<td>关闭思考模式</td>
+<td>用 <code>thinkdisabled</code> 版本模型</td>
+<td>更快、省内存</td>
+</tr>
+<tr>
+<td>限制上下文</td>
+<td>调小 num_ctx</td>
+<td>减少状态开销</td>
+</tr>
+<tr>
+<td>CPU 多线程</td>
+<td>llama.cpp 设置 <code>-t</code> 线程数</td>
+<td>CPU 更快</td>
+</tr>
+<tr>
+<td>内存回收</td>
+<td>关闭其他占用内存的程序</td>
+<td>给模型更多空间</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># llama.cpp 用多线程跑
+./llama-cli -m model.Q8_0.gguf -t 8 -c 4096
+
+# Ollama 设置 CPU 线程
+OLLAMA_NUM_PARALLEL=1 ollama serve
+</code></pre>
+<h2 id="h197">16.5 性能对比：RWKV vs Transformer（同硬件）</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>Transformer 7B</th>
+<th>RWKV-7 2.9B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型体积（Q8）</td>
+<td>约 8GB</td>
+<td>约 3GB</td>
+</tr>
+<tr>
+<td>长对话稳定性</td>
+<td>越聊越慢，可能 OOM</td>
+<td>恒定</td>
+</tr>
+<tr>
+<td>8GB 无 GPU 机器</td>
+<td>基本跑不动</td>
+<td>稳定 4-5 tok/s</td>
+</tr>
+<tr>
+<td>单卡部署</td>
+<td>显存吃紧</td>
+<td>轻松</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="多轮对话稳定性对比" src="img/fig22_speed_stable.png" /></p>
+<h2 id="h198">16.6 压测与监控：怎么确认优化有效</h2>
+<pre><code class="language-bash"># 1. 监控显存/内存
+nvidia-smi -l 1          # GPU 显存实时
+free -h                  # 内存
+
+# 2. llama.cpp 自带压测
+./llama-bench -m model.gguf -p 512 -n 128
+
+# 3. 简单计时
+time curl http://localhost:11434/api/chat -d '{...}'
+</code></pre>
+<p><strong>需要关注三个指标</strong>：</p>
+<ol>
+<li><strong>首 token 延迟（TTFT）</strong>：问完到开始回答的时间；</li>
+<li><strong>生成速度（tok/s）</strong>：每秒生成多少 token；</li>
+<li><strong>显存/内存峰值</strong>：是否恒定、是否够用。</li>
+</ol>
+<h2 id="h199">16.7 常见性能问题速查</h2>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>生成很慢</td>
+<td>没开官方内核 / CPU 跑大模型</td>
+<td>开内核、换小模型</td>
+</tr>
+<tr>
+<td>显存不足</td>
+<td>模型太大或上下文太长</td>
+<td>量化、调小 ctx、换小模型</td>
+</tr>
+<tr>
+<td>首次回答特别久</td>
+<td>长上下文预填充</td>
+<td>缩短输入、分段</td>
+</tr>
+<tr>
+<td>多用户一慢全慢</td>
+<td>没做批量</td>
+<td>用 vLLM continuous batching</td>
+</tr>
+<tr>
+<td>输出质量下降</td>
+<td>量化档太低</td>
+<td>用 Q8_0 / FP16</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：性能优化的核心排序——① 开官方 WKV 内核（最重要）→ ② 选对模型规模 → ③ 控制上下文 → ④ 流式输出 → ⑤ 服务化批量。省内存靠量化（推荐 Q8_0）+ 关思考模式 + 限制上下文。优化前先量好"TTFT / tok/s / 内存峰值"三个指标，再针对性调优。
+
+</div>
+<h1 id="h200">第十七章 公式通俗课：RWKV 的数学只讲直觉</h1>
+<p>很多教程一上来就甩公式，小白直接劝退。这一章反着来：<strong>只讲公式背后的直觉</strong>，把 RWKV 的核心数学用"买菜、记账、做笔记"的比喻讲清楚。你不需要会推导，只需要"看懂它想干什么"。</p>
+<h2 id="h201">17.1 预备：向量、矩阵、点积，用生活语言理解</h2>
+<ul>
+<li><strong>向量</strong>：一列数字，可以理解成"一个东西在多维空间的坐标"。比如"苹果"可以用 [甜度, 价格, 热量, ...] 表示；</li>
+<li><strong>矩阵</strong>：一堆向量排成表格；</li>
+<li><strong>点积（内积）</strong>：两个向量对应位置相乘再求和。<strong>直觉：衡量两个向量有多"相似/对齐"</strong>。方向一致 → 点积大；方向垂直 → 点积为 0。</li>
+</ul>
+<blockquote>
+<p>记住"点积 = 相似度打分"，RWKV 的数学就通了一半。</p>
+</blockquote>
+<h2 id="h202">17.2 四个字母的数学直觉（R / W / K / V）</h2>
+<table>
+<thead>
+<tr>
+<th>字母</th>
+<th>数学角色</th>
+<th>生活直觉</th>
+<th>通俗公式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R</td>
+<td>感受态（门控系数）</td>
+<td>"这条信息我接受多少"</td>
+<td>R 乘在最终结果上</td>
+</tr>
+<tr>
+<td>W</td>
+<td>衰减系数</td>
+<td>"记忆忘得多快"</td>
+<td>越旧乘越小的系数</td>
+</tr>
+<tr>
+<td>K</td>
+<td>键</td>
+<td>"这条信息叫什么名字"</td>
+<td>用于"对号入座"</td>
+</tr>
+<tr>
+<td>V</td>
+<td>值</td>
+<td>"这条信息的实际内容"</td>
+<td>真正被记住的内容</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h203">17.3 WKV 算子：三句话讲清核心公式</h2>
+<p>RWKV-4 的经典 WKV 公式（不背，只看结构）：</p>
+<pre><code class="language-text">output_t = R_t · (  Σ_{i&lt;t}  exp(-w·(t-i)) · (K_i · V_i)  +  exp(u)·(K_t · V_t) )
+</code></pre>
+<p>拆成三句话：</p>
+<ol>
+<li><strong><code>K_i · V_i</code>（写入）</strong>：每个历史词把"名字 × 内容"记进状态——就像记账时写下"日期 × 金额"；</li>
+<li><strong><code>exp(-w·(t-i))</code>（衰减）</strong>：越早的账目乘的衰减系数越小——就像老账目被时间冲淡；</li>
+<li><strong><code>R_t</code>（读出/门控）</strong>：当前这个词决定"这段记忆对我重不重要"——就像翻账本时只挑有关的看。</li>
+</ol>
+<blockquote>
+<p><strong>一句话</strong>：WKV = 把历史"按新旧打折后求和"，再乘一个"要不要管它"的开关。</p>
+</blockquote>
+<h2 id="h204">17.4 为什么是"指数衰减"而不是"直接忘掉"</h2>
+<ul>
+<li><strong>指数衰减</strong>：<code>exp(-w·(t-i))</code> 让旧信息<strong>平滑地、按比例地</strong>变淡，但不会瞬间归零——远亲也能沾点光；</li>
+<li>对比 RNN 的"梯度消失"（失控地忘）：RWKV 的衰减是<strong>显式、可学习</strong>的（W 是训练出来的参数），所以模型能自己决定"该记多久"。</li>
+</ul>
+<blockquote>
+<p>这正是 RWKV "不健忘"的秘密：把"遗忘"从玄学变成可调的旋钮。</p>
+</blockquote>
+<h2 id="h205">17.5 Token Shift 的数学</h2>
+<pre><code class="language-text">Shift(x[t]) = μ · x[t] + (1 - μ) · x[t-1]
+</code></pre>
+<ul>
+<li>就是"当前值"和"上一个值"按比例混合；</li>
+<li>μ 是混合比例（不同通道可以不同）；</li>
+<li>效果：每个 token "自带一点上一时刻的影子"，补充邻近信息。</li>
+</ul>
+<p><strong>为什么叫"短卷积"</strong>：它等价于一个核长 2 的卷积，几乎零成本，却能显著提升表现——RWKV 的"以小博大"典型例子。</p>
+<h2 id="h206">17.6 Channel Mixing 的数学</h2>
+<pre><code class="language-text">out = sigmoid(R) ⊙ ( W2 · gelu(W1 · K) ) ⊙ V
+</code></pre>
+<p>逐块拆解：</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义</th>
+<th>直觉</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>W1 · K</code></td>
+<td>线性变换</td>
+<td>把输入换个"视角"看</td>
+</tr>
+<tr>
+<td><code>gelu(...)</code></td>
+<td>非线性激活</td>
+<td>引入非线性，增强表达</td>
+</tr>
+<tr>
+<td><code>W2 · ...</code></td>
+<td>再变换</td>
+<td>加工后回到原维度</td>
+</tr>
+<tr>
+<td><code>sigmoid(R)</code></td>
+<td>门控</td>
+<td>决定"这些特征要不要激活"</td>
+</tr>
+<tr>
+<td><code>⊙</code></td>
+<td>逐元素相乘</td>
+<td>逐位把关</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>一句话</strong>：Channel Mixing 就是在"同一个时刻"上，把特征加工得更丰富，再按需放行——作用类似 Transformer 的 FFN。</p>
+</blockquote>
+<h2 id="h207">17.7 RWKV-7：动态状态演化（广义 Delta 规则）</h2>
+<p>RWKV-7 的状态更新比 v4 复杂，但直觉更简单——<strong>会改错</strong>：</p>
+<pre><code class="language-text">旧版（v4）： S = 衰减 · S + K·V        # 只能写，不能改
+新版（v7）： S = S · 门控 + 基于误差的修正   # 能写，还能改
+</code></pre>
+<p>用"做笔记"比喻：</p>
+<ul>
+<li><strong>v4</strong>：一边读一边记，但记错了就一直错下去；</li>
+<li><strong>v7</strong>：读完一段会"对答案"，发现记错了就<strong>修正笔记</strong>——所以记性更好、更会"状态追踪"。</li>
+</ul>
+<p>这正是论文里说的"<strong>元上下文学习器</strong>"：模型在每个 token 上，用"上下文里的梯度下降"自我调整状态。</p>
+<h2 id="h208">17.8 复杂度的数学：为什么差一个 N</h2>
+<ul>
+<li>Transformer：N 个词两两打分 → 需要 N×N 次 → <strong>O(N²)</strong>；</li>
+<li>RWKV：每个词只更新一次固定状态 → 需要 N 次 → <strong>O(N)</strong>。</li>
+</ul>
+<pre><code class="language-text">O(N²)  vs  O(N)
+N=4K：1600万  vs  4000
+N=32K：10亿    vs  3.2万
+</code></pre>
+<p><img alt="计算复杂度曲线" src="img/fig06_complexity.png" /></p>
+<p>这就是"长上下文不心疼"的全部秘密——<strong>少算了一个 N 的配对</strong>。</p>
+<h2 id="h209">17.9 一张"公式 → 直觉"对照表</h2>
+<table>
+<thead>
+<tr>
+<th>公式/术语</th>
+<th>数学形式</th>
+<th>生活直觉</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>点积 K·V</td>
+<td>Σ K_i·V_i</td>
+<td>记下"名字×内容"</td>
+</tr>
+<tr>
+<td>指数衰减</td>
+<td>exp(-w·(t-i))</td>
+<td>老账按比例冲淡</td>
+</tr>
+<tr>
+<td>感受态 R</td>
+<td>sigmoid(R)</td>
+<td>开关：要不要管它</td>
+</tr>
+<tr>
+<td>Token Shift</td>
+<td>μ·x[t]+(1-μ)·x[t-1]</td>
+<td>瞥一眼上一句</td>
+</tr>
+<tr>
+<td>归一化分母</td>
+<td>/Σ exp(-w·(t-i))</td>
+<td>让账本总和不发散</td>
+</tr>
+<tr>
+<td>Delta 规则（v7）</td>
+<td>S←S·D+误差修正</td>
+<td>记错了就改</td>
+</tr>
+<tr>
+<td>前缀和并行</td>
+<td>cumsum</td>
+<td>摊开来一次算完</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：RWKV 的核心数学只有三招——**点积写记忆、指数衰减忘记忆、感受态门控读记忆**。v7 加了一招"能改错"。复杂度的差距来自"少算一个 N"。记住这些直觉，公式就不再吓人了。
+
+</div>
+<h1 id="h210">第十八章 高效架构家族：RWKV vs Mamba vs RetNet</h1>
+<p>RWKV 并不孤单。在"用状态代替注意力"这条路上，还有 Mamba、RetNet、Gated DeltaNet 等一批高效架构。这一章帮你建立全局观：它们各自怎么"省"、差异在哪、RWKV 的位置和优势是什么。</p>
+<h2 id="h211">18.1 为什么大家都在"去注意力"</h2>
+<p>Transformer 的 O(N²) 是行业痛点，于是出现了一整条研究路线：<strong>用"固定大小的状态/记忆"替代"两两配对的注意力"</strong>，把复杂度降到 O(N) 甚至 O(1)。这些架构统称"线性注意力 / 状态空间 / 高效序列模型"。</p>
+<p><img alt="高效序列模型家族地图" src="img/fig23_family_map.png" /></p>
+<h2 id="h212">18.2 逐个认识家族成员</h2>
+<h3 id="h213">18.2.1 Mamba（SSM 派）</h3>
+<ul>
+<li><strong>思想</strong>：来自控制论的<strong>状态空间模型（SSM）</strong>，把序列建模看成"连续系统 + 离散采样"；</li>
+<li><strong>关键机制</strong>：选择性扫描（selective scan）——每个位置决定"吸收多少新信息"；</li>
+<li><strong>特点</strong>：训练可用并行扫描，推理是常数开销；在某些长序列任务上表现出色。</li>
+</ul>
+<h3 id="h214">18.2.2 RetNet（微软）</h3>
+<ul>
+<li><strong>思想</strong>：显式引入<strong>衰减（decay）</strong>，用"线性注意力 + 衰减"模拟位置效应；</li>
+<li><strong>特点</strong>：提出三种并行模式，推理也可常数开销；和 RWKV 思路较接近（都有显式衰减）。</li>
+</ul>
+<h3 id="h215">18.2.3 Gated DeltaNet</h3>
+<ul>
+<li><strong>思想</strong>：把 <strong>Delta 规则</strong>引入状态更新——让状态能"修正"而不是只能"累积"；</li>
+<li><strong>特点</strong>：和 RWKV-7 的 DSE 思想一脉相承（都强调"可更新的记忆"）。</li>
+</ul>
+<h3 id="h216">18.2.4 RWKV</h3>
+<ul>
+<li><strong>思想</strong>：R / W / K / V 四件套——<strong>感受态门控 + 显式可学衰减 + 键值写入 + 值读出</strong>；</li>
+<li><strong>特点</strong>：100% 无注意力、训练并行 + 推理常数、有 State Tuning 独家能力、从 0.1B 到 7.2B <strong>全系开源可商用</strong>。</li>
+</ul>
+<h2 id="h217">18.3 一张表对比全家</h2>
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th>记忆机制</th>
+<th>复杂度</th>
+<th>训练并行</th>
+<th>推理成本</th>
+<th>代表模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transformer</td>
+<td>自注意力 + KV Cache</td>
+<td>O(N²)</td>
+<td>完全并行</td>
+<td>随上下文增长</td>
+<td>GPT/Llama/Qwen</td>
+</tr>
+<tr>
+<td>Mamba</td>
+<td>SSM 状态 + 选择机制</td>
+<td>O(N)</td>
+<td>并行扫描</td>
+<td>常数</td>
+<td>Mamba-1/2</td>
+</tr>
+<tr>
+<td>RetNet</td>
+<td>线性注意力 + 显式衰减</td>
+<td>O(N)</td>
+<td>并行</td>
+<td>常数</td>
+<td>RetNet</td>
+</tr>
+<tr>
+<td>Gated DeltaNet</td>
+<td>Delta 规则状态</td>
+<td>O(N)</td>
+<td>并行</td>
+<td>常数</td>
+<td>研究/小规模</td>
+</tr>
+<tr>
+<td>RWKV</td>
+<td>R/W/K/V 状态</td>
+<td>O(N)</td>
+<td>并行</td>
+<td>常数</td>
+<td>RWKV-4~7</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h218">18.4 RWKV 的差异化优势</h2>
+<p>和同族相比，RWKV 有几个"别人没有"的特点：</p>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>100% 无注意力</strong></td>
+<td>架构里完全没有 self-attention（有些混合模型仍保留稀疏注意力）</td>
+</tr>
+<tr>
+<td><strong>全系开源可商用</strong></td>
+<td>0.1B–7.2B 模型、代码、内核均 Apache 2.0，Linux 基金会项目</td>
+</tr>
+<tr>
+<td><strong>State Tuning</strong></td>
+<td>可微调隐藏状态，个性化/对齐又快又省，是 RNN 系独有能力</td>
+</tr>
+<tr>
+<td><strong>状态可持久化</strong></td>
+<td>状态 S 可直接序列化保存/恢复，天然支持跨会话记忆</td>
+</tr>
+<tr>
+<td><strong>多语言强</strong></td>
+<td>RWKV-7 在 3B 多语言任务上刷新 SOTA</td>
+</tr>
+<tr>
+<td><strong>生态可直接用</strong></td>
+<td>Ollama/llama.cpp/vLLM/RWKV-Runner 均已支持，开箱即用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h219">18.5 和其他架构的常见误区澄清</h2>
+<h3 id="h220">误区一："RWKV 就是 Mamba"</h3>
+<p><strong>不是。</strong> 虽然都属于"线性注意力/状态"家族，但机制不同：Mamba 来自 SSM（连续系统离散化），RWKV 来自 RNN + 显式衰减 + Token Shift。RWKV 强调"R/W/K/V 四件套 + 可学衰减"，Mamba 强调"选择性扫描"。</p>
+<h3 id="h221">误区二："高效架构效果都不如 Transformer"</h3>
+<p><strong>分任务。</strong> 在标准 benchmark 上，头部高效架构（含 RWKV-7）已能与同规模 Transformer 打平甚至超过；在"状态追踪"等特定推理任务上，RWKV-7 理论上还能超过注意力受限的模型。真正有差距的是"超大模型规模下的极致效果"和"生态成熟度"。</p>
+<h3 id="h222">误区三："线性注意力都有严重记忆损失"</h3>
+<p><strong>旧版确实有，但已改善。</strong> RWKV-7 的动态状态演化让状态可修正，大幅缓解了记忆"只进不出"的问题；不过对"逐字精确回忆"仍弱于完整注意力，因此出现了 RWKV-X 等"状态 + 稀疏注意力"的混合方案。</p>
+<h2 id="h223">18.6 混合架构趋势：RWKV-X</h2>
+<p>最近的一个方向是<strong>混合架构</strong>：以状态记忆为主干，在关键位置混入少量稀疏注意力，兼顾"便宜"和"精确回忆"：</p>
+<ul>
+<li><strong>RWKV-X</strong>：RWKV + 稀疏注意力，补强极端细节回忆；</li>
+<li><strong>RWKV-8 DeepEmbedAttention</strong>：精简 KV Cache，特别适合混合模型；</li>
+<li><strong>类似趋势</strong>：很多大厂也在做"线性 + 稀疏"混合，这可能是未来主流形态。</li>
+</ul>
+<blockquote>
+<p><strong>判断</strong>：纯 RNN 派（RWKV）、SSM 派（Mamba）、混合派（RWKV-X / 各类 linear-attention hybrid）会长期共存，各取所长。</p>
+</blockquote>
+<h2 id="h224">18.7 我们该选谁？（选型参考）</h2>
+<table>
+<thead>
+<tr>
+<th>你的情况</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>要现成可用、全系开源、中文好、能商用</td>
+<td><strong>RWKV</strong>（生态成熟、开箱即用）</td>
+</tr>
+<tr>
+<td>只研究架构、喜欢 SSM 理论</td>
+<td>Mamba</td>
+</tr>
+<tr>
+<td>追求极致长序列（超长文档）</td>
+<td>Mamba / 混合架构（扫描式更适合极长序列）</td>
+</tr>
+<tr>
+<td>要做 AI 陪伴/长会话 + 个性化</td>
+<td><strong>RWKV</strong>（State Tuning + 状态持久化是独门优势）</td>
+</tr>
+<tr>
+<td>要最新效果、算力充足</td>
+<td>头部 Transformer</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+
+**本章小结**：在"去注意力"的高效架构家族里，RWKV 与 Mamba、RetNet、Gated DeltaNet 同路但机制不同。RWKV 的差异化优势：100% 无注意力、全系开源可商用、独有的 State Tuning、状态可持久化、多语言强、生态开箱即用。未来趋势是"状态 + 稀疏注意力"的混合架构。
+
+</div>
+<h1 id="h225">第十九章 多模态与未来方向：RWKV 还能走多远</h1>
+<p>RWKV 不只是文本模型。这一章看看它的多模态能力、最新实验方向（v8、混合架构），以及"未来 RWKV 会往哪走"，帮你判断要不要长期押注它。</p>
+<h2 id="h226">19.1 RWKV 已经有的多模态能力</h2>
+<p>官方与社区已在多个模态方向推进 RWKV：</p>
+<table>
+<thead>
+<tr>
+<th>模态</th>
+<th>形态</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文本</td>
+<td>语言模型（LLM）</td>
+<td>成熟，v1–v7 全系</td>
+</tr>
+<tr>
+<td>语音</td>
+<td>音频输入/输出</td>
+<td>官方支持多模态方向，社区有语音模型</td>
+</tr>
+<tr>
+<td>图像</td>
+<td>视觉理解（VLM）</td>
+<td>RWKV 已发布视觉语言模型（RWKV-VL）</td>
+</tr>
+<tr>
+<td>跨模态</td>
+<td>统一状态建模</td>
+<td>RNN 状态天然适合流式多模态</td>
+</tr>
+</tbody>
+</table>
+<p><strong>为什么 RNN 适合多模态</strong>：RWKV 的状态式处理是"流式"的（来一段处理一段），对语音、视频这类<strong>实时流式信号</strong>特别友好——不用等整段输入完再处理。这是它在多模态上的天然优势。</p>
+<h2 id="h227">19.2 RWKV-8：实验中的下一代</h2>
+<p>截至 2026 年，RWKV-8 仍在实验阶段，公开了几个值得关注的方向：</p>
+<h3 id="h228">19.2.1 DeepEmbed（边缘友好的稀疏设计）</h3>
+<ul>
+<li>目标：解决 <strong>MoE（专家混合）显存占用过大</strong>的问题；</li>
+<li>思路：用"稀疏嵌入"代替部分稠密计算，让 MoE 也能跑在边缘设备上；</li>
+<li>意义：为"更大模型的端侧部署"铺路。</li>
+</ul>
+<h3 id="h229">19.2.2 DeepEmbedAttention（精简 KV Cache）</h3>
+<ul>
+<li>目标：精简 KV Cache，特别适合<strong>混合架构（RWKV-7s）</strong>；</li>
+<li>思路：让需要"精确回忆"的地方少量保留注意力，其余用状态；</li>
+<li>意义：向"状态 + 稀疏注意力"的混合形态演进。</li>
+</ul>
+<h3 id="h230">19.2.3 ROSA（在线后缀自动机机制）</h3>
+<ul>
+<li>目标：更强的记忆与检索能力；</li>
+<li>名字来自"在线后缀自动机"，本质是让记忆可以更灵活地被索引和回溯；</li>
+<li>意义：进一步补强"精确回忆"，缩小与注意力的差距。</li>
+</ul>
+<h2 id="h231">19.3 混合架构：未来最可能的形态</h2>
+<p>一个越来越明显的趋势：<strong>"状态记忆为主 + 必要处稀疏注意力"的混合架构</strong>。</p>
+<pre><code class="language-text">输入 → [状态记忆层 ×N] → [稀疏注意力层（少量）] → 输出
+        （便宜，管长程摘要）      （贵，管精确回忆）
+</code></pre>
+<ul>
+<li><strong>RWKV-X</strong>：RWKV + 稀疏注意力，已出现；</li>
+<li><strong>RWKV-8</strong>：DeepEmbedAttention 正是为混合模型准备的；</li>
+<li><strong>业界同频</strong>：Google、Meta 等也在做 linear-attention + sparse 的混合。</li>
+</ul>
+<blockquote>
+<p><strong>判断</strong>：未来的 RWKV 大概率不是"纯 RNN"，而是"以状态为主、混合稀疏注意力"的进化版——既保留便宜，又补强精确。</p>
+</blockquote>
+<h2 id="h232">19.4 RWKV 生态正在发生什么</h2>
+<table>
+<thead>
+<tr>
+<th>方向</th>
+<th>进展</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>推理框架</td>
+<td>Ollama / llama.cpp / vLLM / RWKV-Runner / Albatross 全面支持</td>
+</tr>
+<tr>
+<td>微调工具</td>
+<td>RWKV-LM / RWKV-PEFT（LoRA、State Tuning）</td>
+</tr>
+<tr>
+<td>应用生态</td>
+<td>RAG、Agent、多模态、嵌入式应用不断涌现</td>
+</tr>
+<tr>
+<td>基金会</td>
+<td>Linux 基金会 AI 项目，治理更规范</td>
+</tr>
+<tr>
+<td>社区</td>
+<td>中英文社区活跃，中文教程完善（rwkv.cn）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h233">19.5 长期使用 RWKV 的风险与对策</h2>
+<p>任何技术选型都要看到"风险"：</p>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>对策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>生态比 Transformer 小</td>
+<td>关注官方与社区进展；核心推理已标准化</td>
+</tr>
+<tr>
+<td>模型规模上限偏低（目前到 14B 级别）</td>
+<td>用在"中低资源/边缘/长会话"优势场景</td>
+</tr>
+<tr>
+<td>极致精确回忆弱</td>
+<td>用混合架构 / RAG / 分段总结补强</td>
+</tr>
+<tr>
+<td>版本迭代快，API 有变动</td>
+<td>锁定版本，跟随官方文档迁移</td>
+</tr>
+</tbody>
+</table>
+<p><strong>总体判断</strong>：RWKV 作为"高效长会话 + 低资源部署 + 低成本个性化"的主力选手，至少在 AI 陪伴、边缘智能、私有化部署这几个赛道上，有长期价值。</p>
+<h2 id="h234">19.6 给团队的路线建议</h2>
+<ol>
+<li><strong>现在就做</strong>：用 RWKV-7 做长会话/陪伴类产品的原型（成本极低）；</li>
+<li><strong>短期演进</strong>：跟进 RWKV-X / v8 的混合架构，评估"精确回忆"需求；</li>
+<li><strong>长期布局</strong>：保持"状态记忆"架构的抽象接口，未来可平滑切换混合版本；</li>
+<li><strong>配套建设</strong>：RAG、状态持久化、个性化（State Tuning）的工程能力，这些是 RWKV 路线上的核心资产。</li>
+</ol>
+<div class="tip">
+
+**本章小结**：RWKV 正向"多模态 + 混合架构"演进。v8 的 DeepEmbed、DeepEmbedAttention、ROSA 都在补强"便宜"与"精确"两头。未来最可能是"状态为主 + 稀疏注意力"的形态。对长会话/陪伴/边缘/私有化场景，RWKV 有明确长期价值。
+
+</div>
+<h1 id="h235">第二十章 实战练习手册：12 个动手任务</h1>
+<p>光看不练等于白学。这一章给你 <strong>12 个由浅入深的动手任务</strong>，从"跑起第一个模型"到"做一个带长期记忆的 AI 陪伴机器人"。每个任务都给出目标、步骤和验收标准，做完这套练习，你就真正"会" RWKV 了。</p>
+<h2 id="h236">任务 1：跑起你的第一个 RWKV</h2>
+<ul>
+<li><strong>目标</strong>：本地成功运行 RWKV 并对话；</li>
+<li><strong>步骤</strong>：</li>
+</ul>
+<pre><code class="language-bash">curl -fsSL https://ollama.com/install.sh | sh
+ollama run mollysama/rwkv-7-g1:2.9b
+</code></pre>
+<ul>
+<li><strong>验收</strong>：能正常和它聊几句，比如问"你是谁？""1+1=？"。</li>
+</ul>
+<h2 id="h237">任务 2：验证"状态记忆"的存在</h2>
+<ul>
+<li><strong>目标</strong>：亲眼看到多轮对话有记忆；</li>
+<li><strong>步骤</strong>：告诉它"我叫小明，我喜欢蓝色"，聊几句后再问"我叫什么？我喜欢什么颜色？"；</li>
+<li><strong>验收</strong>：它能答出"小明、蓝色"（而不是完全失忆）。</li>
+</ul>
+<h2 id="h238">任务 3：对比速度稳定性</h2>
+<ul>
+<li><strong>目标</strong>：验证"聊得再久也不慢"；</li>
+<li><strong>步骤</strong>：连续聊 10 轮以上，每轮记录回复耗时；</li>
+<li><strong>验收</strong>：第 1 轮和第 10 轮耗时接近，没有明显变慢。</li>
+</ul>
+<h2 id="h239">任务 4：体验上下文长度</h2>
+<ul>
+<li><strong>目标</strong>：体验长上下文优势；</li>
+<li><strong>步骤</strong>：喂给它一篇长文章（几千字），让它总结；</li>
+<li><strong>验收</strong>：能正常读完并总结，不报内存错误。</li>
+</ul>
+<h2 id="h240">任务 5：调整采样参数，感受"温度"</h2>
+<ul>
+<li><strong>目标</strong>：理解 temperature 的作用；</li>
+<li><strong>步骤</strong>：分别用 temperature=0.2 和 1.0 让它写一首诗，对比风格；</li>
+<li><strong>验收</strong>：低温更稳、高温更有想象力，能描述出区别。</li>
+</ul>
+<h2 id="h241">任务 6：用 Modelfile 造一个角色</h2>
+<ul>
+<li><strong>目标</strong>：给模型设定人设；</li>
+<li><strong>步骤</strong>：写一个"温柔心理咨询师小暖"的 Modelfile，<code>ollama create</code> 后运行；</li>
+<li><strong>验收</strong>：它的语气明显变成了你设定的风格。</li>
+</ul>
+<h2 id="h242">任务 7：通过 API 调用</h2>
+<ul>
+<li><strong>目标</strong>：用代码调用模型；</li>
+<li><strong>步骤</strong>：用 curl 或 Python（openai 库）调用 <code>/api/chat</code>；</li>
+<li><strong>验收</strong>：能拿到 JSON 回复，并能解析出文本内容。</li>
+</ul>
+<h2 id="h243">任务 8：实现流式输出</h2>
+<ul>
+<li><strong>目标</strong>：体验打字机效果；</li>
+<li><strong>步骤</strong>：Python 里用 <code>stream=True</code> 逐块打印；</li>
+<li><strong>验收</strong>：文字逐段冒出，而不是一次性全部返回。</li>
+</ul>
+<h2 id="h244">任务 9：保存和恢复状态</h2>
+<ul>
+<li><strong>目标</strong>：实现跨会话记忆；</li>
+<li><strong>步骤</strong>：用 <code>rwkv</code> 库对话，把 state 存成 .pkl，重启进程后恢复再聊；</li>
+<li><strong>验收</strong>：重启后模型还记得之前聊的内容。</li>
+</ul>
+<h2 id="h245">任务 10：做一个情感感知的陪伴机器人</h2>
+<ul>
+<li><strong>目标</strong>：把情绪检测 + 人设 + 状态记忆组合起来；</li>
+<li><strong>步骤</strong>：按第十二章的思路，实现 <code>detect_emotion</code> + 按情绪调整回复 + 状态持久化；</li>
+<li><strong>验收</strong>：用户说"我好难过"，机器人能先共情再回应，且记得用户名字。</li>
+</ul>
+<h2 id="h246">任务 11：搭建一个迷你 RAG</h2>
+<ul>
+<li><strong>目标</strong>：让模型"查资料"回答；</li>
+<li><strong>步骤</strong>：用 Chroma + embedding 建一个小知识库，实现"提问 → 检索 → 注入 → 生成"；</li>
+<li><strong>验收</strong>：模型能根据你提供的资料回答，而不是瞎编。</li>
+</ul>
+<h2 id="h247">任务 12：做个完整的选型决策</h2>
+<ul>
+<li><strong>目标</strong>：能把 RWKV 放进真实项目里；</li>
+<li><strong>步骤</strong>：选一个你真实的业务场景，用第十三章的决策表判断"该不该用 RWKV"，并给出部署方案（Ollama / llama.cpp / vLLM 三选一）；</li>
+<li><strong>验收</strong>：写出一页纸的方案：场景痛点 → 为什么选 RWKV → 部署架构 → 风险与对策。</li>
+</ul>
+<h2 id="h248">练习地图：每章对应哪些任务</h2>
+<table>
+<thead>
+<tr>
+<th>章节</th>
+<th>对应练习</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第八章 部署</td>
+<td>任务 1、4</td>
+</tr>
+<tr>
+<td>第九章 推理/API</td>
+<td>任务 2、3、5、6、7、8</td>
+</tr>
+<tr>
+<td>第十章 Python</td>
+<td>任务 8、9</td>
+</tr>
+<tr>
+<td>第十一章 微调/RAG</td>
+<td>任务 11</td>
+</tr>
+<tr>
+<td>第十二章 工程套用</td>
+<td>任务 10、12</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h249">进阶挑战（可选）</h2>
+<ul>
+<li><strong>挑战 A</strong>：用 RWKV-Runner 加载 .pth 模型，比较 Albatross 与默认后端的性能；</li>
+<li><strong>挑战 B</strong>：把 RWKV 接到微信/网页机器人，实现"随时在线陪伴"；</li>
+<li><strong>挑战 C</strong>：用 RWKV-PEFT 对一个角色做 State Tuning，对比挂载前后的人设稳定性；</li>
+<li><strong>挑战 D</strong>：在树莓派或旧笔记本上部署 1.5B 量化模型，测真实速度。</li>
+</ul>
+<div class="note">
+
+**完成标准**：做完任务 1–9，你已经是"能独立使用 RWKV"的工程师；做到任务 10–12，你已经能把 RWKV 落地到真实产品里。进阶挑战则是加分项。动手吧！
+
+</div>
+<h1 id="h250">第二十一章 提示词工程实战：让 RWKV 更听话</h1>
+<p>"模型强不强"一半看模型，一半看<strong>你怎么问</strong>。这一章专门讲 RWKV 的提示词（Prompt）工程技巧——从基础结构到 RWKV 的专属玩法，让你花最小的成本，把模型效果榨到最好。</p>
+<h2 id="h251">21.1 一条好提示词的四大要素</h2>
+<p>一个完整、有效的提示词通常包含：</p>
+<table>
+<thead>
+<tr>
+<th>要素</th>
+<th>作用</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>角色（Role）</td>
+<td>设定身份与立场</td>
+<td>"你是一名温柔的心理咨询师"</td>
+</tr>
+<tr>
+<td>任务（Task）</td>
+<td>明确要干什么</td>
+<td>"请概括这段文字"</td>
+</tr>
+<tr>
+<td>约束（Constraints）</td>
+<td>限定格式/风格/边界</td>
+<td>"用 100 字以内，分三点"</td>
+</tr>
+<tr>
+<td>示例（Examples）</td>
+<td>给一个标准答案样板</td>
+<td>"例如：……"</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>黄金结构</strong>：<code>角色 + 任务 + 约束 + 示例</code>。四件套齐全，输出质量明显上升。</p>
+</blockquote>
+<h2 id="h252">21.2 角色设定：RWKV 很吃这一套</h2>
+<p>RWKV 这类模型对"角色"非常敏感。同一个问题，加不加角色，效果天差地别：</p>
+<pre><code class="language-text">✗ 差：解释一下什么是焦虑。
+✓ 好：你是一位有 10 年经验的心理咨询师。请用温柔、通俗的语言，向一位 20 岁的年轻人解释什么是焦虑，并给出 3 条缓解建议。
+</code></pre>
+<p>角色越具体，输出越"入戏"、越稳定。这对我们后面做 AI 陪伴（第十二章）尤其重要。</p>
+<h2 id="h253">21.3 格式约束：让输出"可控"</h2>
+<p>想让输出变成 JSON、列表、表格，直接说清楚：</p>
+<pre><code class="language-text">请分析下面这段话的情绪，只输出 JSON：
+{&quot;emotion&quot;: &quot;&lt;开心/平静/难过/焦虑/愤怒/疲惫&gt;&quot;, &quot;confidence&quot;: &lt;0~1&gt;}
+
+文本：今天工作被领导骂了，好烦。
+</code></pre>
+<p>输出：</p>
+<pre><code class="language-json">{&quot;emotion&quot;: &quot;焦虑&quot;, &quot;confidence&quot;: 0.85}
+</code></pre>
+<blockquote>
+<p><strong>技巧</strong>：明确给出"输出格式模板"，比只说"结构化输出"有效得多。</p>
+</blockquote>
+<h2 id="h254">21.4 少样本（Few-shot）：给几个例子胜过千言万语</h2>
+<p>给模型 1-3 个"输入 → 输出"示例，它就能模仿你的格式和风格：</p>
+<pre><code class="language-text">把口语转成书面语：
+
+口语：那啥，明儿咱们去逛个街呗？
+书面语：明天我们一起去逛街，好吗？
+
+口语：这事儿我觉得吧，其实也没啥大不了的。
+书面语：我认为这件事其实并不严重。
+
+口语：你等会儿，我马上来。
+书面语：
+</code></pre>
+<p>模型会自动顺着你的"例子风格"继续，产出高度一致。</p>
+<h2 id="h255">21.5 RWKV 专属提示词技巧</h2>
+<h3 id="h256">21.5.1 技巧一：状态式思考，善用"记忆"</h3>
+<p>RWKV 有状态记忆，多轮对话时<strong>不需要把历史再抄一遍</strong>。系统提示词里放"长期人设"，每轮只放"本轮增量"：</p>
+<pre><code class="language-text"># 系统提示词（只设一次）
+你是小暖，温柔耐心的 AI 伙伴。你记得用户的喜好和过往。
+
+# 每轮只传当前消息（状态自动带着记忆）
+用户：我今天有点难过……
+</code></pre>
+<p>这比 Transformer 的"每轮把整段历史重发"更省、更自然。</p>
+<h3 id="h257">21.5.2 技巧二：用 State Tuning 固化人设</h3>
+<p>如果提示词太长（占大量 token），或者人设总是不稳定，就该上 <strong>State Tuning</strong> 了：把人设"训练进状态"，提示词就可以大大缩短，甚至只留一句"你是小暖"。</p>
+<h3 id="h258">21.5.3 技巧三：善用"思考模式"开关</h3>
+<p>RWKV-7 G1 默认带思考模式（<code>/set think</code> / <code>/set nothink</code>）：</p>
+<ul>
+<li><strong>要严谨回答</strong>（数学、代码、推理）→ 开思考模式；</li>
+<li><strong>要快速闲聊</strong>（陪伴、接话）→ 关思考模式，更快更省。</li>
+</ul>
+<h3 id="h259">21.5.4 技巧四：重复惩罚对抗"车轱辘话"</h3>
+<p>陪伴类对话里模型容易重复，除了调 <code>repetition_penalty</code>，提示词里也可以写：</p>
+<pre><code class="language-text">请避免重复用词和句式，不要复读之前说过的话。
+</code></pre>
+<h2 id="h260">21.6 常见提示词误区</h2>
+<table>
+<thead>
+<tr>
+<th>误区</th>
+<th>表现</th>
+<th>改正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提示词太短</td>
+<td>输出泛泛而谈</td>
+<td>补上角色 + 约束 + 示例</td>
+</tr>
+<tr>
+<td>要求太多</td>
+<td>顾此失彼</td>
+<td>一次只聚焦 1-2 个要求</td>
+</tr>
+<tr>
+<td>措辞模糊</td>
+<td>输出跑偏</td>
+<td>用"具体"代替"大概"</td>
+</tr>
+<tr>
+<td>提示词超长</td>
+<td>占上下文、易被稀释</td>
+<td>精简，或转 State Tuning</td>
+</tr>
+<tr>
+<td>忘记约束输出格式</td>
+<td>解析困难</td>
+<td>给出明确格式模板</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h261">21.7 提示词模板库（直接抄）</h2>
+<h3 id="h262">模板一：通用助手</h3>
+<pre><code class="language-text">你是一个友好、专业的中文 AI 助手。请直接、简洁地回答问题，不要啰嗦。
+问题：{问题}
+</code></pre>
+<h3 id="h263">模板二：总结提炼</h3>
+<pre><code class="language-text">请把下面这段文字概括为 {N} 个要点，每个要点不超过 {M} 字，用编号列表输出：
+{文本}
+</code></pre>
+<h3 id="h264">模板三：角色扮演 / 陪伴</h3>
+<pre><code class="language-text">你是 {角色名}，性格 {性格描述}。说话风格：{风格}。
+规则：先共情，再回应；不要长篇大论说教。
+用户说：{消息}
+</code></pre>
+<h3 id="h265">模板四：结构化抽取</h3>
+<pre><code class="language-text">从下面文本中抽取 {字段列表}，输出 JSON：
+{文本}
+</code></pre>
+<h2 id="h266">21.8 提示词调优流程（方法论）</h2>
+<ol>
+<li><strong>先写出基线提示词</strong>（角色+任务+约束+示例）；</li>
+<li><strong>跑 5-10 个测试用例</strong>，记录失败点；</li>
+<li><strong>定位问题</strong>：是缺角色？缺示例？还是约束不清晰？</li>
+<li><strong>针对性修改</strong>，一次只改一处；</li>
+<li><strong>回归测试</strong>，确认没改坏其他用例；</li>
+<li>反复迭代，直到稳定。</li>
+</ol>
+<blockquote>
+<p><strong>提示词工程是"低成本迭代"</strong>：不用重新训练，几行字就能显著提升效果。先把它做到极致，再考虑微调/State Tuning。</p>
+</blockquote>
+<div class="tip">
+
+**本章小结**：提示词 = 角色 + 任务 + 约束 + 示例。RWKV 的专属技巧：状态式思考（少传历史）、State Tuning 固化人设、思考模式开关、重复惩罚。先做提示词优化（零成本），不够再上微调。
+
+</div>
+<h1 id="h267">第二十二章 真实案例巡礼：别人怎么用 RWKV</h1>
+<p>看别人怎么把 RWKV 用起来，是最快的学习方式。这一章盘点 RWKV 在真实世界的典型用法——从代码补全到智能客服，从陪伴机器人到边缘设备，帮你打开"我还能拿它做什么"的思路。</p>
+<h2 id="h268">22.1 案例一：VS Code 代码补全插件</h2>
+<p>社区有人基于 RWKV 做了一个 VS Code 代码补全插件（<code>rwkv-code-completion</code>）：</p>
+<ul>
+<li><strong>原理</strong>：用 RWKV 的续写/FIM（Fill-in-the-Middle）能力，在光标处预测代码；</li>
+<li><strong>亮点</strong>：并发推理一次返回<strong>多个候选补全</strong>，侧边栏展示、点选插入；</li>
+<li><strong>技术栈</strong>：前端 VS Code 扩展 + 后端 <code>rwkv_lightning</code>（HTTP API）；</li>
+<li><strong>为什么用 RWKV</strong>：本地跑、低显存、补全延迟稳定，隐私好（代码不出本地）。</li>
+</ul>
+<blockquote>
+<p><strong>启示</strong>：RWKV 的"低资源本地推理"特性，特别适合 IDE 这类"要快、要隐私、要常驻"的场景。</p>
+</blockquote>
+<h2 id="h269">22.2 案例二：私有化智能客服 / 知识问答</h2>
+<p>用 RAG 方案（第十一章）给企业做"私有知识库问答"：</p>
+<ul>
+<li><strong>流程</strong>：文档入库 → 向量化 → 检索 → 注入 → RWKV 生成；</li>
+<li><strong>为什么用 RWKV</strong>：数据不出本地（合规）、长上下文（能塞多段资料）、显存恒定；</li>
+<li><strong>典型形态</strong>：企业内部"员工手册问答""产品客服""法律/财务文档助手"。</li>
+</ul>
+<p><img alt="RAG 应用架构" src="img/fig18_app_rag.png" /></p>
+<h2 id="h270">22.3 案例三：AI 陪伴 / 角色扮演 / 情感支持</h2>
+<p>这是 RWKV 最"量身定做"的场景（也是我们第十二章的重点）：</p>
+<ul>
+<li><strong>产品形态</strong>：虚拟朋友、心理陪伴、角色扮演伙伴；</li>
+<li><strong>核心能力</strong>：状态持久化（记得用户）、恒定内存（长会话不崩）、State Tuning（低成本换人设）；</li>
+<li><strong>工程组合</strong>：人设提示词 / State + 情绪检测 + 状态存档 + TTS 语音。</li>
+</ul>
+<p><img alt="长会话与状态持久化" src="img/fig19_app_chat.png" /></p>
+<h2 id="h271">22.4 案例四：边缘设备 / 离线部署</h2>
+<p>在树莓派、旧笔记本、无网环境跑 RWKV：</p>
+<ul>
+<li><strong>形态</strong>：量化 GGUF + llama.cpp，8GB 内存跑 2.9B；</li>
+<li><strong>场景</strong>：车载语音助手、离线翻译、智能家居、野外作业设备；</li>
+<li><strong>为什么用 RWKV</strong>：CPU 可跑、内存恒定、离线可用、隐私安全。</li>
+</ul>
+<p><img alt="边缘设备部署" src="img/fig20_app_edge.png" /></p>
+<h2 id="h272">22.5 案例五：长文档处理 / 智能写作</h2>
+<p>利用 RWKV 的"长上下文免费"优势：</p>
+<ul>
+<li><strong>长文档总结</strong>：把整本书/整份合同塞进去总结；</li>
+<li><strong>论文/报告辅助</strong>：读长资料后按要求输出；</li>
+<li><strong>剧本/小说续写</strong>：上下文越长，剧情连贯性越好；</li>
+<li><strong>多文档对比</strong>：同时塞入多份资料做对比分析。</li>
+</ul>
+<h2 id="h273">22.6 案例六：低成本多语言应用</h2>
+<p>RWKV-6 World 14B 覆盖大量语言，且多语言效果好：</p>
+<ul>
+<li><strong>翻译工具</strong>：本地翻译，无 API 费用；</li>
+<li><strong>多语言客服</strong>：一套模型服务多语言用户；</li>
+<li><strong>低资源语言助手</strong>：对小语种更友好。</li>
+</ul>
+<h2 id="h274">22.7 从案例中提炼的选型规律</h2>
+<p>观察上面所有案例，共同点是：</p>
+<table>
+<thead>
+<tr>
+<th>共同点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本地/私有化</td>
+<td>数据不出域、合规、离线</td>
+</tr>
+<tr>
+<td>长会话/长文档</td>
+<td>恒定内存、长上下文免费</td>
+</tr>
+<tr>
+<td>成本敏感</td>
+<td>低显存、CPU 可跑、免 API 费</td>
+</tr>
+<tr>
+<td>实时/常驻</td>
+<td>稳定延迟、状态可续</td>
+</tr>
+<tr>
+<td>个性化</td>
+<td>State Tuning 低成本定制</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>反过来说</strong>：如果你的场景是"云端高并发 + 要最先进效果 + 不在乎成本"，RWKV 未必是首选；但凡是"省、私、长、稳、个性"，RWKV 都值得认真考虑。</p>
+</blockquote>
+<h2 id="h275">22.8 案例选择自查表</h2>
+<p>想判断"我的想法能不能用 RWKV 做"，套这个自查表：</p>
+<ul>
+<li>[ ] 需要本地/私有/离线运行？</li>
+<li>[ ] 会有长时间、多轮、长期会话？</li>
+<li>[ ] 需要处理长文档？</li>
+<li>[ ] 硬件资源有限？</li>
+<li>[ ] 需要低成本个性化/人设？</li>
+<li>[ ] 数据隐私/合规敏感？</li>
+</ul>
+<p><strong>勾中 2 条以上，RWKV 就值得试试。</strong></p>
+<div class="tip">
+
+**本章小结**：RWKV 的真实案例集中在——代码补全（本地快）、私有知识问答（RAG）、AI 陪伴（状态记忆）、边缘/离线部署、长文档处理、多语言应用。它们的共同规律是"省、私、长、稳、个性"。用自查表判断你的场景是否匹配。
+
+</div>
+<h1 id="h276">第二十三章 社区生态：谁在做、去哪学、怎么参与</h1>
+<p>RWKV 不是一个人在战斗。这一章带你认识它背后的"江湖"——社区在哪、有哪些核心项目、模型生态长什么样，以及如果你想参与贡献，该从哪里下手。</p>
+<h2 id="h277">23.1 一个开源项目的生命力来自社区</h2>
+<p>判断一个开源模型值不值得长期投入，除了看架构本身，还要看<strong>生态是否活跃</strong>。RWKV 在这点上相当有底气：它是<strong>中国第一个达到 GPT 级性能的开源语言模型</strong>，也是 Linux 基金会（AI &amp; Data 基金会）旗下的首个生成式 AI 托管项目，背后有全球范围的开发者协作。</p>
+<table>
+<thead>
+<tr>
+<th>社区阵地</th>
+<th>说明</th>
+<th>适合谁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub（RWKV-LM）</td>
+<td>源码、模型、v1–v8 各版本、训练代码</td>
+<td>开发者、研究者</td>
+</tr>
+<tr>
+<td>Discord（RWKV 官方）</td>
+<td>全球开发者实时讨论、内核优化、新版本内测</td>
+<td>深度用户、贡献者</td>
+</tr>
+<tr>
+<td>rwkv.cn 中文社区</td>
+<td>中文教程、RWKV-Runner、部署指南、问答</td>
+<td>中文用户、小白</td>
+</tr>
+<tr>
+<td>Hugging Face</td>
+<td>各版本模型权重、GGUF 量化、微调产物</td>
+<td>使用者、部署者</td>
+</tr>
+<tr>
+<td>官方 Wiki</td>
+<td>架构史、部署教程、论文解读</td>
+<td>想深入原理的人</td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话建议</strong>：刚上手就去 rwkv.cn 找教程 + RWKV-Runner 一键跑通；想深入就在 GitHub 和 Discord 泡着；想找现成模型/量化文件就去 Hugging Face。</p>
+<h2 id="h278">23.2 核心项目地图：这些"零件"都该认识</h2>
+<p>RWKV 生态不是只有一个仓库，而是一整套工具链。认识它们，你就知道遇到问题时该找谁：</p>
+<p><img alt="RWKV 生态核心项目" src="img/fig25_ecosystem.png" /></p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>定位</th>
+<th>一句话作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RWKV-LM</strong></td>
+<td>主仓库</td>
+<td>模型定义、训练/推理代码、官方权重发布</td>
+</tr>
+<tr>
+<td><strong>RWKV-Runner</strong></td>
+<td>图形界面</td>
+<td>一键下载/运行/聊天/微调，Windows/Mac 小白神器</td>
+</tr>
+<tr>
+<td><strong>RWKV-PEFT</strong></td>
+<td>微调工具</td>
+<td>LoRA 微调、State Tuning（状态微调）</td>
+</tr>
+<tr>
+<td><strong>Albatross</strong></td>
+<td>推理内核</td>
+<td>RWKV-7 的 CUDA / ROCm 高性能内核，显著提速</td>
+</tr>
+<tr>
+<td><strong>rwkv（pip）</strong></td>
+<td>官方推理库</td>
+<td>Python 里加载/推理 RWKV 的推荐方式</td>
+</tr>
+<tr>
+<td><strong>rwkv_tokenizer</strong></td>
+<td>分词库</td>
+<td>RWKV 专用 tokenizer（世界模型分词）</td>
+</tr>
+<tr>
+<td><strong>RWKV pip / vLLM</strong></td>
+<td>服务框架</td>
+<td>高并发 OpenAI 兼容 API 服务</td>
+</tr>
+<tr>
+<td><strong>Ollama / llama.cpp</strong></td>
+<td>通用推理</td>
+<td>通过 GGUF 格式跑 RWKV，最省心</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>怎么选</strong>：个人体验 → RWKV-Runner 或 Ollama；Python 集成 → <code>pip install rwkv</code>；生产高并发 → vLLM / Albatross；要改模型 → RWKV-LM + RWKV-PEFT。</p>
+</blockquote>
+<h2 id="h279">23.3 模型生态：你现在能拿到什么</h2>
+<p>RWKV 生态的模型非常"全"：从 <strong>0.1B 到 14B</strong> 全系开源，且都带 Apache 2.0 商用许可。按发布时间和使用热度，大致可以分成几代：</p>
+<table>
+<thead>
+<tr>
+<th>系列</th>
+<th>代表模型</th>
+<th>特点</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RWKV-4</td>
+<td>1.5B / 3B / 7B</td>
+<td>经典版，稳定，社区资料多</td>
+<td>学习、轻量部署</td>
+</tr>
+<tr>
+<td>RWKV-5 / 6</td>
+<td>World 0.1B–14B</td>
+<td>多语言强化，14B 最强</td>
+<td>中文/多语言、生产</td>
+</tr>
+<tr>
+<td>RWKV-7 G1</td>
+<td>1.5B / 2.9B</td>
+<td>最新，带思考模式，DSE 状态机制</td>
+<td>推荐首选、长对话</td>
+</tr>
+<tr>
+<td>RWKV-7 World</td>
+<td>1.5B / 2.9B</td>
+<td>多语言版</td>
+<td>多语言需求</td>
+</tr>
+<tr>
+<td>RWKV-X</td>
+<td>实验混合架构</td>
+<td>结合线性注意力的最新尝试</td>
+<td>尝鲜、研究</td>
+</tr>
+</tbody>
+</table>
+<p><strong>获取模型的三种途径：</strong></p>
+<pre><code class="language-bash"># 方式一：Ollama 直接拉（最省心）
+ollama run mollysama/rwkv-7-g1:2.9b
+
+# 方式二：Hugging Face（含 GGUF 量化）
+huggingface-cli download BlinkDL/rwkv-7-g1-2.9B-0.1B-preview \
+  rwkv-7-g1-2.9B-0.1B-preview-GGUF-Q4_K_M.gguf --local-dir ./rwkv
+
+# 方式三：RWKV-Runner 图形界面内一键下载
+</code></pre>
+<h2 id="h280">23.4 怎么从社区"借力"：提问与检索的姿势</h2>
+<p>好的问题 = 一半的答案。社区里高效求助的姿势是这样的：</p>
+<ol>
+<li><strong>先搜再问</strong>：先搜 GitHub Issues、rwkv.cn 问答、Wiki，八成问题已被解决。</li>
+<li><strong>说清环境</strong>：<code>模型版本 + 框架（Ollama/llama.cpp/pip）+ 硬件（显存/内存）+ 报错全文</code>。</li>
+<li><strong>提供复现</strong>：最小可复现的代码或命令，比一大段描述有用得多。</li>
+<li><strong>报错给日志</strong>：把完整报错堆栈贴出来，别只贴"它报错了"。</li>
+<li><strong>英文问题去 Discord，中文问题去 rwkv.cn</strong>：在哪问就用那的语言。</li>
+</ol>
+<div class="warn">
+
+**避坑提醒**：不要在社区问"RWKV 能不能打 GPT-5"这类没有标准答案的对比题；要把问题改成"在 XX 场景、XX 资源约束下，RWKV-7 和 Qwen 谁更合适"这种可决策的问题，才能得到有效回答。
+
+</div>
+
+<h2 id="h281">23.5 如何从"使用者"升级为"贡献者"</h2>
+<p>参与开源不只是"写代码"。RWKV 社区几乎每个人都能找到适合自己的贡献方式：</p>
+<table>
+<thead>
+<tr>
+<th>贡献方式</th>
+<th>难度</th>
+<th>你能得到什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>反馈 bug、提 Feature 建议</td>
+<td>★</td>
+<td>社区信誉、问题被修</td>
+</tr>
+<tr>
+<td>写/翻译中文教程、Wiki</td>
+<td>★</td>
+<td>帮助新人、个人品牌</td>
+</tr>
+<tr>
+<td>提供量化模型（GGUF/INT8）</td>
+<td>★★</td>
+<td>部署者感谢、下载量</td>
+</tr>
+<tr>
+<td>测试新版（RWKV-7/8 内测）</td>
+<td>★★</td>
+<td>第一时间体验、反馈价值</td>
+</tr>
+<tr>
+<td>为 vLLM / llama.cpp 修 bug</td>
+<td>★★★</td>
+<td>开发者认可、合入主仓库</td>
+</tr>
+<tr>
+<td>训练/微调开源模型</td>
+<td>★★★</td>
+<td>影响力、研究产出</td>
+</tr>
+<tr>
+<td>优化内核（Albatross）</td>
+<td>★★★★</td>
+<td>极高认可度（需要 CUDA 功底）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>入门路线</strong>：先在本地跑通一个模型 → 写一篇使用笔记发到 rwkv.cn → 尝试给 Wiki 补一节教程 → 提交一个文档 PR。从小事做起，慢慢就会找到自己感兴趣的方向。</p>
+<h2 id="h282">23.6 关注的"关键人物"与一手信息源</h2>
+<p>想跟上 RWKV 的最新进展，盯住这几类信号即可：</p>
+<ul>
+<li><strong>创始人 BlinkDL</strong>：GitHub 主页 + 论文，架构方向的一手来源；</li>
+<li><strong>RWKV 官方 Wiki</strong>：每次大版本发布都会有架构讲解文章；</li>
+<li><strong>Linux 基金会博客</strong>：项目里程碑、治理、生态合作公告；</li>
+<li><strong>rwkv.cn 更新日志</strong>：RWKV-Runner 等工具迭代、社区精选教程。</li>
+</ul>
+<div class="tip">
+
+**本章小结**：RWKV 的生态 = "全系开源的模型 + 一整套工具链 + 活跃的全球社区"。作为使用者，你只需要"会下载、会运行、会提问"；想深入，就从写教程、提供量化、做测试开始。开源世界的规律是——你投入得越多，收获的回音越大。
+
+</div>
+<h1 id="h283">第二十四章 落地实战：把 RWKV 部署到真实产品</h1>
+<p>前面我们学会了"跑起来"，这一章解决"跑得稳、跑得便宜、跑得专业"。无论你是给公司做私有化助手，还是把自己的 AI 陪伴应用上线，这章的工程实践清单都值得照抄。</p>
+<h2 id="h284">24.1 从 Demo 到生产：差距在哪里</h2>
+<p>本地 <code>ollama run</code> 和真实产品之间，隔着一整套"工程问题"。先看清差距，再对症下药：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Demo（本地玩）</th>
+<th>生产（上线产品）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并发</td>
+<td>1 个用户</td>
+<td>几十上百并发</td>
+</tr>
+<tr>
+<td>稳定性</td>
+<td>崩了重开</td>
+<td>需要监控、告警、自动恢复</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>无所谓</td>
+<td>必须核算 token 成本 / 硬件成本</td>
+</tr>
+<tr>
+<td>安全</td>
+<td>无要求</td>
+<td>内容过滤、隐私合规、防注入</td>
+</tr>
+<tr>
+<td>质量</td>
+<td>聊天就行</td>
+<td>需要评测、回退、A/B</td>
+</tr>
+<tr>
+<td>记忆</td>
+<td>手动存状态</td>
+<td>状态库、多用户隔离、持久化</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心思路</strong>：RWKV 最大的工程红利是"状态（State）"。Transformer 产品要缓存一整套 KV 历史才能续聊，RWKV 只需要持久化一份固定大小的状态文件——这会让你的存储和续聊逻辑简单一个数量级。</p>
+<h2 id="h285">24.2 服务架构：单机 / 多机怎么选</h2>
+<p>根据你的 QPS（每秒请求数）和预算，有三种典型的服务形态：</p>
+<p><img alt="RWKV 生产部署架构" src="img/fig26_prod_arch.png" /></p>
+<p><strong>形态一：单机轻服务（个人/小团队）</strong></p>
+<pre><code class="language-bash"># 用 llama.cpp 起一个 OpenAI 兼容服务，几十个用户够用
+./llama-server -m rwkv-7-g1-2.9B-Q4_K_M.gguf --port 8080 \
+  --ctx-size 8192 --n-gpu-layers 99
+</code></pre>
+<ul>
+<li>优点：简单、零运维、成本极低；</li>
+<li>适用：内网工具、个人 AI 助手、小流量陪伴应用。</li>
+</ul>
+<p><strong>形态二：vLLM 高并发服务（对外产品）</strong></p>
+<pre><code class="language-bash">pip install vllm
+python -m vllm.entrypoints.openai.api_server \
+  --model /path/to/rwkv-7 \
+  --port 8000 --max-model-len 8192
+</code></pre>
+<ul>
+<li>优点：连续批处理（continuous batching）吞吐高、OpenAI 兼容；</li>
+<li>适用：面向公众的聊天产品、多租户 SaaS。</li>
+</ul>
+<p><strong>形态三：混合架构（大模型 + 小模型/规则）</strong></p>
+<ul>
+<li>80% 简单请求走 RWKV 小模型（1.5B/2.9B 量化），省成本；</li>
+<li>20% 复杂请求路由到大模型，保证质量；</li>
+<li>配一个<strong>路由层</strong>（按意图/关键词/长度判断走哪条路）。</li>
+</ul>
+<h2 id="h286">24.3 状态管理：RWKV 的"杀手级工程实践"</h2>
+<p>这是 RWKV 相对 Transformer 最独特、最值得利用的工程点。核心模式是<strong>"状态即身份"</strong>：</p>
+<p><img alt="状态管理与多角色记忆" src="img/fig27_state_mgmt.png" /></p>
+<pre><code class="language-python">from rwkv.model import RWKV
+from rwkv.utils import PIPELINE
+
+model = RWKV(model=&quot;/path/rwkv-7.pth&quot;, strategy=&quot;cuda fp16&quot;)
+pipe = PIPELINE(model, &quot;rwkv_vocab_v20230424&quot;)
+
+def new_session(role_id):
+    &quot;&quot;&quot;每个角色/用户一个独立状态&quot;&quot;&quot;
+    return {&quot;role&quot;: role_id, &quot;state&quot;: None, &quot;history&quot;: []}
+
+def chat(sess, text):
+    out, sess[&quot;state&quot;] = model.run([text], sess[&quot;state&quot;])  # 传旧状态、收新状态
+    sess[&quot;history&quot;].append(text)
+    return out
+</code></pre>
+<p><strong>生产落地的三个要点：</strong></p>
+<ol>
+<li><strong>状态持久化到数据库</strong>：把 <code>state</code> 序列化存进 Redis / 数据库，用户下次进来直接读回，实现"跨会话不失忆"——而 Transformer 想做同样的事，要存整段 KV Cache，代价大得多。</li>
+<li><strong>多用户隔离</strong>：每个用户一份状态，天然隔离，互不串台；这比"把所有上下文拼一起再丢给模型"干净得多。</li>
+<li><strong>状态归档与分片</strong>：一个角色一个文件/一个 key；长对话可用"总结压缩"定期把旧状态精简。</li>
+</ol>
+<blockquote>
+<p><strong>为什么这对你的产品重要</strong>：AI 陪伴/情感智能体的核心卖点就是"它记得我"。用 RWKV，这个记忆是"一等公民"（一份文件的事），实现成本远低于 Transformer 路线。</p>
+</blockquote>
+<h2 id="h287">24.4 性能与成本调优清单</h2>
+<p>按"投入产出比"排序，从最划算的开始：</p>
+<table>
+<thead>
+<tr>
+<th>手段</th>
+<th>效果</th>
+<th>成本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>量化（Q4_K_M / Q8_0）</td>
+<td>显存降 4–8 倍，速度提升</td>
+<td>零成本，精度略降</td>
+</tr>
+<tr>
+<td>选对模型规模</td>
+<td>2.9B 换 7B，速度翻倍以上</td>
+<td>视需求</td>
+</tr>
+<tr>
+<td>开启 Albatross / 官方内核</td>
+<td>RWKV-7 提速明显</td>
+<td>零成本</td>
+</tr>
+<tr>
+<td>vLLM 连续批处理</td>
+<td>吞吐提升数倍</td>
+<td>需要 GPU 服务</td>
+</tr>
+<tr>
+<td>前缀/状态缓存</td>
+<td>多轮请求避免重复计算</td>
+<td>需自己实现</td>
+</tr>
+<tr>
+<td>批处理 + 异步</td>
+<td>客户端体验更稳</td>
+<td>需要工程改造</td>
+</tr>
+<tr>
+<td>小模型兜底路由</td>
+<td>综合成本大幅下降</td>
+<td>需要路由逻辑</td>
+</tr>
+</tbody>
+</table>
+<p><strong>量化速查</strong>（以 2.9B 为例，大致值）：</p>
+<table>
+<thead>
+<tr>
+<th>精度</th>
+<th>显存占用</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fp16</td>
+<td>约 6GB</td>
+<td>质量最好</td>
+</tr>
+<tr>
+<td>INT8 / Q8_0</td>
+<td>约 3GB</td>
+<td>质量几乎无损</td>
+</tr>
+<tr>
+<td>Q4_K_M</td>
+<td>约 1.8GB</td>
+<td>性价比之王</td>
+</tr>
+<tr>
+<td>Q4_K_S</td>
+<td>约 1.6GB</td>
+<td>更小，质量略降</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h288">24.5 质量与体验：评测、监控、兜底</h2>
+<p>上线前请建立三条防线：</p>
+<p><strong>① 评测集</strong>：准备 50–100 条覆盖你业务场景的"黄金问题"，每次改模型/改参数后跑一遍，对比输出质量。别凭感觉上线。</p>
+<p><strong>② 监控指标</strong>：
+- 延迟（首 token 延迟、平均 token/秒）；
+- 错误率（超时、空回复、报错）；
+- 成本（每日 token 消耗、GPU 利用率）；
+- 业务指标（对话轮数、留存、好评率）。</p>
+<p><strong>③ 兜底策略</strong>：
+- 超时自动重试一次；
+- 空回复/报错时返回预设话术；
+- 检测到敏感内容时走安全话术；
+- 大模型挂了自动降级到小模型。</p>
+<h2 id="h289">24.6 安全与合规：别踩的坑</h2>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>应对</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提示词注入</td>
+<td>严格角色设定 + 系统提示词隔离 + 输入过滤</td>
+</tr>
+<tr>
+<td>有害内容</td>
+<td>输出侧内容审核（关键词 + 分类器）</td>
+</tr>
+<tr>
+<td>隐私数据</td>
+<td>模型私有化部署、日志脱敏、加密存储状态</td>
+</tr>
+<tr>
+<td>版权/合规</td>
+<td>确认 Apache 2.0 商用条款、注明生成内容</td>
+</tr>
+<tr>
+<td>幻觉</td>
+<td>关键事实类场景加 RAG 检索约束</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h290">24.7 一份可以直接抄的"上线清单"</h2>
+<pre><code class="language-text">[ ] 模型与量化选型（规模 / 精度 / 显存）定稿
+[ ] 推理服务（llama.cpp / vLLM）本地压测通过
+[ ] 状态持久化 + 多用户隔离实现
+[ ] OpenAI 兼容 API 对接业务后端
+[ ] 评测集跑通，质量达标
+[ ] 监控 + 告警 + 兜底策略上线
+[ ] 内容安全过滤接入
+[ ] 压测：并发、长对话稳定性、内存是否恒定
+[ ] 成本核算：单次会话 token 成本 × 用户量
+[ ] 灰度发布（先 10% 用户）→ 观察 → 全量
+</code></pre>
+<div class="note">
+
+**本章小结**：RWKV 的工程优势可以浓缩成一句话——**把"记忆"变成一份可持久化、可隔离、可迁移的状态文件**。围绕这个特点，你的存储、续聊、个性化、多角色方案都会变得出奇地简单。剩下的并发、监控、安全，和任何大模型产品一样按标准工程流程做即可。
+
+</div>
+<h1 id="h291">第二十五章 未来展望与进阶学习路线</h1>
+<p>最后一章，我们从"现在"看向"以后"：RWKV 下一步往哪走？这个方向的终点是什么？以及——如果你想从"会用"进阶到"懂原理、能研究"，该按什么路线走。</p>
+<h2 id="h292">25.1 架构演进的下一站</h2>
+<p>RWKV 的演进有一条清晰的脉络：<strong>每次迭代都在解决"状态的表达能力"问题</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>状态机制</th>
+<th>解决的核心问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1–v4</td>
+<td>固定衰减（W 不可随输入变化）</td>
+<td>证明"无注意力也能训练出模型"</td>
+</tr>
+<tr>
+<td>v5/v6</td>
+<td>数据相关衰减（W 随输入变化）</td>
+<td>让遗忘系数"懂上下文"</td>
+</tr>
+<tr>
+<td>v7（Goose）</td>
+<td>DSE 动态状态演化（可修正的线性注意力）</td>
+<td>状态能"纠错"，逼近 Transformer 记忆精度</td>
+</tr>
+<tr>
+<td>v8+</td>
+<td>实验阶段，探索更强的状态表达</td>
+<td>进一步缩小与全注意力的差距</td>
+</tr>
+</tbody>
+</table>
+<p><strong>趋势判断（基于公开信息）：</strong></p>
+<ol>
+<li><strong>混合化</strong>：RWKV-X 等实验表明，业界在探索"状态模型 + 少量注意力"的混合架构——用线性注意力扛长序列，用少量局部注意力补精确回忆。这可能不是"RWKV 输给 Transformer"，而是<strong>两个家族走向融合</strong>。</li>
+<li><strong>更大的多模态</strong>：语言 → 视觉 → 音频 → 世界模型。RWKV 的恒定内存特性，让"长视频/长音频流式理解"这种高耗场景反而成为它的优势场。</li>
+<li><strong>更强的状态机制</strong>：状态不再只是"摘要"，而是可读写、可纠错、可编辑的"外部记忆"，配合 State Tuning，可能催生"记忆即产品"的新范式。</li>
+</ol>
+<p><img alt="RWKV 未来演进方向" src="img/fig28_future.png" /></p>
+<h2 id="h293">25.2 这个方向会"赢"吗？理性看待</h2>
+<p>给你一副冷静的眼镜，别被任何一方带节奏：</p>
+<table>
+<thead>
+<tr>
+<th>论点</th>
+<th>正（看好 RWKV 方向）</th>
+<th>反（谨慎）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>长上下文</td>
+<td>恒定内存，成本可控</td>
+<td>精确回忆仍不如全注意力</td>
+</tr>
+<tr>
+<td>效率</td>
+<td>O(N) 天生优势</td>
+<td>硬件针对 Transformer 优化更多</td>
+</tr>
+<tr>
+<td>生态</td>
+<td>全系开源、Apache 2.0</td>
+<td>工具链、生态规模小于 Transformer</td>
+</tr>
+<tr>
+<td>科研</td>
+<td>理论清晰（TC0 类）</td>
+<td>头部算力仍倾斜 Transformer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>理性的结论</strong>：不是"谁取代谁"，而是<strong>任务决定架构</strong>——需要极长上下文、低资源、私有化、个性化、流式处理的任务，RWKV 这类线性注意力/状态模型会越来越有竞争力；需要极致效果和成熟生态的任务，Transformer 继续占主导。<strong>两者共存，且越来越融合</strong>，这才是最可能的中期图景。</p>
+<h2 id="h294">25.3 进阶学习路线：从"会用"到"能研究"</h2>
+<p>如果你对 RWKV 产生了"想搞懂"的冲动，这是一条由浅入深的路：</p>
+<p><img alt="RWKV 进阶学习路线图" src="img/fig29_learning_path.png" /></p>
+<p><strong>第一阶段：使用者（1–2 周）</strong>
+- 用 Ollama / RWKV-Runner 跑通 2.9B，玩熟状态保存；
+- 读完本手册第 1–12 章，能独立部署 + 写 Python 调用；
+- 完成第 20 章 12 个实战任务。</p>
+<p><strong>第二阶段：工程派（1–2 个月）</strong>
+- 精读第 5、6、7 章，理解 Time Mixing / WKV / DSE 的直觉；
+- 用 RWKV-PEFT 做一次 LoRA 微调和 State Tuning；
+- 把 RWKV 接进一个真实小产品，跑通第 24 章的上线清单。</p>
+<p><strong>第三阶段：研究者（半年+）</strong>
+- 精读 RWKV 论文 + 关键参考文献（见下方书单）；
+- 复现一个简化版 RWKV（在 colab 上从零训练小模型）；
+- 读 Mamba、RetNet、Gated DeltaNet 论文，横向对比；
+- 关注 RWKV-8 / RWKV-X 的公开实验，找可改进的切入点。</p>
+<p><strong>进阶必读论文清单：</strong></p>
+<table>
+<thead>
+<tr>
+<th>论文</th>
+<th>为什么读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RWKV-7 "Goose"（2025）</td>
+<td>理解最新的 DSE 状态机制</td>
+</tr>
+<tr>
+<td>EMNLP 2023 RWKV 论文</td>
+<td>权威的架构说明与评测</td>
+</tr>
+<tr>
+<td>Attention Free Transformer（AFT）</td>
+<td>RWKV 的灵感来源，理解 Token Shift 由来</td>
+</tr>
+<tr>
+<td>Mamba（2023）</td>
+<td>状态空间模型的代表，横向对比必备</td>
+</tr>
+<tr>
+<td>RetNet（2023）</td>
+<td>另一条线性注意力路线</td>
+</tr>
+<tr>
+<td>Gated DeltaNet</td>
+<td>和 RWKV-7 最接近的"邻居"</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h295">25.4 数学与工具地基</h2>
+<p>想真正读进论文，你需要补这几块"地基"，顺序建议如下：</p>
+<ol>
+<li><strong>线性代数</strong>：矩阵乘法、向量点积、Softmax——够用即可；</li>
+<li><strong>RNN 与反向传播</strong>：理解"梯度消失/爆炸"，这是所有状态模型的起点；</li>
+<li><strong>注意力机制</strong>：Q/K/V、自注意力、复杂度分析，这是对照的基准；</li>
+<li><strong>状态空间模型（SSM）</strong>：离散化、扫描运算（scan），Mamba 的数学语言；</li>
+<li><strong>PyTorch 实操</strong>：能读懂 RWKV-LM 源码里的 <code>TimeMix</code>、<code>ChannelMix</code> 层。</li>
+</ol>
+<blockquote>
+<p><strong>最快的捷径</strong>：把本手册第 17 章（公式通俗课）先啃下来，它已经把 RWKV 的公式翻译成了人话；有了直觉，再去看论文里的数学符号，就不会被劝退。</p>
+</blockquote>
+<h2 id="h296">25.5 不同身份，给你一句话</h2>
+<table>
+<thead>
+<tr>
+<th>你是谁</th>
+<th>你该怎么用 RWKV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>产品经理</td>
+<td>用它验证"长对话 + 记忆 + 私有化"的产品假设，成本极低</td>
+</tr>
+<tr>
+<td>后端工程师</td>
+<td>重点研究第 24 章状态管理，这是你相对 Transformer 路线的差异化优势</td>
+</tr>
+<tr>
+<td>算法工程师</td>
+<td>读第 25.3 书单，RWKV 的论文量和复杂度远低于重读全套 Transformer</td>
+</tr>
+<tr>
+<td>学生</td>
+<td>用它入门"高效序列模型"，这是一个学术空白很多、好发力的方向</td>
+</tr>
+<tr>
+<td>创业团队</td>
+<td>用全系开源模型快速搭 MVP，省掉大笔 API 费用</td>
+</tr>
+<tr>
+<td>普通用户</td>
+<td>用 RWKV-Runner 把它变成你的本地 AI 助手，数据不出电脑</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h297">25.6 给读者的最后寄语</h2>
+<p>我们从"一句话看懂 RWKV"一路走到了"未来展望"。回顾这一趟，你其实已经掌握了一套<strong>理解一切大模型架构的通用框架</strong>：</p>
+<blockquote>
+<p><strong>任何序列模型，本质上都在回答三个问题：怎么记（记忆机制）、怎么算（并行性）、怎么省（成本）。</strong> RNN 用状态记、串行算；Transformer 用注意力记、平方算；RWKV 用"聪明的状态"记、线性算。看懂了这个坐标，你就不再是"只会用"的人，而是能<strong>判断和选择</strong>的人。</p>
+</blockquote>
+<p>RWKV 的故事还在继续（RWKV-8、RWKV-X、多模态、世界模型都在路上）。本手册写完的这一刻，可能正是某些新进展开始的前一刻。希望你带着这份"看得懂、跑得动、改得了"的能力，去亲手验证它——毕竟，<strong>最好的学习方式，永远是运行一行代码，而不是背诵一段定义。</strong></p>
+<div class="key">
+
+**全书的最后一句**：RWKV 是一个"用状态换效率、用效率换普及"的优雅设计。它教会我们的不只是这一个模型，而是一种思维——**在算力有限的世界里，如何用聪明的结构，让智能更普惠。**
+
+</div>
+
+<hr />
+<p><em>《RWKV 架构详解 · 从入门到落地 · 超全图文手册》完。感谢阅读，动手去跑一个 RWKV 吧！</em></p>
+<h1 id="h298">第二十六章 端到端实战：从零搭一个"带记忆"的 AI 助手</h1>
+<p>前面 25 章把理论和单项技能都讲完了，这一章把它们<strong>串成完整项目</strong>。我们从零到一，搭建一个"有角色、有记忆、能翻知识库"的 RWKV 陪伴助手。你跟着敲，最后会得到一个真正能跑起来的小产品。</p>
+<h2 id="h299">26.1 项目目标与整体架构</h2>
+<p>我们要做的项目叫 <strong>"Memo 伙伴"</strong>：一个带长期记忆的 AI 聊天助手。核心需求三条：</p>
+<ol>
+<li><strong>有角色</strong>：设定成一个"温柔的倾听型朋友"；</li>
+<li><strong>有记忆</strong>：重启程序后还记得你是谁、聊过什么；</li>
+<li><strong>有知识</strong>：能查一份本地知识库再回答（RAG）。</li>
+</ol>
+<p>整体架构非常轻——不需要大集群，一台电脑就能跑：</p>
+<p><img alt="Memo 伙伴项目架构" src="img/fig30_memo_arch.png" /></p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>技术</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前端</td>
+<td>原生 HTML + JS</td>
+<td>聊天界面</td>
+</tr>
+<tr>
+<td>后端</td>
+<td>Python + FastAPI</td>
+<td>接收请求、编排逻辑</td>
+</tr>
+<tr>
+<td>推理</td>
+<td>RWKV（rwkv pip 库）</td>
+<td>生成回复</td>
+</tr>
+<tr>
+<td>记忆</td>
+<td>SQLite（存状态文件）</td>
+<td>跨会话持久化记忆</td>
+</tr>
+<tr>
+<td>知识库</td>
+<td>简单向量检索（可选）</td>
+<td>RAG 外挂资料</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键点</strong>：RWKV 的"状态文件"在这里就是记忆的物理载体——我们把状态存进数据库，用户回来时读出来接着用，这就是它相对 Transformer 的工程红利。</p>
+<h2 id="h300">26.2 环境准备与模型下载</h2>
+<pre><code class="language-bash"># 1. 安装 Python 依赖
+pip install rwkv rwkv_tokenizer fastapi uvicorn
+
+# 2. 下载模型（2.9B 为例，约 6GB fp16；显存不够就下 GGUF 量化）
+# 从 Hugging Face 拉取 RWKV-7 权重（或通过 RWKV-Runner 下载）
+huggingface-cli download BlinkDL/rwkv-7-g1-2.9B-0.1B-preview \
+  --local-dir ./models/rwkv-7
+
+# 3. 准备好 vocab 文件（RWKV 分词器）
+#    通常与模型同目录：rwkv_vocab_v20230424.txt
+</code></pre>
+<h2 id="h301">26.3 第一步：加载模型与基础对话</h2>
+<p>写一个最基础的 <code>llm.py</code>，把模型封装成"说一句话 → 返回回复"的接口：</p>
+<pre><code class="language-python"># llm.py —— RWKV 推理封装
+from rwkv.model import RWKV
+from rwkv.utils import PIPELINE
+
+MODEL_PATH = &quot;./models/rwkv-7/rwkv-7.pth&quot;
+VOCAB_PATH = &quot;./models/rwkv-7/rwkv_vocab_v20230424.txt&quot;
+
+# strategy: &quot;cuda fp16&quot; 用显卡；&quot;cpu fp32&quot; 没显卡也能跑
+model = RWKV(model=MODEL_PATH, strategy=&quot;cuda fp16 * -&gt; cuda fp16&quot;)
+pipe = PIPELINE(model, VOCAB_PATH)
+
+def generate(prompt: str, state=None, temperature=0.8):
+    &quot;&quot;&quot;返回 (回复文本, 新状态)&quot;&quot;&quot;
+    # RWKV 官方库：把整段 prompt 一次性灌入，得到输出和最终状态
+    out, state = model.run([prompt], state)
+    return out, state
+
+if __name__ == &quot;__main__&quot;:
+    text, st = generate(&quot;你好，我是谁？&quot;)
+    print(&quot;助手:&quot;, text)
+</code></pre>
+<blockquote>
+<p>注意：官方 <code>rwkv</code> 库的 <code>model.run</code> 输入通常是"token 序列"。不同版本 API 略有差异，请以你安装版本的 README 为准；核心逻辑不变——<strong>每次调用都传回上一次的 state，实现连续记忆</strong>。</p>
+</blockquote>
+<h2 id="h302">26.4 第二步：角色设定（System Prompt）</h2>
+<p>角色不是一个"开关"，而是写进每一轮输入开头的"身份卡"。我们把角色设定做成可配置：</p>
+<pre><code class="language-python"># prompt.py —— 角色与对话模板
+ROLE_CARD = &quot;&quot;&quot;你叫 Memo，是一个温柔、耐心的倾听型 AI 朋友。
+你说话简短、口语化，经常关心对方的感受。
+如果对方提到难过的事，先共情，再给建议。
+你永远使用简体中文回复。&quot;&quot;&quot;
+
+def build_prompt(user_input: str, history: list[str]) -&gt; str:
+    &quot;&quot;&quot;history 是最近几轮的短记忆，状态文件管长记忆&quot;&quot;&quot;
+    chat = &quot;\n&quot;.join(history[-6:])          # 只保留最近 6 条，防爆 token
+    return f&quot;{ROLE_CARD}\n\n最近的对话：\n{chat}\n用户：{user_input}\nMemo：&quot;
+</code></pre>
+<p><strong>为什么这样设计</strong>：RWKV 的"状态"负责<strong>长期记忆</strong>（跨会话、记大事）；显式塞进 prompt 的 history 负责<strong>短期上下文</strong>（让回复更连贯）。两者分工，这是 RWKV 应用最舒服的用法。</p>
+<h2 id="h303">26.5 第三步：把记忆做成"数据库"</h2>
+<p>这是本项目最 RWKV 的部分——<strong>状态即记忆，存进数据库</strong>：</p>
+<pre><code class="language-python"># memory.py —— 用 SQLite 存状态，实现跨会话记忆
+import sqlite3, pickle
+
+DB = &quot;memo.db&quot;
+
+def _conn():
+    c = sqlite3.connect(DB)
+    c.execute(&quot;CREATE TABLE IF NOT EXISTS sessions &quot;
+              &quot;(uid TEXT PRIMARY KEY, state BLOB, history TEXT)&quot;)
+    return c
+
+def save_session(uid: str, state, history: list[str]):
+    c = _conn()
+    c.execute(&quot;INSERT OR REPLACE INTO sessions VALUES (?,?,?)&quot;,
+              (uid, pickle.dumps(state), &quot;\n&quot;.join(history)))
+    c.commit(); c.close()
+
+def load_session(uid: str):
+    c = _conn()
+    row = c.execute(&quot;SELECT state, history FROM sessions WHERE uid=?&quot;, (uid,)).fetchone()
+    c.close()
+    if not row:
+        return None, []
+    return pickle.loads(row[0]), row[1].split(&quot;\n&quot;)
+</code></pre>
+<p><strong>工作原理</strong>：用户每说一句话，我们拿到新的 <code>state</code>，立刻存库。下次用户再来，直接读回 <code>state</code>——RWKV 就"还记得"之前的所有对话。整个过程不需要存任何原始长文本，一个状态文件搞定。</p>
+<h2 id="h304">26.6 第四步：接入 FastAPI，做成 Web 服务</h2>
+<pre><code class="language-python"># app.py —— FastAPI 聊天接口
+from fastapi import FastAPI
+from pydantic import BaseModel
+from llm import generate
+from prompt import build_prompt
+from memory import load_session, save_session
+
+app = FastAPI()
+
+class ChatIn(BaseModel):
+    uid: str
+    text: str
+
+@app.post(&quot;/chat&quot;)
+def chat(body: ChatIn):
+    state, history = load_session(body.uid)          # 1. 读回记忆
+    prompt = build_prompt(body.text, history)        # 2. 组 prompt
+    reply, new_state = generate(prompt, state)       # 3. 生成回复
+    save_session(body.uid, new_state, history + [body.text, reply])  # 4. 存记忆
+    return {&quot;reply&quot;: reply}
+
+# 启动：uvicorn app:app --port 8000
+</code></pre>
+<h2 id="h305">26.7 第五步：加一个简单前端</h2>
+<p>用原生 HTML 就能做得很像样，不需要框架：</p>
+<pre><code class="language-html">&lt;!-- index.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;Memo 伙伴&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: sans-serif; max-width: 640px; margin: 0 auto; padding: 16px; }
+  #box { border: 1px solid #ddd; height: 60vh; overflow-y: auto; padding: 12px; border-radius: 8px; }
+  .me { background: #dbeafe; padding: 6px 10px; border-radius: 8px; margin: 6px 0; text-align: right; }
+  .ai { background: #f1f5f9; padding: 6px 10px; border-radius: 8px; margin: 6px 0; }
+  input { width: 80%; padding: 8px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;Memo 伙伴 &lt;small&gt;（带记忆的 RWKV 助手）&lt;/small&gt;&lt;/h2&gt;
+&lt;div id=&quot;box&quot;&gt;&lt;/div&gt;
+&lt;br&gt;
+&lt;input id=&quot;inp&quot; placeholder=&quot;和 Memo 说点什么...&quot;&gt;
+&lt;button onclick=&quot;send()&quot;&gt;发送&lt;/button&gt;
+&lt;script&gt;
+const UID = &quot;user-001&quot;;          // 同一 UID = 同一份记忆
+async function send() {
+  const inp = document.getElementById(&quot;inp&quot;);
+  const box = document.getElementById(&quot;box&quot;);
+  const text = inp.value; if (!text) return; inp.value = &quot;&quot;;
+  box.innerHTML += `&lt;div class=&quot;me&quot;&gt;${text}&lt;/div&gt;`;
+  const res = await fetch(&quot;/chat&quot;, {
+    method: &quot;POST&quot;,
+    headers: {&quot;Content-Type&quot;: &quot;application/json&quot;},
+    body: JSON.stringify({uid: UID, text}),
+  });
+  const data = await res.json();
+  box.innerHTML += `&lt;div class=&quot;ai&quot;&gt;${data.reply}&lt;/div&gt;`;
+  box.scrollTop = box.scrollHeight;
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>启动后在浏览器打开 <code>http://localhost:8000/index.html</code>，就能和"带记忆的 Memo"聊天了。</p>
+<h2 id="h306">26.8 第六步（可选）：接入本地知识库（RAG）</h2>
+<p>想让 Memo 能回答你资料里的问题？给它加一个"外挂知识库"：</p>
+<pre><code class="language-python"># rag.py —— 极简 RAG：关键词 + 向量混合检索
+# 这里用最朴素的实现演示思想；生产可换 FAISS / Chroma / Milvus
+import hashlib, sqlite3
+
+def add_doc(text: str):
+    &quot;&quot;&quot;把一段资料按句切分后入库&quot;&quot;&quot;
+    for sentence in text.replace(&quot;\n&quot;, &quot;。&quot;).split(&quot;。&quot;):
+        if len(sentence.strip()) &gt; 10:
+            conn = sqlite3.connect(&quot;kb.db&quot;)
+            conn.execute(&quot;CREATE TABLE IF NOT EXISTS docs &quot;
+                         &quot;(id TEXT PRIMARY KEY, content TEXT)&quot;)
+            h = hashlib.md5(sentence.encode()).hexdigest()
+            conn.execute(&quot;INSERT OR REPLACE INTO docs VALUES (?,?)&quot;, (h, sentence))
+            conn.commit(); conn.close()
+
+def search(query: str, topk: int = 3) -&gt; str:
+    &quot;&quot;&quot;按关键词命中程度检索最相关的句子&quot;&quot;&quot;
+    conn = sqlite3.connect(&quot;kb.db&quot;)
+    rows = conn.execute(&quot;SELECT content FROM docs&quot;).fetchall()
+    conn.close()
+    q = set(query)
+    scored = sorted(rows, key=lambda r: -len(q &amp; set(r[0])))
+    return &quot;\n&quot;.join(c for c, *_ in scored[:topk])
+</code></pre>
+<p>然后改一下 <code>build_prompt</code>，把检索结果作为"参考资料"喂给模型：</p>
+<pre><code class="language-python">def build_prompt(user_input, history):
+    ref = search(user_input)          # 知识库检索结果
+    return (f&quot;{ROLE_CARD}\n\n参考资料：\n{ref}\n&quot;
+            f&quot;（资料若无用请忽略）\n\n最近的对话：\n{history[-6:]}\n&quot;
+            f&quot;用户：{user_input}\nMemo：&quot;)
+</code></pre>
+<p><strong>效果</strong>：现在 Memo 既能"记住你"（状态），又能"查资料"（RAG），还"有人设"（角色卡）。一个三合一的小助手就完成了。</p>
+<h2 id="h307">26.9 第七步：部署与收尾</h2>
+<p><strong>本地演示</strong>（够用了）：</p>
+<pre><code class="language-bash">uvicorn app:app --host 0.0.0.0 --port 8000
+</code></pre>
+<p><strong>对外上线</strong>（参考第 24 章）：
+1. 换 vLLM 托管推理，提升并发；
+2. 数据库从 SQLite 升级到 PostgreSQL/Redis；
+3. 加内容安全过滤和监控告警；
+4. 用 Docker 打包，一键部署。</p>
+<p><strong>常见的三个坑及解法：</strong></p>
+<table>
+<thead>
+<tr>
+<th>坑</th>
+<th>现象</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>状态序列化失败</td>
+<td>重启后记忆丢失</td>
+<td>确认用 <code>pickle</code> 且版本一致；或改存为 JSON 数组格式</td>
+</tr>
+<tr>
+<td>显存不足</td>
+<td>启动报 CUDA OOM</td>
+<td>换 <code>strategy="cuda fp16"</code> 或下载 Q4 量化版</td>
+</tr>
+<tr>
+<td>回复重复/复读机</td>
+<td>一直说同样的话</td>
+<td>调高 <code>temperature</code>、打开重复惩罚</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h308">26.10 本项目用到的 RWKV 特性复盘</h2>
+<p>做完这个项目，回头看你其实已经用上了 RWKV 最有价值的几个特性：</p>
+<table>
+<thead>
+<tr>
+<th>用到的能力</th>
+<th>对应章节</th>
+<th>在本项目中的体现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>恒定内存推理</td>
+<td>第 4、5 章</td>
+<td>单机就能跑，无需大显存</td>
+</tr>
+<tr>
+<td>状态即记忆</td>
+<td>第 10 章</td>
+<td>SQLite 存状态 → 跨会话不失忆</td>
+</tr>
+<tr>
+<td>双模式</td>
+<td>第 7 章</td>
+<td>开发时并行、推理时线性，无需 KV Cache</td>
+</tr>
+<tr>
+<td>State 可迁移</td>
+<td>第 11 章</td>
+<td>换模型/换设备，记忆仍可复用</td>
+</tr>
+<tr>
+<td>RAG 外挂</td>
+<td>第 11 章</td>
+<td>知识库检索 + 状态记忆并行</td>
+</tr>
+</tbody>
+</table>
+<div class="note">
+
+**本章小结**：一个完整的 RWKV 应用 = **角色卡（prompt） + 状态记忆（state 存库） + 可选知识库（RAG）** 三件套。最难的部分不是代码，而是理解"状态"这个一等公民——一旦想通，你的产品架构会变得异常清爽。动手把代码敲一遍，你离"熟练"就只差这一步了。
+
+</div>
+<h1 id="h309">第二十七章 常见报错与排查手册</h1>
+<p>动手过程中，报错是常态，别慌。这一章把 RWKV 从部署到运行最常见的报错整理成"症状 → 原因 → 解法"的速查手册。遇到问题先来这里翻，能省下大量瞎折腾的时间。</p>
+<h2 id="h310">27.1 通用排查方法论</h2>
+<p>在逐条查错之前，先记住一套"通用排查四步法"——它能解决八成问题：</p>
+<ol>
+<li><strong>看完整报错</strong>：报错最后几行才是关键（<code>Traceback</code> / <code>Error</code> 之后的正文）。别只看开头。</li>
+<li><strong>搜一下</strong>：把<strong>报错原文</strong>（英文部分）复制到搜索引擎 / rwkv.cn / Discord，十有八九有人踩过。</li>
+<li><strong>缩小范围</strong>：用"最小复现"测试——只跑最简命令，把环境、模型、代码变量逐个排除。</li>
+<li><strong>看版本</strong>：<code>rwkv</code> / <code>torch</code> / <code>llama.cpp</code> / <code>ollama</code> 版本不匹配是高频元凶，先统一版本。</li>
+</ol>
+<p><strong>通用环境诊断命令：</strong></p>
+<pre><code class="language-bash">python -c &quot;import torch; print(torch.__version__, torch.cuda.is_available())&quot;
+ollama list &amp;&amp; ollama --version
+nvidia-smi            # 看显存是否够
+free -h               # 看内存是否够
+</code></pre>
+<h2 id="h311">27.2 安装与环境类报错</h2>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>常见原因</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pip install rwkv</code> 报编译错误</td>
+<td>缺编译工具 / 版本过旧</td>
+<td><code>pip install --upgrade pip setuptools wheel</code>，再装 C++ 编译器</td>
+</tr>
+<tr>
+<td>模型下载极慢或失败</td>
+<td>国内网络访问 Hugging Face 慢</td>
+<td><code>export HF_ENDPOINT=https://hf-mirror.com</code> 走国内镜像</td>
+</tr>
+<tr>
+<td><code>ModuleNotFoundError: rwkv</code></td>
+<td>装错环境 / 未激活虚拟环境</td>
+<td>检查 <code>which python</code>，在 venv 里重新 <code>pip install</code></td>
+</tr>
+<tr>
+<td><code>AttributeError: ... has no attribute ...</code></td>
+<td>库版本太老</td>
+<td><code>pip install -U rwkv rwkv_tokenizer</code> 升级到最新</td>
+</tr>
+<tr>
+<td>加载 <code>.pth</code> 报 <code>unexpected key</code></td>
+<td>模型文件不完整/损坏</td>
+<td>重新 <code>huggingface-cli download</code>，校验文件大小</td>
+</tr>
+</tbody>
+</table>
+<p><strong>镜像加速示例：</strong></p>
+<pre><code class="language-bash">export HF_ENDPOINT=https://hf-mirror.com
+pip install rwkv -i https://pypi.tuna.tsinghua.edu.cn/simple
+</code></pre>
+<h2 id="h312">27.3 显存 / 内存类报错</h2>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>常见原因</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CUDA out of memory</code></td>
+<td>模型太大 / 上下文太长 / 并发太多</td>
+<td>换量化版、缩短上下文、<code>strategy="cuda fp16"</code>、加 <code>--n-gpu-layers</code> 分层</td>
+</tr>
+<tr>
+<td>CPU 跑 <code>MemoryError</code></td>
+<td>内存不够加载 fp16</td>
+<td>下载 GGUF Q4/Q8 量化，用 llama.cpp 跑</td>
+</tr>
+<tr>
+<td>加载即崩、进程被杀</td>
+<td>OOM 被系统 Kill</td>
+<td>用 <code>Q4_K_M</code> 量化版，先测 <code>free -h</code></td>
+</tr>
+<tr>
+<td>显存占用随对话暴涨</td>
+<td>用了非 RWKV 方案 / 上下文没限制</td>
+<td>RWKV 显存应恒定；检查是否误开了长上下文或缓存</td>
+</tr>
+</tbody>
+</table>
+<p><strong>给 2.9B 模型的显存速查（约）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>精度</th>
+<th>显存</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fp16</td>
+<td>~6GB</td>
+<td>质量最好</td>
+</tr>
+<tr>
+<td>Q8_0 / INT8</td>
+<td>~3GB</td>
+<td>推荐平衡点</td>
+</tr>
+<tr>
+<td>Q4_K_M</td>
+<td>~1.8GB</td>
+<td>低显存首选</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h313">27.4 推理质量类"报错"（不算报错，但很常见）</h2>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>常见原因</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>回复"复读机" / 一直重复</td>
+<td>temperature 过低、无重复惩罚</td>
+<td><code>temperature=0.9</code> + 开启重复惩罚 / <code>presence_penalty</code></td>
+</tr>
+<tr>
+<td>中文乱码 / 输出怪字</td>
+<td>用了错误 vocab 文件</td>
+<td>用模型自带的 vocab（如 <code>rwkv_vocab_v20230424.txt</code>）</td>
+</tr>
+<tr>
+<td>回复过于简短/废话</td>
+<td>模型偏小 + prompt 引导不足</td>
+<td>调高 top_p、给更明确的指令、换更大模型</td>
+</tr>
+<tr>
+<td>回答内容瞎编（幻觉）</td>
+<td>所有 LLM 通病</td>
+<td>关键事实走 RAG 检索约束</td>
+</tr>
+<tr>
+<td>长对话后半段变笨</td>
+<td>状态被挤压 / 上下文太长</td>
+<td>分段总结、定期压缩状态、用 RAG 分担</td>
+</tr>
+</tbody>
+</table>
+<p><strong>采样参数速调口诀</strong>：要<strong>稳</strong> → 低 temperature（0.2–0.5）；要<strong>创意</strong> → 高 temperature（0.8–1.1）；要<strong>不重复</strong> → 打开重复惩罚；要<strong>准确</strong> → 配 RAG。</p>
+<h2 id="h314">27.5 服务与 API 类报错</h2>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>常见原因</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Address already in use</code></td>
+<td>端口被占用</td>
+<td>换端口：<code>--port 8081</code>；或 <code>lsof -i:11434</code> 找占用进程</td>
+</tr>
+<tr>
+<td><code>Connection refused</code></td>
+<td>服务没启动 / 地址写错</td>
+<td>确认服务在跑、host 与端口一致；跨机器用 <code>--host 0.0.0.0</code></td>
+</tr>
+<tr>
+<td>前端请求被 CORS 拦截</td>
+<td>浏览器跨域限制</td>
+<td>后端加 CORS 中间件，允许你的前端域名</td>
+</tr>
+<tr>
+<td>API 返回 401 / 无响应</td>
+<td>未带鉴权 / 模型名错误</td>
+<td>检查 <code>Authorization</code> 头与 <code>model</code> 参数拼写</td>
+</tr>
+<tr>
+<td>vLLM 启动报 <code>model not found</code></td>
+<td>路径/格式不对</td>
+<td>vLLM 需要 HF 目录结构或 Safetensors，确认格式</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ollama 常见问题速查：</strong></p>
+<pre><code class="language-bash">ollama ps              # 看当前加载的模型和显存
+ollama rm &lt;model&gt;      # 清理不要的模型
+ollama run xxx --verbose   # 看耗时与 token 速度
+</code></pre>
+<h2 id="h315">27.6 微调与状态类报错</h2>
+<table>
+<thead>
+<tr>
+<th>症状</th>
+<th>常见原因</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoRA 微调 <code>OOM</code></td>
+<td>batch 太大 / 序列太长</td>
+<td>减小 <code>batch_size</code>、<code>micro_bsz</code>、<code>ctx_len</code>，或用 QLoRA</td>
+</tr>
+<tr>
+<td>加载 <code>.st</code> 状态报维度不匹配</td>
+<td>模型版本/规模不一致</td>
+<td>状态文件和模型必须同版本同规模，重新导出</td>
+</tr>
+<tr>
+<td>微调后变傻 / 灾难性遗忘</td>
+<td>学习率太高 / 步数过多</td>
+<td>降学习率（如 1e-5）、用 LoRA 而非全参、加正则</td>
+</tr>
+<tr>
+<td>状态文件读取为空</td>
+<td>序列化/路径问题</td>
+<td>检查 pickle 文件完整性，确认读的是同一路径</td>
+</tr>
+</tbody>
+</table>
+<p><strong>State Tuning 的黄金法则</strong>：状态文件是"记忆快照"，换模型权重前先导出 <code>.st</code>；它只负责"性格/记忆"，不负责"知识"——知识靠权重或 RAG。</p>
+<h2 id="h316">27.7 一张图看懂"先查哪一步"</h2>
+<p><img alt="报错排查决策树" src="img/fig31_troubleshoot.png" /></p>
+<p>排查优先级从高到低：<strong>环境与版本 → 显存/内存 → 模型文件完整性 → 参数设置 → 代码逻辑</strong>。90% 的问题都集中在"版本不匹配"和"显存不够"这两类上，先确认它们再深挖。</p>
+<div class="tip">
+
+**最后的求助姿势**：如果手册里没有你的问题，按第 23 章的方法去社区提问——记得带上**版本号 + 硬件 + 完整报错**这三件套，别人才能帮你。另外，很多"报错"其实只是参数调得不对，多试几次 `temperature` 和上下文长度，可能根本不用改代码。
+
+</div>
+<h1 id="h317">附录 A 参考资料与命令速查</h1>
+<h2 id="h318">A.1 官方与权威资料</h2>
+<table>
+<thead>
+<tr>
+<th>资料</th>
+<th>地址 / 说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RWKV-LM 官方仓库</td>
+<td>github.com/BlinkDL/RWKV-LM（源码、模型、v1–v8 各版本）</td>
+</tr>
+<tr>
+<td>RWKV 官网</td>
+<td>rwkv.com</td>
+</tr>
+<tr>
+<td>中文社区</td>
+<td>rwkv.cn（教程、RWKV-Runner、中文文档）</td>
+</tr>
+<tr>
+<td>官方 Wiki</td>
+<td>wiki.rwkv.com（架构史、Ollama/llama.cpp 等部署教程）</td>
+</tr>
+<tr>
+<td>RWKV-7 论文</td>
+<td>《RWKV-7 "Goose" with Expressive Dynamic State Evolution》（2025-03）</td>
+</tr>
+<tr>
+<td>EMNLP 2023 论文</td>
+<td>RWKV-4 相关论文（首个正式收录）</td>
+</tr>
+<tr>
+<td>AFT 论文</td>
+<td>Attention Free Transformer（Apple，RWKV 的启发来源之一）</td>
+</tr>
+<tr>
+<td>RWKV-PEFT</td>
+<td>github.com/JL-er/RWKV-PEFT（微调与 State Tuning 工具）</td>
+</tr>
+<tr>
+<td>RWKV Runner</td>
+<td>rwkv.cn 提供的一键图形界面工具</td>
+</tr>
+<tr>
+<td>Ollama RWKV 模型库</td>
+<td>ollama.com/mollysama/rwkv-7-g1 等</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h319">A.2 快速上手：三步跑通 RWKV</h2>
+<pre><code class="language-bash"># 第 1 步：安装 Ollama（Linux 为例）
+curl -fsSL https://ollama.com/install.sh | sh
+
+# 第 2 步：拉取并运行 RWKV-7
+ollama run mollysama/rwkv-7-g1:2.9b
+
+# 第 3 步（可选）：用 API 调用
+curl http://localhost:11434/api/chat -d '{&quot;model&quot;:&quot;mollysama/rwkv-7-g1:2.9b&quot;,&quot;messages&quot;:[{&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;你好&quot;}],&quot;stream&quot;:false}'
+</code></pre>
+<h2 id="h320">A.3 命令速查表</h2>
+<h3 id="h321">A.3.1 Ollama</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ollama run &lt;model&gt;</code></td>
+<td>运行模型并进入对话</td>
+</tr>
+<tr>
+<td><code>ollama pull &lt;model&gt;</code></td>
+<td>下载模型</td>
+</tr>
+<tr>
+<td><code>ollama list</code></td>
+<td>查看已下载模型</td>
+</tr>
+<tr>
+<td><code>ollama create my-model -f Modelfile</code></td>
+<td>用 Modelfile 创建自定义模型</td>
+</tr>
+<tr>
+<td><code>ollama serve</code></td>
+<td>启动 API 服务（默认 11434）</td>
+</tr>
+<tr>
+<td><code>ollama rm &lt;model&gt;</code></td>
+<td>删除模型</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h322">A.3.2 llama.cpp</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>./llama-cli -m model.gguf -p "你好"</code></td>
+<td>命令行交互</td>
+</tr>
+<tr>
+<td><code>./llama-server -m model.gguf --port 8080</code></td>
+<td>启动 OpenAI 兼容服务</td>
+</tr>
+<tr>
+<td><code>./llama-bench -m model.gguf</code></td>
+<td>性能测试</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h323">A.3.3 vLLM</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pip install vllm</code></td>
+<td>安装</td>
+</tr>
+<tr>
+<td><code>python -m vllm.entrypoints.openai.api_server --model ... --port 8000</code></td>
+<td>启动服务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h324">A.3.4 HuggingFace / Python</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>huggingface-cli download &lt;repo&gt; &lt;file&gt; --local-dir &lt;dir&gt;</code></td>
+<td>下载模型</td>
+</tr>
+<tr>
+<td><code>export HF_ENDPOINT=https://hf-mirror.com</code></td>
+<td>切换国内镜像</td>
+</tr>
+<tr>
+<td><code>pip install rwkv rwkv_tokenizer</code></td>
+<td>安装官方推理库</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h325">A.4 常用环境变量</h2>
+<pre><code class="language-bash"># HuggingFace 镜像（国内加速）
+export HF_ENDPOINT=https://hf-mirror.com
+
+# 关闭 HuggingFace 的联网检查（离线环境）
+export HF_HUB_OFFLINE=1
+
+# 指定模型缓存目录
+export HF_HOME=/path/to/hf_cache
+</code></pre>
+<h2 id="h326">A.5 推荐阅读路线（复习版）</h2>
+<table>
+<thead>
+<tr>
+<th>目的</th>
+<th>章节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30 秒搞懂 RWKV</td>
+<td>第一章</td>
+</tr>
+<tr>
+<td>补 RNN/Transformer 基础</td>
+<td>第二章</td>
+</tr>
+<tr>
+<td>名字/定义/出身</td>
+<td>第三章</td>
+</tr>
+<tr>
+<td>十大卖点</td>
+<td>第四章</td>
+</tr>
+<tr>
+<td>架构内部原理</td>
+<td>第五章</td>
+</tr>
+<tr>
+<td>与 Transformer 全面对比</td>
+<td>第六章</td>
+</tr>
+<tr>
+<td>版本历史与为什么有效</td>
+<td>第七章</td>
+</tr>
+<tr>
+<td>部署与环境准备</td>
+<td>第八章</td>
+</tr>
+<tr>
+<td>命令行/API/调参</td>
+<td>第九章</td>
+</tr>
+<tr>
+<td>Python 实战（含状态管理）</td>
+<td>第十章</td>
+</tr>
+<tr>
+<td>微调 / State Tuning / RAG</td>
+<td>第十一章</td>
+</tr>
+<tr>
+<td>套用到我们的 AI 陪伴工程</td>
+<td>第十二章</td>
+</tr>
+<tr>
+<td>FAQ / 选型 / 术语表</td>
+<td>第十三章</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h327">A.6 全书章节内容速览</h2>
+<p>想精准定位某个知识点？这份全章节速览表让你"按图索骥"：</p>
+<table>
+<thead>
+<tr>
+<th>章节</th>
+<th>主题</th>
+<th>一句话内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第 1 章</td>
+<td>一句话看懂 RWKV</td>
+<td>30 秒入门：RWKV 是什么、能做什么</td>
+</tr>
+<tr>
+<td>第 2 章</td>
+<td>RNN 与 Transformer 基础</td>
+<td>看懂两大前辈，理解 RWKV 的出发点</td>
+</tr>
+<tr>
+<td>第 3 章</td>
+<td>RWKV 到底是什么</td>
+<td>名字含义、定义、出身与家族定位</td>
+</tr>
+<tr>
+<td>第 4 章</td>
+<td>特殊之处十大卖点</td>
+<td>RWKV 凭什么特殊，一次性讲透</td>
+</tr>
+<tr>
+<td>第 5 章</td>
+<td>架构拆解</td>
+<td>Time Mixing / Channel Mixing / WKV 内部原理</td>
+</tr>
+<tr>
+<td>第 6 章</td>
+<td>与 Transformer 全面对比</td>
+<td>机制、复杂度、内存、效果的逐项对照</td>
+</tr>
+<tr>
+<td>第 7 章</td>
+<td>版本进化与原理</td>
+<td>v1→v8 演进史，以及"为什么有效"</td>
+</tr>
+<tr>
+<td>第 8 章</td>
+<td>部署方案与环境准备</td>
+<td>Ollama / Runner / llama.cpp / vLLM 选型</td>
+</tr>
+<tr>
+<td>第 9 章</td>
+<td>推理实战与 API</td>
+<td>命令行、API、采样参数调优</td>
+</tr>
+<tr>
+<td>第 10 章</td>
+<td>Python 代码实战</td>
+<td>状态管理、多轮对话完整代码</td>
+</tr>
+<tr>
+<td>第 11 章</td>
+<td>微调与 RAG</td>
+<td>LoRA / State Tuning / 知识库接入</td>
+</tr>
+<tr>
+<td>第 12 章</td>
+<td>应用场景与工程套用</td>
+<td>如何套用到你的 AI 陪伴工程</td>
+</tr>
+<tr>
+<td>第 13 章</td>
+<td>FAQ 与术语表</td>
+<td>常见疑问、选型决策、术语速查</td>
+</tr>
+<tr>
+<td>第 14 章</td>
+<td>Tokenizer 与数据流</td>
+<td>分词、嵌入与 token 全流程</td>
+</tr>
+<tr>
+<td>第 15 章</td>
+<td>训练原理</td>
+<td>训练目标、双模式训练、微调</td>
+</tr>
+<tr>
+<td>第 16 章</td>
+<td>量化与性能优化</td>
+<td>INT8 / Q4 量化与推理加速</td>
+</tr>
+<tr>
+<td>第 17 章</td>
+<td>公式通俗课</td>
+<td>用大白话解释 RWKV 的数学</td>
+</tr>
+<tr>
+<td>第 18 章</td>
+<td>高效架构家族对比</td>
+<td>Mamba / RetNet / Gated DeltaNet 横向对比</td>
+</tr>
+<tr>
+<td>第 19 章</td>
+<td>多模态与未来方向</td>
+<td>视觉音频、RWKV-8 路线图</td>
+</tr>
+<tr>
+<td>第 20 章</td>
+<td>实战练习手册</td>
+<td>12 个从部署到 RAG 的动手任务</td>
+</tr>
+<tr>
+<td>第 21 章</td>
+<td>提示词工程实战</td>
+<td>面向 RWKV 的 Prompt 技巧与角色设定</td>
+</tr>
+<tr>
+<td>第 22 章</td>
+<td>真实案例巡礼</td>
+<td>别人都在用 RWKV 做什么</td>
+</tr>
+<tr>
+<td>第 23 章</td>
+<td>社区生态与资源</td>
+<td>社区在哪、有哪些项目、如何参与</td>
+</tr>
+<tr>
+<td>第 24 章</td>
+<td>落地实战（生产部署）</td>
+<td>并发、状态管理、监控、安全、上线清单</td>
+</tr>
+<tr>
+<td>第 25 章</td>
+<td>未来展望与学习路线</td>
+<td>演进趋势、论文书单、三阶段进阶路线</td>
+</tr>
+<tr>
+<td>第 26 章</td>
+<td>端到端项目实战</td>
+<td>从零搭一个"带记忆"的 AI 助手全流程</td>
+</tr>
+<tr>
+<td>第 27 章</td>
+<td>常见报错与排查手册</td>
+<td>部署/显存/推理/API/微调报错速查</td>
+</tr>
+<tr>
+<td>附录 A</td>
+<td>资料与命令速查</td>
+<td>官方资料、命令、环境变量、速览表</td>
+</tr>
+</tbody>
+</table>
+<h2 id="h328">A.7 免责与致谢</h2>
+<ul>
+<li>本文基于公开资料整理（RWKV-LM 仓库、RWKV 官方 Wiki、rwkv.cn 社区、RWKV-7 论文等），部分数据为示意值，请以官方最新文档为准；</li>
+<li>文中所有命令与代码仅供学习参考，生产环境请结合自身版本与硬件验证；</li>
+<li>感谢 RWKV 社区（BlinkDL 及众多贡献者）的开源工作，让如此高效的架构能够免费学习和商用。</li>
+</ul>
+<hr />
+<p><em>RWKV 架构详解 · 从入门到落地 · 超全图文手册 —— 完</em></p>
+</body></html>
