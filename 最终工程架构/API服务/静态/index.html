@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语义回响 · 模型服务控制台</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="logo">语义回响 <span>模型服务控制台</span></div>
+  <div class="badges">
+    <span class="badge" id="服务徽章">服务检测中…</span>
+    <span class="badge" id="模型徽章">未加载模型</span>
+    <span class="badge" id="显存徽章">—</span>
+    <a class="badge" href="/dashboard" title="运行大屏">大屏 →</a>
+    <a class="badge" href="/pro" title="技术人员专用">专业版 →</a>
+  </div>
+</header>
+
+<main>
+  <div id="流程卡片" class="card">
+    <h2>处理流程 <span class="tag" id="流程类型标签">标准流程</span></h2>
+    <div class="flow" id="流程条"></div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h2>① 选择并注册模型 <span class="tag">模型文件生成</span></h2>
+      <label>从扫描到的模型中选择</label>
+      <div class="row">
+        <select id="模型下拉" class="grow"><option value="">正在扫描可用模型…</option></select>
+        <button id="注册按钮">注册模型</button>
+      </div>
+      <div class="hint" id="注册提示">注册时会自动分析模型结构，并自动匹配最佳参数（λ / γ / τ）。</div>
+    </div>
+
+    <div class="card">
+      <h2>② 模型状态</h2>
+      <div class="row">
+        <span class="status-pill" id="加载状态"><span class="dot"></span>未加载</span>
+        <button id="加载按钮" disabled>加载模型</button>
+        <button id="卸载按钮" class="ghost" disabled>卸载模型</button>
+      </div>
+      <div class="bar"><div id="显存条" style="width:0%"></div></div>
+      <div class="hint" id="加载提示">点击「加载模型」开始，大模型加载需要一些时间。</div>
+      <div class="row mt12">
+        <label style="margin:0">开关</label>
+        <button id="开关RAG" class="ghost small" disabled>RAG 跟随</button>
+        <button id="开关LoRA" class="ghost small" disabled>LoRA 跟随</button>
+        <button id="开关记忆" class="ghost small" disabled>记忆 关</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>③ 测试 <span class="tag">自动验证</span></h2>
+    <div class="row">
+      <button id="测试按钮" disabled>运行测试</button>
+      <span class="muted small">测试会自动检查参数匹配、回响调度、模型生成与接口协议。</span>
+    </div>
+    <div id="测试结果" class="mt12"></div>
+  </div>
+
+  <div class="card">
+    <h2>④ 试试对话 <span class="tag" id="对话模型标签">—</span></h2>
+    <div class="row">
+      <input type="text" id="对话输入" class="grow" placeholder="输入一句话，例如：今天的中标消息让我兴奋得睡不着">
+      <button id="发送按钮" disabled>发送</button>
+    </div>
+    <div class="chat mt12" id="对话区"></div>
+  </div>
+
+  <div class="card" id="打标卡片" style="display:none">
+    <h2>⑤ 定制模型 · 打标 <span class="tag">定制流程</span></h2>
+    <div class="row">
+      <input type="text" id="批次名" class="grow" value="批次1" placeholder="批次名">
+      <button id="打标按钮">开始打标</button>
+    </div>
+    <div class="bar"><div id="打标进度" style="width:0%"></div></div>
+    <div class="hint" id="打标提示">打标会逐条生成回复并输出标注任务文件到 f:\打标，供人工标注。</div>
+  </div>
+</main>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

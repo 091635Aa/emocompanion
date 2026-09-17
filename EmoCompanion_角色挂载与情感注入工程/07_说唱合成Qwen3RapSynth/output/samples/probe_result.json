@@ -1,0 +1,25 @@
+{
+  "static_wrapper_api": {
+    "generate_voice_clone": "(self, text: Union[str, List[str]], language: Union[str, List[str]] = None, ref_audio: Union[str, numpy.ndarray, Tuple[numpy.ndarray, int], List[Union[str, numpy.ndarray, Tuple[numpy.ndarray, int]]], NoneType] = None, ref_text: Union[str, List[Optional[str]], NoneType] = None, x_vector_only_mode: Union[bool, List[bool]] = False, voice_clone_prompt: Union[Dict[str, Any], List[qwen_tts.inference.qwen3_tts_model.VoiceClonePromptItem], NoneType] = None, non_streaming_mode: bool = False, **kwargs) -> Tuple[List[numpy.ndarray], int]",
+    "generate_custom_voice": "(self, text: Union[str, List[str]], speaker: Union[str, List[str]], language: Union[str, List[str]] = None, instruct: Union[str, List[str], NoneType] = None, non_streaming_mode: bool = True, **kwargs) -> Tuple[List[numpy.ndarray], int]",
+    "generate_voice_design": "(self, text: Union[str, List[str]], instruct: Union[str, List[str]], language: Union[str, List[str]] = None, non_streaming_mode: bool = True, **kwargs) -> Tuple[List[numpy.ndarray], int]",
+    "create_voice_clone_prompt": "(self, ref_audio: Union[str, numpy.ndarray, Tuple[numpy.ndarray, int], List[Union[str, numpy.ndarray, Tuple[numpy.ndarray, int]]]], ref_text: Union[str, List[Optional[str]], NoneType] = None, x_vector_only_mode: Union[bool, List[bool]] = False) -> List[qwen_tts.inference.qwen3_tts_model.VoiceClonePromptItem]",
+    "VoiceClonePromptItem": "['ref_code', 'ref_spk_embedding', 'x_vector_only_mode', 'icl_mode', 'ref_text']"
+  },
+  "static_lowlevel_generate": "(self, input_ids: Optional[list[torch.Tensor]] = None, instruct_ids: Optional[list[torch.Tensor]] = None, ref_ids: Optional[list[torch.Tensor]] = None, voice_clone_prompt: list[dict] = None, languages: list[str] = None, speakers: list[str] = None, non_streaming_mode=False, max_new_tokens: int = 4096, do_sample: bool = True, top_k: int = 50, top_p: float = 1.0, temperature: float = 0.9, subtalker_dosample: bool = True, subtalker_top_k: int = 50, subtalker_top_p: float = 1.0, subtalker_temperature: float = 0.9, eos_token_id: Optional[int] = None, repetition_penalty: float = 1.05, **kwargs)",
+  "ref_audio_mandatory": true,
+  "task_hypothesis_explicit_pitch": false,
+  "task_hypothesis_explicit_duration": false,
+  "task_hypothesis_explicit_energy": false,
+  "env": {
+    "torch": "2.6.0+cu124",
+    "cuda": true,
+    "base_model_dir": true,
+    "tokenizer_dir": true,
+    "numpy": true,
+    "librosa": true,
+    "soundfile": true,
+    "peft": "0.20.0"
+  },
+  "runtime_synthesis": null
+}

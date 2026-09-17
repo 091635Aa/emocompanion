@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全自动情感打标系统 · 打标报告</title>
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0f1420; color: #e6edf3; font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif; line-height: 1.7; padding: 28px; }
+.标题区 { text-align: center; margin-bottom: 30px; }
+.标题区 h1 { font-size: 28px; letter-spacing: 1px; margin-bottom: 12px;
+  background: linear-gradient(90deg, #5b8def, #9b6ff0, #e05bb0);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.标题信息 { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; color: #9aa7bd; font-size: 14px; }
+.KPI区 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 26px; }
+.KPI卡片 { background: #171e2e; border: 1px solid #243047; border-radius: 12px; padding: 18px 22px; }
+.KPI卡片 .卡片标签 { color: #9aa7bd; font-size: 13px; margin-bottom: 8px; }
+.KPI卡片 .卡片数值 { font-size: 30px; font-weight: 700; }
+.卡片-1 .卡片数值 { color: #5b8def; }
+.卡片-2 .卡片数值 { color: #6fce8f; }
+.卡片-3 .卡片数值 { color: #e2d75b; }
+.卡片-4 .卡片数值 { color: #e05bb0; }
+.区块 { background: #171e2e; border: 1px solid #243047; border-radius: 12px; padding: 22px 26px; margin-bottom: 26px; }
+.区块 h2 { font-size: 18px; margin-bottom: 18px; padding-left: 12px; border-left: 4px solid #5b8def; }
+.条形行 { margin-bottom: 14px; }
+.条形标签 { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; }
+.条形名称 { color: #c9d4e5; }
+.条形数值 { color: #5b8def; font-weight: 600; }
+.条形轨道 { height: 10px; background: #232c40; border-radius: 5px; overflow: hidden; }
+.条形填充 { height: 100%; border-radius: 5px; }
+.数据表 { width: 100%; border-collapse: collapse; font-size: 13px; }
+.数据表 th, .数据表 td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #243047; vertical-align: top; }
+.数据表 th { background: #1d2740; color: #9aa7bd; font-weight: 600; white-space: nowrap; }
+.数据表 tbody tr:hover td { background: #1b2336; }
+.表格容器 { overflow-x: auto; }
+.徽章 { display: inline-block; background: rgba(91, 141, 239, 0.15); color: #8fb4f5; border: 1px solid rgba(91, 141, 239, 0.4); border-radius: 999px; padding: 2px 10px; margin: 2px 4px 2px 0; font-size: 12px; white-space: nowrap; }
+.方向徽章 { display: inline-block; border: 1px solid; border-radius: 999px; padding: 2px 12px; font-size: 12px; white-space: nowrap; }
+.弱文字 { color: #5d6b85; }
+.空提示 { color: #5d6b85; text-align: center; padding: 24px 0; }
+.片段路径 { color: #8fb4f5; word-break: break-all; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+.描述文本 { max-width: 320px; }
+.置信度 { font-weight: 700; color: #6fce8f; white-space: nowrap; }
+.模型名 { color: #9aa7bd; font-size: 12px; }
+.时间列 { white-space: nowrap; }
+.展开块 summary { cursor: pointer; color: #8fb4f5; }
+.展开块 ol { margin: 8px 0 0 20px; color: #c9d4e5; }
+.事件列表 { list-style: none; margin: 0; }
+.事件列表 li { margin-bottom: 6px; font-size: 12px; color: #c9d4e5; }
+.事件时间 { color: #e2d75b; font-weight: 600; }
+.事件类型 { color: #e05bb0; margin: 0 6px; }
+.事件描述 { color: #c9d4e5; }
+
+</style>
+</head>
+<body>
+<header class="标题区"><h1>全自动情感打标系统 · 打标报告</h1><div class="标题信息"><span>生成时间：2026-07-31 18:56:32</span><span>总片段数：0</span><span>总时长：0.0 分钟（0.0 秒）</span><span>模型分布：暂无数据</span></div></header><div class="KPI区"><div class="KPI卡片 卡片-1"><div class="卡片标签">总片段数</div><div class="卡片数值">0 段</div></div><div class="KPI卡片 卡片-2"><div class="卡片标签">总有效标签数</div><div class="卡片数值">0 个</div></div><div class="KPI卡片 卡片-3"><div class="卡片标签">总奖励点数</div><div class="卡片数值">0 点</div></div><div class="KPI卡片 卡片-4"><div class="卡片标签">平均置信度</div><div class="卡片数值">0.0%</div></div></div><section class="区块"><h2>情感方向分布</h2><div class="空提示">暂无数据</div></section><section class="区块"><h2>标签类型分布</h2><div class="空提示">暂无数据</div></section><section class="区块"><h2>高频标签 Top 20</h2><div class="空提示">暂无数据</div></section><section class="区块"><h2>片段明细（0）</h2><div class="空提示">暂无数据</div></section>
+</body>
+</html>

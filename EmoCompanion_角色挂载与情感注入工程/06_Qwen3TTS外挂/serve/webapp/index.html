@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EmoCompanion · 一体化对话台</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ==================== 顶栏：状态 + 挂载 ==================== -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">缘</span>
+    <div class="brand-txt">
+      <h1>EmoCompanion · 一体化对话台</h1>
+      <p class="sub">文本生成 · 本地外挂情感 TTS · 会话历史</p>
+    </div>
+  </div>
+  <div class="conn">
+    <span id="textState" class="pill">文本引擎: …</span>
+    <span id="ttsState" class="pill">TTS: …</span>
+    <button id="debugBtn" class="pill db-btn" title="开启调试模式，查看相关标签 / 生成速度 / 显卡资源">
+      <span class="db-dot"></span>调试模式
+    </button>
+    <button id="loadBtn" class="pill db-btn" title="加载外挂情感模型（llama-tts GGUF）">
+      <span class="load-dot"></span>加载模型
+    </button>
+  </div>
+</header>
+<span id="loadBar" class="load-bar hidden">加载中…</span>
+
+<!-- ==================== 调试模式面板 ==================== -->
+<div id="debugPanel" class="db-panel hidden">
+  <div class="db-grid">
+    <div class="db-card">
+      <h3>相关标签 · 角色情感</h3>
+      <div class="db-row"><span class="k">情感词表</span><span class="v" id="dbEmotions">-</span></div>
+      <div class="db-row"><span class="k">TTS 风格</span><span class="v" id="dbStyles">-</span></div>
+      <div class="db-row"><span class="k">口头禅</span><span class="v" id="dbCatch">-</span></div>
+      <div class="db-row"><span class="k">adapter</span><span class="v" id="dbAdapters">-</span></div>
+      <div class="db-row"><span class="k">当前情感</span><span class="v warn" id="dbCurEmo">-</span></div>
+    </div>
+    <div class="db-card">
+      <h3>相关标签 · 文本引擎(去AI腔/锚点表)</h3>
+      <div class="db-row"><span class="k">情感锚点</span><span class="v" id="dbAnchors">-</span></div>
+      <div class="db-row"><span class="k">正例词 / 短语</span><span class="v" id="dbPos">-</span></div>
+      <div class="db-row"><span class="k">空泛抑制 / 短语</span><span class="v" id="dbHol">-</span></div>
+      <div class="db-row"><span class="k">OOC 拦截短语</span><span class="v warn" id="dbOoc">-</span></div>
+      <div class="db-row"><span class="k">β / T / vocab</span><span class="v" id="dbMeta">-</span></div>
+    </div>
+    <div class="db-card">
+      <h3>生成速度</h3>
+      <div class="db-row"><span class="k">模型(LLM)</span><span class="v" id="dbModel">-</span></div>
+      <div class="db-row"><span class="k">TTS 模型</span><span class="v" id="dbModelTTS" title="Qwen3-TTS-12Hz-1.7B-Base INT4 + mmproj Q8_0">-</span></div>
+      <div class="db-row"><span class="k">累计调用 / Token</span><span class="v" id="dbCalls">-</span></div>
+      <div class="db-row"><span class="k">文本累计时长(s)</span><span class="v" id="dbSecs">-</span></div>
+      <div class="db-row"><span class="k">平均速度(tok/s)</span><span class="v ok" id="dbAvg">-</span></div>
+      <div class="db-row"><span class="k">TTS 后端</span><span class="v" id="dbBackend">-</span></div>
+      <div class="db-row"><span class="k">TTS 采样</span><span class="v" id="dbTTSSamp" title="当前温度 / top_k / top_p / LoRA adapter">-</span></div>
+      <div class="db-row"><span class="k">模型加载状态</span><span class="v warn" id="dbLoad">-</span></div>
+    </div>
+    <div class="db-card">
+      <h3>显卡 / 资源</h3>
+      <div class="db-row"><span class="k">GPU</span><span class="v" id="dbGpuName">-</span></div>
+      <div class="db-row"><span class="k">显存使用</span><span class="v" id="dbVram">-</span></div>
+      <div class="db-bar"><i id="dbVramBar"></i></div>
+      <div class="db-row" style="margin-top:8px"><span class="k">GPU 利用率</span><span class="v" id="dbUtil">-</span></div>
+      <div class="db-row"><span class="k">进程内存(MB)</span><span class="v" id="dbRam">-</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- ==================== 左栏：历史回顾 ==================== -->
+  <aside class="sidebar">
+    <button id="newChat" class="new-chat">＋ 新建对话</button>
+    <div class="side-hd">历史回顾</div>
+    <div id="sessionList" class="sessions"></div>
+    <div class="side-foot">
+      <button id="roleBtn" class="ghost">人物角色设定</button>
+    </div>
+  </aside>
+
+  <!-- ==================== 主区 ==================== -->
+  <main class="chatwrap">
+
+    <!-- Tab 导航 -->
+    <nav class="navbar">
+      <button class="nav-tab active" id="tabBtn-chat" data-tab="chat"><span class="nt-ic">💬</span>对话台</button>
+      <button class="nav-tab" id="tabBtn-studio" data-tab="studio"><span class="nt-ic">🎙️</span>语音合成</button>
+    </nav>
+
+    <!-- 对话台 -->
+    <section id="tab-chat" class="tab-pane">
+      <div class="chat-hd">
+        <div>
+          <span id="chatTitle" class="chat-title">新对话</span>
+          <span id="roleTag" class="role-tag">EmoCompanion</span>
+        </div>
+        <div class="hd-ctl">
+          <label>角色 <select id="roleSel"></select></label>
+          <label>adapter <select id="adapterSel">
+            <option value="emotion">emotion 情感</option>
+            <option value="voice">voice 音色</option>
+          </select></label>
+          <label>情感 <select id="emotionModeSel">
+            <option value="auto">自动识别</option>
+            <option value="manual">手动</option>
+          </select></label>
+          <label id="manualEmoWrap" class="hidden">指定
+            <select id="manualEmo"></select>
+          </label>
+          <label>说话风格 <select id="styleSel"></select></label>
+        </div>
+      </div>
+
+      <div id="chat" class="chat"></div>
+
+      <!-- 回到底部 / 新消息提示（用户上翻时显示；有未读新消息时带计数） -->
+      <button id="scrollBottomBtn" class="scroll-bottom hidden" title="回到最新">
+        <span class="sbn-icon">▼</span><span id="sbnLabel" class="sbn-label">回到底部</span>
+        <span id="sbnCount" class="sbn-count hidden">0</span>
+      </button>
+
+      <div id="qaBar" class="qa-bar">
+        <span class="qa-hint">快速问答</span>
+        <button class="qa-chip" data-q="你好呀，今天过得怎么样？">日常寒暄</button>
+        <button class="qa-chip" data-q="说点温柔的话哄哄我嘛">温柔哄人</button>
+        <button class="qa-chip" data-q="今天直播遇到一件特别开心的事！">分享开心</button>
+        <button class="qa-chip" data-q="我好难过，陪我说说话吧">安慰陪伴</button>
+      </div>
+
+      <div class="input-bar">
+        <div class="opts">
+          <label class="tgl"><input type="checkbox" id="wantTts" checked /> 语音回复</label>
+          <label class="tgl">语气强度
+            <input type="range" id="toneVar" min="0" max="1" step="0.05" value="0.35" />
+          </label>
+          <span id="genStats" class="stats"></span>
+        </div>
+        <div class="send-row">
+          <textarea id="input" rows="2" placeholder="跟EmoCompanion说点什么…（Enter 发送 / Shift+Enter 换行）"></textarea>
+          <button id="sendBtn" class="primary">发送</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 语音合成工作室 -->
+    <section id="tab-studio" class="tab-pane hidden">
+      <div class="studio">
+        <div class="studio-inner">
+          <div class="ss-card">
+            <h3>🎙️ EmoCompanion音色 · 外挂情感合成</h3>
+            <p class="ss-desc">在EmoCompanion的真人音色下生成语音，情感由 voice+emotion LoRA + 采样预设驱动。</p>
+            <span class="ss-tag">llama-tts GGUF · CUDA INT4</span>
+            <div class="ss-form">
+              <div class="ss-field">
+                <label for="ssText">合成文本</label>
+                <textarea id="ssText" rows="4" placeholder="输入要在EmoCompanion音色下说的话…">哥哥你回来啦，今天想我了吗</textarea>
+              </div>
+              <div class="ss-row">
+                <div class="ss-field">
+                  <label for="ssEmotion">情感</label>
+                  <select id="ssEmotion"></select>
+                </div>
+                <div class="ss-field">
+                  <label for="ssTopK">top_k · <output id="ssTopKOut">50</output></label>
+                  <input type="range" id="ssTopK" min="1" max="100" value="50" />
+                </div>
+              </div>
+              <div class="ss-row">
+                <div class="ss-field ss-range-row">
+                  <label for="ssTemp">温度</label>
+                  <input type="range" id="ssTemp" min="0.2" max="1.4" step="0.05" value="0.9" />
+                  <output id="ssTempOut">0.90</output>
+                </div>
+                <div class="ss-field ss-range-row">
+                  <label for="ssRate">语速</label>
+                  <input type="range" id="ssRate" min="0.6" max="1.6" step="0.05" value="1.0" />
+                  <output id="ssRateOut">x1.00</output>
+                </div>
+              </div>
+              <div class="ss-actions">
+                <button id="ssBtn" class="primary">合成语音</button>
+                <span id="ssStatus" class="ss-status"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ss-card">
+            <h3>合成结果</h3>
+            <p class="ss-desc">合成完成后自动播放，可反复试听。</p>
+            <span class="ss-tag">自动情感识别</span>
+            <div class="ss-form">
+              <div class="ss-field">
+                <label for="ssDetectText">自动情感识别 · 试听文本</label>
+                <textarea id="ssDetectText" rows="3" placeholder="输入一句话，自动判断情感并合成…">哎呀，今天好开心见到你呀！</textarea>
+              </div>
+              <div class="ss-actions">
+                <button id="ssDetectBtn" class="ghost">自动识别并合成</button>
+              </div>
+            </div>
+            <div class="ss-result hidden" id="ssResult">
+              <audio id="ssAudio" class="ss-audio" controls></audio>
+              <div class="ss-meta" id="ssMeta"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ==================== 角色设定抽屉 ==================== -->
+<div id="roleDrawer" class="drawer-mask hidden">
+  <div class="drawer">
+    <div class="drawer-hd">
+      <h2>人物角色设定</h2>
+      <button id="roleClose" class="ghost">✕</button>
+    </div>
+    <div class="drawer-body">
+      <label class="fld">角色名
+        <input id="roleName" readonly />
+      </label>
+      <label class="fld">一句话人设
+        <input id="roleDesc" />
+      </label>
+      <label class="fld">人设 / persona（将作为 system 提示词注入文本引擎）
+        <textarea id="rolePersona" rows="6"></textarea>
+      </label>
+      <div class="fld">人设特征（源自 6951 条打标数据均值）</div>
+      <div id="traitList" class="traits"></div>
+      <label class="fld">口头禅 / 语气词（逗号分隔）
+        <input id="roleCatch" />
+      </label>
+      <div class="fld">各情感关键词（用于自动情感识别与参考音频选择）</div>
+      <div id="emoKwList" class="emo-kws"></div>
+    </div>
+    <div class="drawer-ft">
+      <button id="roleSave" class="primary">保存角色设定</button>
+      <span id="roleSaveStat" class="stats"></span>
+    </div>
+  </div>
+</div>
+
+<audio id="player" class="hidden"></audio>
+<script src="/static/app.js"></script>
+</body>
+</html>

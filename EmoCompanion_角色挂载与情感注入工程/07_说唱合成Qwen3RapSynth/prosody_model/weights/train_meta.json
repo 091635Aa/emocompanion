@@ -1,0 +1,17 @@
+{
+  "epochs": 8,
+  "batch": 32,
+  "device": "cpu",
+  "loss_history": [
+    10.0037,
+    3.4048,
+    2.7044,
+    2.3947,
+    2.3002,
+    2.2727,
+    2.1749,
+    2.064
+  ],
+  "lines": 12,
+  "style": "rule-distillation (teacher), 待真实数据重训"
+}

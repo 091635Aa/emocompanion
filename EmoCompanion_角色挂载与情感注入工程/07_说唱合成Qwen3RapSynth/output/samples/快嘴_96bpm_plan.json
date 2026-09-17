@@ -1,0 +1,60 @@
+{
+  "plan": {
+    "bpm": 96.0,
+    "style": "快嘴",
+    "beat_sec": 0.625,
+    "total_seconds": 10.0,
+    "lines": [
+      {
+        "index": 0,
+        "text": "夜色之下把话说完不留半句",
+        "syllables": 12,
+        "start_sec": 0.0,
+        "duration_sec": 3.75,
+        "mean_f0": 180.0,
+        "f0_style": "flat",
+        "energy": 1.15,
+        "jump": 1
+      },
+      {
+        "index": 1,
+        "text": "节奏像是电流穿进每个脉络",
+        "syllables": 12,
+        "start_sec": 4.062,
+        "duration_sec": 3.75,
+        "mean_f0": 185.4,
+        "f0_style": "flat",
+        "energy": 1.15,
+        "jump": 1
+      },
+      {
+        "index": 2,
+        "text": "一口气贯到底分秒都不犹豫",
+        "syllables": 12,
+        "start_sec": 8.125,
+        "duration_sec": 3.75,
+        "mean_f0": 180.0,
+        "f0_style": "flat",
+        "energy": 1.15,
+        "jump": 1
+      },
+      {
+        "index": 3,
+        "text": "饶舌就是我的枪口对准利弊",
+        "syllables": 12,
+        "start_sec": 12.188,
+        "duration_sec": 3.75,
+        "mean_f0": 185.4,
+        "f0_style": "flat",
+        "energy": 1.15,
+        "jump": 1
+      }
+    ]
+  },
+  "onsets": [
+    0.0,
+    4.062,
+    8.125,
+    12.188
+  ]
+}

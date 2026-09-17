@@ -1,0 +1,29 @@
+[worker] 加载处理器：f:\打标\模型\模型缓存\Qwen2.5-Omni-7B
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. Note that this behavior will be extended to all models in a future release.
+You have video processor config saved in `preprocessor.json` file which is deprecated. Video processor configs should be saved in their own `video_preprocessor.json` file. You can rename the file or load and save the processor back which renames it automatically. Loading from `preprocessor.json` will be removed in v5.0.
+[worker] 加载模型（7B 需 1-2 分钟）...
+Unrecognized keys in `rope_scaling` for 'rope_type'='default': {'mrope_section'}
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]Loading checkpoint shards:  20%|██        | 1/5 [00:24<01:36, 24.19s/it]Loading checkpoint shards:  40%|████      | 2/5 [00:47<01:11, 23.71s/it]Loading checkpoint shards:  60%|██████    | 3/5 [01:09<00:45, 22.79s/it]Loading checkpoint shards:  80%|████████  | 4/5 [01:31<00:22, 22.48s/it]Loading checkpoint shards: 100%|██████████| 5/5 [01:31<00:00, 18.25s/it]
+Some parameters are on the meta device because they were offloaded to the disk and cpu.
+[worker] 模型就绪，显存 10.9GB
+[worker] 转写段 0.0s-30.0s 开始
+[worker] 临时wav 已写 C:\Users\Administrator\AppData\Local\Temp\asr段_1786094650519264.wav
+WARNING:root:System prompt modified, audio output may not work as expected. Audio output mode only works when using default system prompt 'You are Qwen, a virtual human developed by the Qwen Team, Alibaba Group, capable of perceiving auditory and visual inputs, as well as generating text and speech.'
+[worker] 模板OK
+[worker] 输入OK keys: ['input_ids', 'attention_mask', 'feature_attention_mask', 'input_features']
+[worker] 生成OK
+[worker] 段 1/2 完成：.
+user
+请将这段音频的内容逐字转写为文字，不要添加任何解释或润色。
+ass...
+[worker] 转写段 30.0s-44.0s 开始
+[worker] 临时wav 已写 C:\Users\Administrator\AppData\Local\Temp\asr段_1786094823648874.wav
+WARNING:root:System prompt modified, audio output may not work as expected. Audio output mode only works when using default system prompt 'You are Qwen, a virtual human developed by the Qwen Team, Alibaba Group, capable of perceiving auditory and visual inputs, as well as generating text and speech.'
+[worker] 模板OK
+[worker] 输入OK keys: ['input_ids', 'attention_mask', 'feature_attention_mask', 'input_features']
+[worker] 生成OK
+[worker] 段 2/2 完成：.
+user
+请将这段音频的内容逐字转写为文字，不要添加任何解释或润色。
+ass...
+{"成功": true, "文本": ".\nuser\n请将这段音频的内容逐字转写为文字，不要添加任何解释或润色。\nassistant\n谢谢你们帮我凑展馆名，谢谢安然，恭喜安然八子，欢迎小金，晚上好，小金，等等玩数字炸弹，我先管理一下我的额头，我先管理一下我的额头，等等着玩数字炸弹，等我一下，快挪到这里来，小金你来点展馆了，猫喵。\n.\nuser\n请将这段音频的内容逐字转写为文字，不要添加任何解释或润色。\nassistant\n小新是来玩数字炸弹的喵应该会给我透一点的喵有感觉的吗喵", "分段": [{"起始秒": 0.0, "结束秒": 30.0, "文本": ".\nuser\n请将这段音频的内容逐字转写为文字，不要添加任何解释或润色。\nassistant\n谢谢你们帮我凑展馆名，谢谢安然，恭喜安然八子，欢迎小金，晚上好，小金，等等玩数字炸弹，我先管理一下我的额头，我先管理一下我的额头，等等着玩数字炸弹，等我一下，快挪到这里来，小金你来点展馆了，猫喵。"}, {"起始秒": 30.0, "结束秒": 44.0, "文本": ".\nuser\n请将这段音频的内容逐字转写为文字，不要添加任何解释或润色。\nassistant\n小新是来玩数字炸弹的喵应该会给我透一点的喵有感觉的吗喵"}], "总时长秒": 44.0, "耗时秒": 333.5}

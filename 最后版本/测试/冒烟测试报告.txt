@@ -1,0 +1,21 @@
+============================================================
+一体化全流程AI应用 · 冒烟测试报告
+时间：2026-08-07 15:01:47
+目标：文本输入 → 微调数据包 → 微调 → 推理（最小链路）
+============================================================
+
+[PASS] a.文本输入→上传并清洗：任务ID=20260807150145e28148，文本长度=14
+[PASS] b.自动打标：片段数=1，情感维度=积极
+[PASS] b.导出数据包：条数=1，路径=J:\最后版本！\数据\微调数据包\情感微调_20260807_150147.jsonl
+[SKIP] c.微调：依赖缺失跳过：transformers（transformers）、peft（peft）、datasets（datasets）
+[SKIP] d.推理（V1推理引擎）：依赖缺失跳过：transformers
+
+------------------------------------------------------------
+汇总：PASS 3 / FAIL 0 / SKIP 2
+总体：通过
+
+待安装命令（依赖缺失，安装后可重新运行）：
+  pip install -i https://pypi.tuna.tsinghua.edu.cn/simple transformers
+  pip install -i https://pypi.tuna.tsinghua.edu.cn/simple transformers peft datasets accelerate bitsandbytes
+
+退出码：0

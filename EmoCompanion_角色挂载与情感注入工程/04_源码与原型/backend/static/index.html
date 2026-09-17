@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmoCompanion情感引擎 · 调试前端</title>
+<style>
+  :root {
+    --bg: #12141a; --panel: #1b1e27; --panel2: #232733; --line: #2e3442;
+    --txt: #e6e8ef; --dim: #9aa2b5; --acc: #ff7a9d; --acc2: #7aa2ff; --ok: #34d399; --warn: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+  body { background: var(--bg); color: var(--txt); height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+  .sub { color: var(--dim); font-size: 12px; margin-left: auto; }
+  .debug-toggle { display: flex; align-items: center; gap: 8px; background: var(--panel2); border: 1px solid var(--line); border-radius: 20px; padding: 6px 12px; cursor: pointer; user-select: none; transition: .2s; }
+  .debug-toggle:hover { border-color: var(--acc); }
+  .debug-toggle .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--dim); transition: .2s; }
+  .debug-toggle.on { border-color: var(--acc); box-shadow: 0 0 10px rgba(255,122,157,.25); }
+  .debug-toggle.on .dot { background: var(--acc); box-shadow: 0 0 8px var(--acc); }
+  .debug-toggle span { font-size: 13px; font-weight: 600; }
+
+  .debug-panel { display: none; background: var(--panel); border-bottom: 1px solid var(--line); padding: 14px 20px; }
+  .debug-panel.show { display: block; }
+  .db-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .db-card { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .db-card h3 { font-size: 12px; color: var(--acc); letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
+  .db-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+  .db-row .k { color: var(--dim); }
+  .db-row .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .db-row .v.ok { color: var(--ok); } .db-row .v.warn { color: var(--warn); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { background: rgba(255,122,157,.12); color: var(--acc); border: 1px solid rgba(255,122,157,.35); border-radius: 6px; padding: 2px 8px; font-size: 12px; }
+  .tag.gray { background: rgba(154,162,181,.12); color: var(--dim); border-color: rgba(154,162,181,.35); }
+  .gbar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .gbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--acc), var(--acc2)); width: 0%; transition: .3s; }
+  .persona { font-size: 12px; color: var(--dim); line-height: 1.6; max-height: 96px; overflow: auto; }
+
+  .chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .msg { max-width: 70%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; position: relative; }
+  .msg.user { align-self: flex-end; background: var(--acc2); color: #0e0f14; border-bottom-right-radius: 4px; }
+  .msg.bot { align-self: flex-start; background: var(--panel2); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 11px; color: var(--dim); }
+  .msg .meta .chip { background: rgba(122,162,255,.12); color: var(--acc2); border-radius: 4px; padding: 1px 6px; }
+  .msg .meta .chipslow { background: rgba(34,211,153,.12); color: var(--ok); border-radius: 4px; padding: 1px 6px; }
+  .msg.dbg .meta { display: flex; }
+  .cursor { display: inline-block; width: 8px; height: 16px; background: var(--acc); vertical-align: -2px; animation: blink .8s infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .inputbar { display: flex; gap: 10px; padding: 14px 20px; background: var(--panel); border-top: 1px solid var(--line); }
+  textarea { flex: 1; resize: none; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; color: var(--txt); padding: 10px 12px; font-size: 14px; outline: none; }
+  textarea:focus { border-color: var(--acc); }
+  button.send { background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #0e0f14; border: none; border-radius: 10px; padding: 0 22px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  button.send:disabled { opacity: .5; cursor: not-allowed; }
+  .hint { font-size: 12px; color: var(--dim); padding: 0 20px 4px; }
+  .empty { text-align: center; color: var(--dim); font-size: 13px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>EmoCompanion情感引擎</h1>
+  <span class="sub" id="roleLabel">角色: default</span>
+  <div class="debug-toggle" id="debugBtn" title="开启调试模式，查看标签/速度/显卡详情">
+    <span class="dot"></span><span>调试模式</span>
+  </div>
+</header>
+
+<div class="debug-panel" id="debugPanel">
+  <div class="db-grid">
+    <div class="db-card">
+      <h3>相关标签 · 角色锚点与风格权重</h3>
+      <div class="tags" id="dbAnchors"></div>
+      <div class="tags" id="dbWeights" style="margin-top:8px"></div>
+    </div>
+    <div class="db-card">
+      <h3>去AI腔 / 拦截 标签表</h3>
+      <div class="db-row"><span class="k">正例词 boost(单token)</span><span class="v" id="dbPosTok">-</span></div>
+      <div class="db-row"><span class="k">正例短语 boost</span><span class="v" id="dbPosPhr">-</span></div>
+      <div class="db-row"><span class="k">空泛词抑制(单token)</span><span class="v" id="dbHolTok">-</span></div>
+      <div class="db-row"><span class="k">空泛短语抑制</span><span class="v" id="dbHolPhr">-</span></div>
+      <div class="db-row"><span class="k">OOC 身份拦截短语</span><span class="v" id="dbOoc" style="color:var(--warn)">-</span></div>
+    </div>
+    <div class="db-card">
+      <h3>生成速度</h3>
+      <div class="db-row"><span class="k">累计调用</span><span class="v" id="dbCalls">-</span></div>
+      <div class="db-row"><span class="k">累计 Token</span><span class="v" id="dbTokens">-</span></div>
+      <div class="db-row"><span class="k">累计时长(s)</span><span class="v" id="dbSecs">-</span></div>
+      <div class="db-row"><span class="k">平均速度(tok/s)</span><span class="v ok" id="dbAvg">-</span></div>
+    </div>
+    <div class="db-card">
+      <h3>显卡 / 资源</h3>
+      <div class="db-row"><span class="k">GPU</span><span class="v" id="dbGpuName">-</span></div>
+      <div class="db-row"><span class="k">显存使用</span><span class="v" id="dbVram">-</span></div>
+      <div class="gbar"><i id="dbVramBar"></i></div>
+      <div class="db-row" style="margin-top:8px"><span class="k">GPU 利用率</span><span class="v" id="dbUtil">-</span></div>
+      <div class="db-row"><span class="k">进程内存(MB)</span><span class="v" id="dbRam">-</span></div>
+    </div>
+    <div class="db-card" style="grid-column:1/-1">
+      <h3>角色 Persona</h3>
+      <div class="persona" id="dbPersona">-</div>
+    </div>
+  </div>
+</div>
+
+<div class="chat" id="chat"><div class="empty">你好呀，我是EmoCompanion~ 随便聊聊，点右上角「调试模式」可查看生成详情。</div></div>
+<div class="hint">建议先发送对话后切换调试模式查看本句生成速度/Token；回车发送 / Shift+回车换行</div>
+<div class="inputbar">
+  <textarea id="input" rows="1" placeholder="和EmoCompanion聊点什么…"></textarea>
+  <button class="send" id="send">发送</button>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const debBtn = document.getElementById('debugBtn');
+const debPanel = document.getElementById('debugPanel');
+let debug = false;
+
+debBtn.addEventListener('click', () => {
+  debug = !debug;
+  debBtn.classList.toggle('on', debug);
+  debPanel.classList.toggle('show', debug);
+  if (debug) refreshDebug();
+});
+function chip(t, c) { return `<span class="chip" style="background:${c==='slow'?'rgba(34,211,153,.12)':'rgba(122,162,255,.12)'};color:${c==='slow'?'var(--ok)':'var(--acc2)'}">${t}</span>`; }
+
+function addMsg(role, text, info) {
+  if (chat.querySelector('.empty')) chat.querySelector('.empty').remove();
+  const m = document.createElement('div');
+  m.className = 'msg ' + role + (info ? ' dbg' : '');
+  m.innerHTML = `<span class="txt"></span>${info ? `<div class="meta">${info}</div>` : ''}`;
+  m.querySelector('.txt').textContent = text;
+  chat.appendChild(m);
+  chat.scrollTop = chat.scrollHeight;
+  return m;
+}
+
+async function refreshDebug() {
+  try {
+    const d = await (await fetch('/debug')).json();
+    // 标签
+    const anchors = d.meta.anchors || [];
+    document.getElementById('dbAnchors').innerHTML = anchors.map(a => `<span class="tag">${a}</span>`).join('');
+    const w = d.meta.target_weights || {};
+    document.getElementById('dbWeights').innerHTML = anchors.map(a => {
+      const v = w[a]; const c = v>0 ? 'var(--acc)' : 'var(--acc2)';
+      return `<span class="tag ${v>0?'':'gray'}" style="color:${c}">${a}: ${v}</span>`;
+    }).join('');
+    // 去AI腔
+    const ds = d.deai_summary || {};
+    document.getElementById('dbPosTok').textContent = ds.pos_tok;
+    document.getElementById('dbPosPhr').textContent = ds.pos_phr;
+    document.getElementById('dbHolTok').textContent = ds.hol_tok;
+    document.getElementById('dbHolPhr').textContent = ds.hol_phr;
+    document.getElementById('dbOoc').textContent = ds.ooc_phr;
+    // 速度
+    const st = d.stats || {};
+    document.getElementById('dbCalls').textContent = st.calls;
+    document.getElementById('dbTokens').textContent = st.tokens;
+    document.getElementById('dbSecs').textContent = st.seconds;
+    document.getElementById('dbAvg').textContent = st.avg_tok_s + ' tok/s';
+    // 显卡
+    const g = d.gpu;
+    document.getElementById('dbGpuName').textContent = g ? g.name : '未检测到';
+    document.getElementById('dbVram').textContent = g ? `${(g.used_mb/1024).toFixed(1)} / ${(g.total_mb/1024).toFixed(1)} GB` : '-';
+    document.getElementById('dbVramBar').style.width = g ? Math.min(100, g.used_mb/g.total_mb*100) + '%' : '0%';
+    document.getElementById('dbUtil').textContent = g ? g.util_gpu + '%' : '-';
+    document.getElementById('dbRam').textContent = d.process_ram_mb;
+    document.getElementById('dbPersona').textContent = d.persona;
+  } catch (e) { document.getElementById('dbPersona').textContent = '调试信息获取失败: ' + e; }
+}
+
+async function send() {
+  const text = input.value.trim();
+  if (!text || sendBtn.disabled) return;
+  input.value = '';
+  sendBtn.disabled = true;
+  addMsg('user', text);
+
+  const msgs = [...chat.querySelectorAll('.msg')].map(m => ({
+    role: m.classList.contains('user') ? 'user' : 'assistant',
+    content: m.querySelector('.txt').textContent
+  }));
+  const m = addMsg('bot', '', null);
+  const txt = m.querySelector('.txt');
+  txt.innerHTML = '<span class="cursor"></span>';
+
+  const t0 = performance.now();
+  let full = '', toks = 0;
+  const res = await fetch('/chat/stream', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ messages: [{role:'user',content:text}], max_new:128 })
+  });
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  const doneEv = { reply: null };
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, {stream:true});
+    const lines = buf.split('\n\n'); buf = lines.pop();
+    for (const ev of lines) {
+      if (!ev.startsWith('data: ')) continue;
+      const j = JSON.parse(ev.slice(6));
+      if (j.done) { doneEv.reply = j.reply; continue; }
+      if (j.delta) { full += j.delta; toks++; txt.textContent = full; txt.innerHTML = full + '<span class="cursor"></span>'; chat.scrollTop = chat.scrollHeight; }
+      if (j.error) { full += '\n[错误] ' + j.error; }
+    }
+  }
+  const final = (doneEv.reply ?? full) + '';
+  txt.textContent = final;
+  // 调试模式：为这句补充速度/Token 详情
+  const dt = (performance.now() - t0) / 1000;
+  let info = '';
+  if (debug) {
+    const tok = toks || 1;
+    const tokS = (tok / dt).toFixed(1);
+    info = chip('延迟 ' + dt.toFixed(2) + 's') + chip('Token ' + (toks||final.length)) +
+           ' ' + chip(tokS + ' tok/s', 'slow');
+  }
+  const meta = m.querySelector('.meta');
+  if (info) { meta.innerHTML = info; meta.style.display='flex'; }
+  if (debug) refreshDebug();
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+input.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+sendBtn.addEventListener('click', send);
+</script>
+</body>
+</html>

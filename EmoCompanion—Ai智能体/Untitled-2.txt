@@ -1,0 +1,1 @@
+python f:\EmoCompanion—Ai智能体\启动.pypython f:\EmoCompanion—Ai智能体\启动.py

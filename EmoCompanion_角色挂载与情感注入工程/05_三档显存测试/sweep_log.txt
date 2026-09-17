@@ -1,0 +1,103 @@
+
+======== [ Qwen2.5-0.5B | 0.5B | 4bit=False ] ========
+python.exe : `torch_dtype` is deprecated! Use `dtype` instead!
+At C:\Users\Administrator\AppData\Local\Temp\trae-agent-toolhost\jobs\job-01e1f6f37c664df38cab5c009162d3f5\command.ps1:
+15 char:7260
++ ... pgrep\bin'; & "d:\AI情感\打标\.venv\Scripts\python.exe" "d:\AI情感\EmoCompanion_角色挂载与 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (`torch_dtype` i...dtype` instead!:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Building prefix dict from the default dictionary ...
+Loading model from cache C:\Users\Administrator\AppData\Local\Temp\jieba.cache
+Loading model cost 0.530 seconds.
+Prefix dict has been built successfully.
+  [baseline] ent=2.845 rep=0.0401 pos/neg=36/7 toneHit=2 speed=27.7t/s vram=1.96G
+  [      P3] ent=3.216 rep=0.0607 pos/neg=30/9 toneHit=3 speed=28.9t/s vram=1.96G
+
+======== [ Qwen3-0.6B | 0.6B | 4bit=False ] ========
+  [baseline] ent=2.231 rep=0.1647 pos/neg=24/8 toneHit=10 speed=22.4t/s vram=2.28G
+  [      P3] ent=2.751 rep=0.1247 pos/neg=37/8 toneHit=7 speed=22.0t/s vram=2.28G
+
+======== [ SmolLM2-1.7B | 1.7B | 4bit=False ] ========
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequenc
+e, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+  [baseline] ent=1.510 rep=0.2062 pos/neg=61/0 toneHit=0 speed=36.7t/s vram=3.95G
+  [      P3] ent=1.574 rep=0.1333 pos/neg=54/1 toneHit=0 speed=34.8t/s vram=3.95G
+
+======== [ gemma-2-2b | 2B | 4bit=False ] ========
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [02:32<02:32, 152.77s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [02:40<00:00, 67.18s/it] 
+Loading checkpoint shards: 100%|██████████| 2/2 [02:40<00:00, 80.02s/it]
+  [baseline] ent=1.491 rep=0.0811 pos/neg=47/2 toneHit=3 speed=18.3t/s vram=9.28G
+  [      P3] ent=1.431 rep=0.2257 pos/neg=97/7 toneHit=5 speed=20.2t/s vram=9.28G
+
+======== [ Phi-3.5-mini | 3.8B | 4bit=False ] ========
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [02:13<02:13, 133.84s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [03:22<00:00, 95.32s/it] 
+Loading checkpoint shards: 100%|██████████| 2/2 [03:22<00:00, 101.10s/it]
+  [baseline] ent=1.387 rep=0.0324 pos/neg=9/1 toneHit=2 speed=27.6t/s vram=9.28G
+  [      P3] ent=1.385 rep=0.0488 pos/neg=11/3 toneHit=0 speed=29.4t/s vram=9.28G
+
+======== [ Qwen3-4B | 4B | 4bit=True ] ========
+The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions. Please, pass
+ a `BitsAndBytesConfig` object in `quantization_config` argument instead.
+
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]
+Loading checkpoint shards:  33%|███▎      | 1/3 [01:52<03:44, 112.27s/it]
+Loading checkpoint shards:  67%|██████▋   | 2/3 [03:40<01:49, 109.76s/it]
+Loading checkpoint shards: 100%|██████████| 3/3 [03:42<00:00, 60.87s/it] 
+Loading checkpoint shards: 100%|██████████| 3/3 [03:42<00:00, 74.32s/it]
+  [baseline] ent=1.818 rep=0.1525 pos/neg=31/7 toneHit=8 speed=13.2t/s vram=9.28G
+  [      P3] ent=1.561 rep=0.1203 pos/neg=54/11 toneHit=5 speed=12.8t/s vram=9.28G
+
+======== [ DeepSeek-R1-Qwen7B | 7B | 4bit=True ] ========
+The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions. Please, pass
+ a `BitsAndBytesConfig` object in `quantization_config` argument instead.
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]
+Loading checkpoint shards:  50%|█████     | 1/2 [04:27<04:27, 267.04s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [07:59<00:00, 235.10s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [07:59<00:00, 239.89s/it]
+  [baseline] ent=1.310 rep=0.1857 pos/neg=60/7 toneHit=2 speed=14.6t/s vram=9.53G
+  [      P3] ent=1.718 rep=0.1224 pos/neg=17/14 toneHit=3 speed=14.6t/s vram=9.53G
+
+======== [ Qwen3-8B | 8B | 4bit=True ] ========
+The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions. Please, pass
+ a `BitsAndBytesConfig` object in `quantization_config` argument instead.
+
+Loading checkpoint shards:   0%|          | 0/5 [00:00<?, ?it/s]
+Loading checkpoint shards:  20%|██        | 1/5 [00:19<01:16, 19.19s/it]
+Loading checkpoint shards:  40%|████      | 2/5 [00:39<00:59, 19.79s/it]
+Loading checkpoint shards:  60%|██████    | 3/5 [00:59<00:40, 20.03s/it]
+Loading checkpoint shards:  80%|████████  | 4/5 [01:27<00:22, 22.94s/it]
+Loading checkpoint shards: 100%|██████████| 5/5 [01:39<00:00, 19.11s/it]
+Loading checkpoint shards: 100%|██████████| 5/5 [01:39<00:00, 19.89s/it]
+  [baseline] ent=1.312 rep=0.1218 pos/neg=27/6 toneHit=11 speed=11.7t/s vram=10.62G
+  [      P3] ent=2.031 rep=0.1210 pos/neg=17/4 toneHit=5 speed=9.8t/s vram=10.62G
+
+
+==== 结果汇总 ====
+model                  mode     ent    rep2   pos/neg tone   tok/s   vram
+Qwen2.5-0.5B       baseline  2.8451  0.0401      36/7    2   27.66   1.96
+Qwen2.5-0.5B             P3  3.2159  0.0607      30/9    3   28.86   1.96
+Qwen3-0.6B         baseline  2.2305  0.1647      24/8   10   22.39   2.28
+Qwen3-0.6B               P3  2.7512  0.1247      37/8    7   21.99   2.28
+SmolLM2-1.7B       baseline  1.5096  0.2062      61/0    0   36.74   3.95
+SmolLM2-1.7B             P3  1.5736  0.1333      54/1    0   34.84   3.95
+gemma-2-2b         baseline  1.4906  0.0811      47/2    3    18.3   9.28
+gemma-2-2b               P3  1.4309  0.2257      97/7    5   20.18   9.28
+Phi-3.5-mini       baseline  1.3866  0.0324       9/1    2   27.64   9.28
+Phi-3.5-mini             P3  1.3849  0.0488      11/3    0   29.38   9.28
+Qwen3-4B           baseline  1.8184  0.1525      31/7    8    13.2   9.28
+Qwen3-4B                 P3  1.5608  0.1203     54/11    5   12.77   9.28
+DeepSeek-R1-Qwen7B baseline  1.3098  0.1857      60/7    2   14.59   9.53
+DeepSeek-R1-Qwen7B       P3  1.7177  0.1224     17/14    3   14.63   9.53
+Qwen3-8B           baseline  1.3121  0.1218      27/6   11   11.74  10.62
+Qwen3-8B                 P3  2.0305   0.121      17/4    5     9.8  10.62
+
+saved: sweep_results.json

@@ -1,0 +1,22 @@
+# ============================================================
+# 一体化全流程AI应用 依赖清单
+# 使用清华镜像安装（Windows PowerShell 示例）：
+#   pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+# 说明：torch 等大体积包建议按 PyTorch 官方指引安装对应 CUDA 版本，
+#       本清单中的版本号保持开放（>= 当前稳定版），避免锁定冲突。
+# ============================================================
+
+fastapi
+uvicorn[standard]
+python-multipart
+torch
+transformers
+peft
+bitsandbytes
+accelerate
+datasets
+modelscope
+cnsenti
+jieba
+tqdm
+pydantic

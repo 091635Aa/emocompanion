@@ -1,0 +1,27 @@
+[testset] 10 条 | Qwen3-4B 4bit | K_probe=16 | β=0.375 T=1.6 γ_bwd=0.6 mid_step=12
+layers=36 取第18层隐状态
+[turn 1/10] 为什么主播要催观众加灯牌？ | cos(fwd,bwd)=0.019 cos(bwd,tgt)=-0.016 | probe3656ms fwd368ms bwd1252ms
+[turn 2/10] 观众为什么不留？ | cos(fwd,bwd)=0.023 cos(bwd,tgt)=0.005 | probe2849ms fwd378ms bwd1158ms
+[turn 3/10] 主播为什么提到猫？ | cos(fwd,bwd)=0.029 cos(bwd,tgt)=0.001 | probe3033ms fwd498ms bwd1305ms
+[turn 4/10] 主播的语气为什么这么活泼？ | cos(fwd,bwd)=0.018 cos(bwd,tgt)=-0.010 | probe2764ms fwd341ms bwd1264ms
+[turn 5/10] 这个直播间的氛围如何？ | cos(fwd,bwd)=-0.005 cos(bwd,tgt)=0.015 | probe2487ms fwd341ms bwd1194ms
+[turn 6/10] 主播为什么说‘一见钟情’？ | cos(fwd,bwd)=0.001 cos(bwd,tgt)=-0.028 | probe2605ms fwd367ms bwd1168ms
+[turn 7/10] ‘十五级’是什么意思？ | cos(fwd,bwd)=0.041 cos(bwd,tgt)=-0.025 | probe2893ms fwd400ms bwd1127ms
+[turn 8/10] 主播和观众的关系如何？ | cos(fwd,bwd)=-0.019 cos(bwd,tgt)=-0.021 | probe1652ms fwd236ms bwd961ms
+[turn 9/10] 主播为什么会说‘想你了’？ | cos(fwd,bwd)=0.024 cos(bwd,tgt)=-0.023 | probe2089ms fwd242ms bwd997ms
+[turn 10/10] 菠萝是谁？ | cos(fwd,bwd)=-0.010 cos(bwd,tgt)=0.009 | probe1897ms fwd246ms bwd937ms
+[judge] load Qwen3-8B
+  A_base     保真84.0  熵0.804  重复0.105  7.1t/s  词命中61
+  B_p3       保真85.0  熵0.79  重复0.094  7.7t/s  词命中51
+  C8         保真86.0  熵0.814  重复0.11  7.6t/s  词命中56
+  C16        保真85.0  熵0.796  重复0.099  7.4t/s  词命中62
+  D8         保真85.0  熵0.834  重复0.092  7.3t/s  词命中49
+  D16        保真86.0  熵0.855  重复0.109  7.3t/s  词命中57
+  E16        保真88.0  熵0.848  重复0.113  7.4t/s  词命中55
+  E16_mid    保真83.0  熵0.803  重复0.105  7.5t/s  词命中59
+  D16_norole 保真83.9  熵0.81  重复0.098  7.3t/s  词命中56
+
+==== P1.7 反向传播导向向量 ====
+timing(ms): {'probe_gen_ms': 2592.6, 'fwd_vec_ms': 341.8, 'bwd_ms': 1136.2}
+geometry: {'cos_fwd_bwd': 0.012, 'cos_bwd_tgt': -0.0093, 'cos_fwd_tgt': 0.003, 'cos_fwd_tgt8': 0.003, 'cos_bwd_norole': 0.2842}
+saved: p17_reverse.json

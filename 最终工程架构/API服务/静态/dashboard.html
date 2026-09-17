@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语义回响 · 运行大屏</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="dash-body">
+<div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+
+<div class="dash-main">
+  <div class="dash-title">
+    <h1>语义回响 <em>运行大屏</em></h1>
+    <div class="links">
+      <a href="/">简化版控制台</a>
+      <a href="/pro">专业控制台</a>
+      <a href="/docs">API 文档</a>
+    </div>
+  </div>
+
+  <!-- KPI 指标 -->
+  <div class="kpis">
+    <div class="kpi green"><div class="k-label">服务状态</div><div class="k-value" id="k-服务">—</div><div class="k-sub" id="k-服务sub">—</div></div>
+    <div class="kpi blue"><div class="k-label">已加载模型</div><div class="k-value" id="k-模型" style="font-size:20px">—</div><div class="k-sub" id="k-模型sub">—</div></div>
+    <div class="kpi cyan"><div class="k-label">GPU 显存</div><div class="k-value" id="k-显存">—</div><div class="k-sub" id="k-显存sub">—</div></div>
+    <div class="kpi purple"><div class="k-label">系统内存</div><div class="k-value" id="k-内存">—</div><div class="k-sub" id="k-内存sub">—</div></div>
+    <div class="kpi gold"><div class="k-label">总生成 Token</div><div class="k-value" id="k-token">0</div><div class="k-sub" id="k-tokensub">—</div></div>
+    <div class="kpi cyan"><div class="k-label">Token / 秒</div><div class="k-value" id="k-tps">0.0</div><div class="k-sub">滑动窗口实时</div></div>
+    <div class="kpi green"><div class="k-label">稳定度</div><div class="k-value" id="k-稳定">100</div><div class="k-sub">1 - 平均重复率</div></div>
+    <div class="kpi rose"><div class="k-label">情感命中率</div><div class="k-value" id="k-情感">—</div><div class="k-sub" id="k-情感sub">—</div></div>
+  </div>
+
+  <div class="dash-grid">
+    <div>
+      <div class="panel2" style="margin-bottom:14px">
+        <h3>Token / 秒 趋势（最近 20 次生成）</h3>
+        <canvas id="tokenChart"></canvas>
+      </div>
+      <div class="panel2" style="margin-bottom:14px">
+        <h3>稳定度 / 情感命中率 趋势</h3>
+        <canvas id="stabilityChart"></canvas>
+        <div class="small" style="color:#5d6b85;margin-top:6px"><span style="color:#37d67a">■ 稳定度</span> · <span style="color:#FF5D8F">■ 情感命中率</span>（每 2.5s 采样）</div>
+      </div>
+      <div class="panel2" style="margin-bottom:14px">
+        <h3>运行时开关（点击热切换）</h3>
+        <div class="switches" id="开关区"></div>
+        <div class="flow2" id="流程条"></div>
+        <div class="row mt12" id="参数行" style="display:none">
+          <label style="margin:0;color:#8b98b3">参数</label>
+          <span id="参数λ"></span><span id="参数γ"></span><span id="参数τ"></span>
+          <button class="ghost" id="参数重置" style="font-size:12px;padding:4px 10px">恢复推荐</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel2" style="margin-bottom:14px">
+        <h3>情感实时向量</h3>
+        <div class="emoji-bars" id="情感条"></div>
+      </div>
+      <div class="panel2" style="margin-bottom:14px">
+        <h3>服务日志（最近 40 条）</h3>
+        <div class="log-view" id="日志区"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="panel2">
+      <h3>超长期记忆系统 <span style="font-size:11px;color:#5d6b85" id="记忆统计"></span></h3>
+      <div class="mem-list" id="记忆区"></div>
+    </div>
+    <div class="panel2">
+      <h3>打标任务监控 <span style="font-size:11px;color:#5d6b85" id="打标统计"></span></h3>
+      <div id="打标当前"></div>
+      <div class="label-hist mt12" id="打标历史"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

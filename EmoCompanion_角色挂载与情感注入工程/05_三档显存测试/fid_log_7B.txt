@@ -1,0 +1,13 @@
+[testset] 12 条; β=1.0
+python.exe : `torch_dtype` is deprecated! Use `dtype` instead!
+At C:\Users\Administrator\AppData\Local\Temp\trae-agent-toolhost\jobs\job-bab8aa9074534c348cf8dcfb31010690\command.ps1:
+15 char:7260
++ ... pgrep\bin'; & "d:\AI情感\打标\.venv\Scripts\python.exe" "d:\AI情感\EmoCompanion_角色挂载与 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (`torch_dtype` i...dtype` instead!:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+The `load_in_4bit` and `load_in_8bit` arguments are deprecated and will be removed in the future versions. Please, pass
+ a `BitsAndBytesConfig` object in `quantization_config` argument instead.
+
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]

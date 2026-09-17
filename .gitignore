@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# 模型与权重（不入库）
+*.gguf
+*.safetensors
+*.bin
+*.npy
+*.pt
+*.onnx
+
+# 音频/媒体产物
+*.wav
+*.mp3
+*.flac
+*.m4a
+
+# 数据库与日志
+*.db
+*.sqlite3
+*.log
+logs/
+
+# 密钥
+.env
+*.env
+!密钥模板.env
+
+# 依赖与构建
+node_modules/
+dist/
+build/
+
+# 大文件兜底
+*.zip
+*.7z
+*.bundle
